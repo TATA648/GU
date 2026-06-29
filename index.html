@@ -72,7 +72,7 @@
     </div>
   </div>
 
-  <!-- ===== 外观设置页 ===== -->
+  <!-- ===== 外观设置页（保持不变） ===== -->
   <div class="page appearance-page">
     <div class="page-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -121,7 +121,7 @@
     </div>
   </div>
 
-  <!-- ===== 设置页 ===== -->
+  <!-- ===== 设置页（保持不变） ===== -->
   <div class="page setting-page">
     <div class="page-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -154,7 +154,7 @@
     </div>
   </div>
 
-  <!-- ===== 聊天设置页 ===== -->
+  <!-- ===== 聊天设置页（保持不变） ===== -->
   <div class="page chat-set-page">
     <div class="page-header">
       <button class="back-btn chat-set-back"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -197,7 +197,7 @@
     </div>
   </div>
 
-  <!-- ===== 聊天页 ===== -->
+  <!-- ===== 聊天页（保持不变） ===== -->
   <div class="page chat-page">
     <div class="top-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -248,7 +248,7 @@
     </div>
   </div>
 
-  <!-- ===== 字卡管理页 ===== -->
+  <!-- ===== 字卡管理页（保持不变） ===== -->
   <div class="page card-page">
     <div class="page-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -302,7 +302,7 @@
     </div>
   </div>
 
-  <!-- ===== 日历页 ===== -->
+  <!-- ===== 日历页（保持不变） ===== -->
   <div class="page calendar-page">
     <div class="page-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
@@ -324,7 +324,7 @@
     </div>
   </div>
 
-  <!-- ===== 弹窗区 ===== -->
+  <!-- ===== 弹窗区（修改了 taMask 和 meMask） ===== -->
   <!-- 通用图片选择弹窗 -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
@@ -360,24 +360,40 @@
     </div>
   </div>
 
-  <!-- 关于TA（通过HE触发） -->
+  <!-- ===== 关于TA（修改为新的预览样式） ===== -->
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
-      <div class="upload-item"><label>角色头像（本地上传）</label><input type="file" id="taAvatarFile" accept="image/*" /></div>
-      <div class="link-item"><label>角色头像（图片链接）</label><input type="text" id="taAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
-      <label style="font-size:14px;color:#444;">角色昵称</label><input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
+      <div class="image-preview-wrap">
+        <div class="image-preview-box" id="taPreviewBox">
+          <img id="taPreviewImg" src="" alt="头像预览" />
+          <div class="image-preview-placeholder">暂无图片</div>
+        </div>
+      </div>
+      <button class="upload-btn" id="taLocalBtn">上传本地图片</button>
+      <input type="file" id="taAvatarFile" accept="image/*" style="display:none;" />
+      <input type="text" id="taAvatarLink" placeholder="填入图片链接" autocomplete="off" />
+      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">角色昵称</label>
+      <input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
       <div class="btns-wrap"><button class="close" id="closeTaSet">取消</button><button class="save" id="saveTaSet">保存</button></div>
     </div>
   </div>
 
-  <!-- 关于我（通过ME触发） -->
+  <!-- ===== 关于我（修改为新的预览样式） ===== -->
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
-      <div class="upload-item"><label>我的头像（本地上传）</label><input type="file" id="meAvatarFile" accept="image/*" /></div>
-      <div class="link-item"><label>我的头像（图片链接）</label><input type="text" id="meAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
-      <label style="font-size:14px;color:#444;">我的昵称</label><input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
+      <div class="image-preview-wrap">
+        <div class="image-preview-box" id="mePreviewBox">
+          <img id="mePreviewImg" src="" alt="头像预览" />
+          <div class="image-preview-placeholder">暂无图片</div>
+        </div>
+      </div>
+      <button class="upload-btn" id="meLocalBtn">上传本地图片</button>
+      <input type="file" id="meAvatarFile" accept="image/*" style="display:none;" />
+      <input type="text" id="meAvatarLink" placeholder="填入图片链接" autocomplete="off" />
+      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">我的昵称</label>
+      <input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
       <div class="btns-wrap"><button class="close" id="closeMeSet">取消</button><button class="save" id="saveMeSet">保存</button></div>
     </div>
   </div>
