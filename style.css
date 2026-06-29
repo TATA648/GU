@@ -16,7 +16,15 @@ html, body {
 }
 body {
   background: #f8f4fb;
+}
+body.home-bg {
   background-image: var(--wallpaper, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.chat-page {
+  background-image: var(--chat-bg, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -82,10 +90,6 @@ body {
 .avatar-img.show {
   display: block;
 }
-.avatar-txt {
-  font-weight: bold;
-  color: #885fb3;
-}
 .dream-name {
   font-size: 16px;
   font-weight: 600;
@@ -122,7 +126,7 @@ body {
   padding-top: 70px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
-.card-page, .setting-page {
+.card-page, .setting-page, .chat-set-page, .mail-page {
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
@@ -167,7 +171,6 @@ body {
   color: #444;
 }
 
-/* 外观设置完整样式 */
 .setting-container {
   padding: 20px;
   display: flex;
@@ -191,6 +194,9 @@ body {
   align-items: center;
   gap: 16px;
 }
+.wallpaper-row.reverse {
+  flex-direction: row-reverse;
+}
 .icon-set-item {
   display: flex;
   align-items: center;
@@ -207,6 +213,10 @@ body {
 .preview-box.small {
   width: 50px;
   height: 50px;
+}
+.preview-box.rect {
+  width: 140px;
+  height: 70px;
 }
 .preview-img {
   width: 100%;
@@ -233,8 +243,102 @@ body {
   color: #999;
   align-self: flex-end;
 }
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap:6px;
+  margin-bottom:16px;
+}
+.form-item label {
+  font-size:14px;
+  color:#333;
+}
+.form-item input {
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:9px 10px;
+}
+.save-btn {
+  width:100%;
+  background:#a87bc9;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:10px;
+  font-size:15px;
+}
 
-/* 弹窗通用样式 */
+/* 信箱样式 */
+.mail-container {
+  padding:16px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+.mail-tab-bar {
+  display:flex;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.mail-tab {
+  flex:1;
+  border:none;
+  padding:12px;
+  background:#f3eef8;
+  color:#666;
+  font-size:15px;
+}
+.mail-tab.active {
+  background:#a87bc9;
+  color:#fff;
+}
+.write-box {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+#letterInput {
+  flex:1;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:12px;
+  resize:none;
+  font-size:14px;
+}
+.send-letter-btn {
+  background:#a87bc9;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:10px;
+}
+.inbox-box {
+  flex:1;
+  overflow-y:auto;
+}
+.inbox-box.hidden {
+  display:none;
+}
+.letter-item {
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.letter-time {
+  font-size:12px;
+  color:#999;
+  margin-bottom:6px;
+}
+.letter-content {
+  font-size:14px;
+  color:#333;
+}
+
+/* 弹窗 */
 .mask {
   position: fixed;
   inset: 0;
