@@ -29,7 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
       locationIcon:"https://i.ibb.co/pjyVcqxM/position.png",
       signature:"浅尝辄止 是命运轻轻放过了我"
     },
-    decoImage:""
+    decoImage:"",
+    appliedFont:""  // 记录字体名称（仅展示）
   };
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -71,7 +72,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEditTarget=null, currentMailTab='sent', typingTimer=null, letterTimer=null, selectedMoodEmoji=null, currentDateStr=null;
   let quoteMsg=null, videoTimerInterval=null;
-  let importCallback=null; // 用于导入确认后的回调
+  let importCallback=null;
+
+  // ========== 深度合并工具（防止数据丢失） ==========
+  function deepMerge(target, source) {
+    const result = { ...target };
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) && !(source[key] instanceof File)) {
+          result[key] = deepMerge(target[key] || {}, source[key]);
+        } else {
+          result[key] = source[key];
+        }
+      }
+    }
+    return result;
+  }
 
   // ========== 页面切换 ==========
   function switchPage(pageName) {
@@ -87,9 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ========== 导航 ==========
-  // 首页应用卡片
   $$('.app-card').forEach(c=>c.addEventListener('click',function(e){ e.preventDefault(); const t=this.dataset.target; if(t) switchPage(t); }));
-  // 底栏项
   bottomBarItems.forEach(item=>{
     if(item.classList.contains('placeholder')) return;
     item.addEventListener('click',function(e){
@@ -97,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if(target) switchPage(target);
     });
   });
-  // 占位app点击更换图标
   if(placeholderApp){
     placeholderApp.addEventListener('click',function(e){
       if(e.target.closest('.bar-item.placeholder')){
@@ -105,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  // 所有返回按钮
   $$('.back-btn').forEach(b=>b.addEventListener('click',function(e){ e.stopPropagation(); switchPage('home-page'); }));
   if(chatSetBack) chatSetBack.addEventListener('click',function(e){ e.stopPropagation(); switchPage('chat-page'); });
   if(openChatSettingPage) openChatSettingPage.addEventListener('click',function(){ switchPage('chat-set-page'); });
@@ -146,9 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
     else{ store.appIcon[currentEditTarget]=url; refreshAllIconPreview(); }
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
-
-  // ========== 装饰图点击 ==========
-  if(decoImage) decoImage.addEventListener('click',()=>openImageModal('更换装饰图','decoImage'));
 
   // ========== 文本编辑弹窗 ==========
   function openEditText(title, currentValue, callback){
@@ -196,6 +205,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   if(profileSignature) profileSignature.addEventListener('click',()=>openEditText('修改签名', store.profile.signature, (val)=>{ store.profile.signature=val; profileSignature.innerText=val; saveLocal(); }));
 
+  // ========== 装饰图点击 ==========
+  if(decoImage) decoImage.addEventListener('click',()=>openImageModal('更换装饰图','decoImage'));
+
   // ========== 聊天设置 ==========
   if(blockTa) blockTa.addEventListener('click',()=>{ taNameInput.value=store.taInfo.name; taAvatarLink.value=store.taInfo.avatarUrl||''; taAvatarFile.value=''; taMask.style.display='flex'; });
   if(closeTaSet) closeTaSet.addEventListener('click',()=>taMask.style.display='none');
@@ -227,9 +239,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ========== 全局字体 ==========
+  // ========== 全局字体（修复版） ==========
   if(applyFontBtn){
-    applyFontBtn.addEventListener('click',function(){
+    applyFontBtn.addEventListener('click', function(){
       const file=fontFileInput.files[0];
       if(!file){ alert('请先选择字体文件'); return; }
       const reader=new FileReader();
@@ -239,9 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const fontFace=new FontFace(fontName, arrayBuffer);
         fontFace.load().then(function(loadedFace){
           document.fonts.add(loadedFace);
-          document.body.style.fontFamily=fontName+', "Microsoft Yahei", system-ui, sans-serif';
-          // 保存字体名称到store（仅用于显示，实际无法持久化）
-          alert('字体应用成功！刷新后需重新上传');
+          document.documentElement.style.fontFamily = fontName + ', "Microsoft Yahei", system-ui, sans-serif';
+          store.appliedFont = fontName;
+          saveLocal();
+          alert('字体应用成功！当前会话有效，刷新后需重新上传。');
         }).catch(function(err){
           alert('字体加载失败：'+err.message);
         });
@@ -336,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function renderInbox(){
     if(!inboxWrap) return;
     inboxWrap.innerHTML='';
-    if(store.inbox.length===0){ inboxWrap.innerHTML='<div style="color:#999;text-align:center;padding:20px 0;">暂无回信</div>'; return; }
+    if(store.inbox.length===0){ inboxWrap.innerHTML='<div style="color:#999;text-align:center;padding:40px 0;">暂无回信</div>'; return; }
     [...store.inbox].reverse().forEach(item=>{
       const div=document.createElement('div');
       div.className='letter-item';
@@ -391,9 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if(el) el.src=src;
       if(prev) prev.src=src;
     });
-    // 占位底栏图标
     if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
-    // 装饰图
     if(decoImg) decoImg.src=store.decoImage||'';
   }
   function parseEmojiText(text){ return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>`<img class="msg-emoji-inside" src="${src}" loading="lazy">`); }
@@ -766,7 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-  // 视频按钮
   const videoCallBtn=document.createElement('button');
   videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.padding='4px'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.minWidth='40px'; videoCallBtn.style.display='flex'; videoCallBtn.style.alignItems='center'; videoCallBtn.style.justifyContent='center';
   videoCallBtn.innerHTML='<img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" style="width:24px;height:24px;">';
@@ -823,7 +833,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if(saveMoodModal) saveMoodModal.addEventListener('click',function(){ const dateStr=currentDateStr; if(!dateStr) return; const text=moodTextInput.value.trim(); const data=store.calendar[dateStr]||{}; data.meEmoji=selectedMoodEmoji||data.meEmoji; data.meText=text||data.meText; if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱']; data.taEmoji=taEmojis[randomInt(0,taEmojis.length-1)]; } if(!data.taText){ const cards=getAllValidCards(); if(cards.length>0){ const count=Math.min(randomInt(1,3),cards.length); const shuffled=[...cards].sort(()=>Math.random()-0.5); data.taText=shuffled.slice(0,count).map(c=>c.text).join(' '); } else { data.taText='今天没有什么想说的～'; } } store.calendar[dateStr]=data; saveLocal(); renderCalendar(); moodModal.style.display='none'; selectedMoodEmoji=null; });
 
   // ========== 导入导出功能 ==========
-  // 通用导入确认
   function showImportConfirm(title, msg, callback){
     importConfirmTitle.innerText=title;
     importConfirmMsg.innerText=msg;
@@ -855,7 +864,6 @@ document.addEventListener('DOMContentLoaded', function() {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入聊天记录
   if(importChatBtn){
     importChatBtn.addEventListener('click',function(){
       showImportConfirm('导入聊天记录','导入将覆盖当前所有聊天消息，是否继续？', function(){
@@ -901,7 +909,6 @@ document.addEventListener('DOMContentLoaded', function() {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入字卡
   if(importCardsBtn){
     importCardsBtn.addEventListener('click',function(){
       showImportConfirm('导入字卡','导入将覆盖当前所有字卡分组及内容，是否继续？', function(){
@@ -917,7 +924,6 @@ document.addEventListener('DOMContentLoaded', function() {
               const data=JSON.parse(ev.target.result);
               if(data.groups){
                 store.groups=data.groups;
-                // 重置当前选中的分组
                 const keys=Object.keys(store.groups);
                 if(keys.length>0) store.currentSelectGroup=keys[0];
                 else store.currentSelectGroup='';
@@ -951,7 +957,6 @@ document.addEventListener('DOMContentLoaded', function() {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入全部数据
   if(importDataBtn){
     importDataBtn.addEventListener('click',function(){
       showImportConfirm('导入全部数据','导入将覆盖所有当前数据，是否继续？', function(){
@@ -980,7 +985,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderCalendar();
                 applyVideoBg();
                 renderMail();
-                // 个人资料UI
                 coverImage.src=store.profile.cover||'';
                 avatarImage.src=store.profile.avatar||'';
                 profileName.innerText=store.profile.name||'TATA';
@@ -988,7 +992,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
                 profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
                 decoImg.src=store.decoImage||'';
-                // 头像样式
                 const style=store.chatSettings.avatarStyle||'circle';
                 styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
                 alert('数据导入成功！');
@@ -1011,20 +1014,28 @@ document.addEventListener('DOMContentLoaded', function() {
   function pad(n){ return String(n).padStart(2,'0'); }
   function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
 
-  // ========== 存储 ==========
+  // ========== 存储（强化版） ==========
   function loadLocal(){
     try{
       const raw=localStorage.getItem('dreamCardStore');
       if(raw){
         const parsed=JSON.parse(raw);
-        store={...store,...parsed};
+        store = deepMerge(store, parsed);
       }
     }catch(e){console.warn('Load local error',e);}
+    // 确保所有字段存在
     if(!store.messages) store.messages=[];
     if(!store.calendar) store.calendar={};
-    if(!store.appIcon.setting) store.appIcon.setting='';
+    if(!store.appIcon) store.appIcon={};
     if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'};
     if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'};
+    if(!store.groups) store.groups={};
+    if(!store.letters) store.letters=[];
+    if(!store.inbox) store.inbox=[];
+    if(!store.emojiList) store.emojiList=[];
+    if(!store.appliedFont) store.appliedFont='';
+
+    // 刷新UI
     renderHeaderAvatar();
     refreshAllIconPreview();
     if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||'';
@@ -1039,7 +1050,6 @@ document.addEventListener('DOMContentLoaded', function() {
     scheduleLetterReplies();
     renderCalendar();
     renderMail();
-    // 个人资料UI
     coverImage.src=store.profile.cover||'';
     avatarImage.src=store.profile.avatar||'';
     profileName.innerText=store.profile.name||'TATA';
@@ -1047,17 +1057,21 @@ document.addEventListener('DOMContentLoaded', function() {
     locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
     profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
     decoImg.src=store.decoImage||'';
-    // 占位图标
     if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
-    // 头像样式
     const style=store.chatSettings.avatarStyle||'circle';
     styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
   }
+
   function saveLocal(){
     try{
       localStorage.setItem('dreamCardStore',JSON.stringify(store));
     }catch(e){console.warn('Save local error',e);}
   }
+
+  // ========== 页面关闭前保存 ==========
+  window.addEventListener('beforeunload', function() {
+    saveLocal();
+  });
 
   // ========== 防缩放 ==========
   let lastTouchEnd=0; document.addEventListener('touchend',function(e){ const now=Date.now(); if(now-lastTouchEnd<=300) e.preventDefault(); lastTouchEnd=now; },{passive:false}); document.addEventListener('gesturestart',function(e){ e.preventDefault(); },{passive:false}); document.querySelectorAll('input,textarea').forEach(el=>el.style.fontSize='16px');
