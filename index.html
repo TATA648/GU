@@ -100,12 +100,14 @@
         <div class="icon-set-item"><div class="preview-box small"><img id="settingIconPreview" class="preview-img" /></div><span class="item-name">设置</span><button class="change-btn icon-change-btn" data-type="setting">更改</button></div>
         <div class="icon-set-item"><div class="preview-box small"><img id="placeholderIconPreview" class="preview-img" /></div><span class="item-name">占位</span><button class="change-btn icon-change-btn" data-type="placeholder">更改</button></div>
       </div>
-      <div class="setting-block">
-        <h4 class="block-title">全局字体</h4>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="file" id="fontFileInput" accept=".ttf,.otf" style="flex:1; padding:6px 0;" />
-          <button class="change-btn" id="applyFontBtn">应用字体</button>
-        </div>
+     <div class="setting-block">
+  <h4 class="block-title">全局字体</h4>
+  <div class="font-upload-area">
+    <input type="file" id="fontFileInput" accept=".ttf,.otf" />
+    <button class="change-btn" id="applyFontBtn">应用字体</button>
+  </div>
+  <div style="font-size:12px; color:#999; margin-top:4px;">上传 .ttf 或 .otf 文件，刷新后失效</div>
+</div>
         <div style="font-size:12px; color:#999; margin-top:4px;">上传 .ttf 或 .otf 文件，刷新后失效</div>
       </div>
       <div class="setting-block">
