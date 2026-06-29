@@ -246,3 +246,23 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
   .app-card { width:80px; padding:10px 6px; }
   .app-icon { width:48px !important; height:48px !important; }
 }
+/* ===== 视频小窗拖动 ===== */
+.video-window {
+  cursor: grab;
+  touch-action: none;
+}
+.video-window.dragging {
+  cursor: grabbing;
+}
+
+/* ===== 拍一拍系统消息 ===== */
+.pat-message {
+  text-align: center;
+  color: #e74c3c;
+  font-size: 12px;
+  padding: 8px 0;
+  margin: 6px 0;
+  width: 100%;
+  background: transparent;
+  font-weight: 500;
+}
