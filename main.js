@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
 
   // ============================================================
-  //  DATA STORE（扩展）
+  //  DATA STORE
   // ============================================================
   let store = {
     taInfo: { name: "梦角", avatarUrl: "" },
     myInfo: { name: "我", avatarUrl: "" },
     delay: { min: 20, max: 120 },
     chatBg: "",
-    appIcon: { chat: "", card: "", theme: "", mail: "", calendar: "" },
+    appIcon: { chat: "", card: "", theme: "", mail: "", calendar: "", setting: "" },
     wallpaper: "",
     groups: {},
     currentSelectGroup: "",
@@ -17,19 +17,16 @@ document.addEventListener('DOMContentLoaded', function() {
     emojiList: [],
     lastChatTime: 0,
     animEnabled: true,
-    // 新增
-    messages: [],               // 聊天记录 [{id, text, isUser, time, quote}]
-    currentStatus: "平静",      // 梦角当前状态
-    calendar: {},               // { "2026-06-30": { taEmoji: "😊", meEmoji: "🥰", taText: "...", meText: "..." } }
-    selectedMoodEmoji: null,    // 当前选中的心情表情
-    quoteMessage: null          // 当前引用的消息对象
+    messages: [],
+    currentStatus: "平静",
+    calendar: {}
   };
 
   // ============================================================
   //  DOM REFS
   // ============================================================
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => document.querySelectorAll(sel);
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
 
   const topHeader = $('.top-header');
   const chatWrap = $('#chatWrap');
@@ -54,11 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const chatBgPreview = $('#chatBgPreview');
   const openChatBgModal = $('#openChatBgModal');
 
-  const chatIconPreview = $('#chatIconPreview');
-  const cardIconPreview = $('#cardIconPreview');
-  const themeIconPreview = $('#themeIconPreview');
-  const mailIconPreview = $('#mailIconPreview');
-  const calendarIconPreview = document.getElementById('calendarAppIcon'); // 新增日历图标
   const changeIconBtns = $$('.icon-change-btn');
 
   const openChatSettingPage = $('#openChatSettingPage');
@@ -112,17 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const headerTaAvatar = $('#headerTaAvatar');
   const headerMyAvatar = $('#headerMyAvatar');
-  const targetName = $('#targetName');
   const currentStatusText = $('#currentStatusText');
 
   const animToggle = $('#animToggle');
 
-  // 新增引用相关
   const quoteBar = $('#quoteBar');
   const quoteContent = $('#quoteContent');
   const quoteClose = $('#quoteClose');
 
-  // 日历相关
   const calendarGrid = $('#calendarGrid');
   const calTaText = $('#calTaText');
   const calMeText = $('#calMeText');
@@ -133,14 +122,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeMoodModal = $('#closeMoodModal');
   const saveMoodModal = $('#saveMoodModal');
 
-  // 数据导入导出
   const exportDataBtn = $('#exportDataBtn');
   const importDataBtn = $('#importDataBtn');
   const importConfirmMask = $('#importConfirmMask');
   const importCancelBtn = $('#importCancelBtn');
   const importConfirmBtn = $('#importConfirmBtn');
 
-  // 其他变量
   let currentEditTarget = null;
   let currentMailTab = 'write';
   let typingTimer = null;
@@ -155,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const pages = $$('.page');
     const target = document.querySelector(`.${pageName}`);
     if (!target) return;
-
     pages.forEach(p => p.classList.remove('active'));
 
     if (store.animEnabled) {
@@ -164,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
       target.classList.add('active');
       requestAnimationFrame(() => {
         target.style.opacity = '1';
-        target.style.transform = 'translateY(0)');
+        target.style.transform = 'translateY(0)';
       });
     } else {
       target.classList.add('active');
@@ -177,9 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
       renderMessages();
       setTimeout(() => { chatWrap.scrollTop = chatWrap.scrollHeight; }, 50);
     }
-    if (pageName === 'calendar-page') {
-      renderCalendar();
-    }
+    if (pageName === 'calendar-page') renderCalendar();
   }
 
   // ============================================================
@@ -208,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (openChatSettingPage) {
     openChatSettingPage.addEventListener('click', function() {
-      switchPage('chat-set-page');
+      switchPage('setting-page');
     });
   }
 
@@ -225,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.body.classList.add('no-transition');
     }
   }
-
   if (animToggle) {
     animToggle.addEventListener('click', function() {
       store.animEnabled = !store.animEnabled;
@@ -263,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
   changeIconBtns.forEach(btn => {
     btn.addEventListener('click', function() {
       const type = this.dataset.type;
-      const labelMap = { chat: '聊天传讯图标', card: '字卡管理图标', theme: '外观设置图标', mail: '信箱图标', calendar: '日历图标' };
-      openImageModal('更改 ' + (labelMap[type] || '图标'), type);
+      const labelMap = { chat:'聊天', card:'字卡', theme:'外观', mail:'信箱', calendar:'日历', setting:'设置' };
+      openImageModal('更改 ' + (labelMap[type]||'图标'), type);
     });
   });
 
@@ -303,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  CHAT SETTINGS (关于TA / 关于我 / 回复时长 / 状态)
+  //  CHAT SETTINGS
   // ============================================================
   if (blockTa) {
     blockTa.addEventListener('click', function() {
@@ -381,7 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 状态设置
   if (blockStatus) {
     blockStatus.addEventListener('click', function() {
       statusInput.value = store.currentStatus;
@@ -413,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  EMOJI PANEL
+  //  EMOJI
   // ============================================================
   if (emojiToggle) {
     emojiToggle.addEventListener('click', function(e) {
@@ -494,22 +476,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function scheduleLetterReplies() {
-    if (letterTimer) {
-      clearTimeout(letterTimer);
-      letterTimer = null;
-    }
+    if (letterTimer) { clearTimeout(letterTimer); letterTimer = null; }
     const now = Date.now();
     let earliest = Infinity;
     store.letters.forEach(l => {
-      if (!l.done && l.replyTime > now) {
-        if (l.replyTime < earliest) earliest = l.replyTime;
-      }
+      if (!l.done && l.replyTime > now && l.replyTime < earliest) earliest = l.replyTime;
     });
     if (earliest !== Infinity) {
       const delay = earliest - now + 1000;
-      letterTimer = setTimeout(() => {
-        processLetterReplies();
-      }, Math.max(delay, 1000));
+      letterTimer = setTimeout(() => { processLetterReplies(); }, Math.max(delay, 1000));
     }
   }
 
@@ -522,23 +497,13 @@ document.addEventListener('DOMContentLoaded', function() {
       changed = true;
       const count = randomInt(5, 20);
       let reply = [];
-      for (let i = 0; i < count; i++) {
-        if (allCards.length === 0) {
-          reply.push('（暂无字卡，请前往字卡库添加）');
-        } else {
-          reply.push(allCards[randomInt(0, allCards.length - 1)].text);
-        }
+      for (let i=0; i<count; i++) {
+        if (allCards.length===0) reply.push('（暂无字卡）');
+        else reply.push(allCards[randomInt(0, allCards.length-1)].text);
       }
-      store.inbox.push({
-        replyText: reply.join(''),
-        originText: letter.text,
-        time: letter.replyTime
-      });
+      store.inbox.push({ replyText: reply.join(''), originText: letter.text, time: letter.replyTime });
     });
-    if (changed) {
-      saveLocal();
-      renderInbox();
-    }
+    if (changed) { saveLocal(); renderInbox(); }
     scheduleLetterReplies();
   }
 
@@ -562,19 +527,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  CHAT (持久化消息 + 引用)
+  //  CHAT
   // ============================================================
   function renderHeaderAvatar() {
-    targetName.innerText = store.taInfo.name || '梦角';
     headerTaAvatar.src = store.taInfo.avatarUrl || '';
     headerMyAvatar.src = store.myInfo.avatarUrl || '';
     updateStatusDisplay();
   }
 
   function updateStatusDisplay() {
-    if (currentStatusText) {
-      currentStatusText.innerText = store.currentStatus || '平静';
-    }
+    if (currentStatusText) currentStatusText.innerText = store.currentStatus || '平静';
   }
 
   function applyBgStyle() {
@@ -583,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function refreshAllIconPreview() {
-    const icons = ['chat', 'card', 'theme', 'mail', 'calendar'];
+    const icons = ['chat','card','theme','mail','calendar','setting'];
     icons.forEach(key => {
       const el = document.getElementById(key + 'AppIcon');
       const prev = document.getElementById(key + 'IconPreview');
@@ -594,45 +556,37 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function parseEmojiText(text) {
-    return text.replace(/\[emoji:(.+?)\]/g, (m, src) => {
-      return `<img class="msg-emoji-inside" src="${src}" loading="lazy">`;
-    });
+    return text.replace(/\[emoji:(.+?)\]/g, (m, src) => `<img class="msg-emoji-inside" src="${src}" loading="lazy">`);
   }
 
   function randomAttachEmoji() {
     if (store.emojiList.length === 0) return null;
-    const r = Math.random();
-    if (r < 0.25) return store.emojiList[randomInt(0, store.emojiList.length - 1)];
+    if (Math.random() < 0.25) return store.emojiList[randomInt(0, store.emojiList.length-1)];
     return null;
   }
 
-  // 渲染所有消息（从store.messages）
   function renderMessages() {
     if (!chatWrap) return;
     chatWrap.innerHTML = '';
     let lastTime = 0;
     store.messages.forEach(msg => {
-      const now = msg.time;
-      if (now - lastTime > 10 * 60 * 1000) {
+      if (msg.time - lastTime > 10*60*1000) {
         const div = document.createElement('div');
         div.className = 'time-divider';
-        div.innerText = formatTime(now);
+        div.innerText = formatTime(msg.time);
         chatWrap.appendChild(div);
       }
-      lastTime = now;
+      lastTime = msg.time;
       appendMessageElement(msg);
     });
-    // 滚动到底部
     chatWrap.scrollTop = chatWrap.scrollHeight;
   }
 
-  // 添加消息元素到DOM（不保存到store，仅用于新消息）
   function appendMessageElement(msg) {
     const item = document.createElement('div');
     item.className = `msg-item ${msg.isUser ? 'user-msg' : 'target-msg'}`;
     item.dataset.msgId = msg.id;
 
-    // 引用内容
     let quoteHtml = '';
     if (msg.quote) {
       quoteHtml = `<div class="msg-quote">📎 ${escapeHtml(msg.quote.text)}</div>`;
@@ -641,26 +595,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let html = parseEmojiText(msg.text);
     let emojiSrc = null;
     if (!msg.isUser) emojiSrc = randomAttachEmoji();
-    if (emojiSrc && msg.text.trim() === '') {
+    if (emojiSrc && msg.text.trim()==='') {
       html = `<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`;
     } else if (emojiSrc) {
       html += `<img class="msg-emoji-inside" src="${emojiSrc}">`;
     }
     const avatarSrc = msg.isUser ? store.myInfo.avatarUrl : store.taInfo.avatarUrl;
     item.innerHTML = `
-      <div class="msg-avatar">
-        ${avatarSrc ? `<img src="${avatarSrc}" loading="lazy">` : ''}
-      </div>
-      <div class="msg-bubble-wrap">
-        ${quoteHtml}
-        <div class="msg-bubble">${html}</div>
-        <div class="time-text">${formatTime(msg.time)}</div>
-      </div>
+      <div class="msg-avatar">${avatarSrc ? `<img src="${avatarSrc}" loading="lazy">` : ''}</div>
+      <div class="msg-bubble-wrap">${quoteHtml}<div class="msg-bubble">${html}</div><div class="time-text">${formatTime(msg.time)}</div></div>
     `;
 
-    // 右滑引用手势
-    let startX = 0;
-    let isSwiping = false;
+    // 右滑引用
+    let startX = 0, isSwiping = false;
     item.addEventListener('touchstart', function(e) {
       const touch = e.touches[0];
       startX = touch.clientX;
@@ -671,38 +618,28 @@ document.addEventListener('DOMContentLoaded', function() {
       const touch = e.touches[0];
       const diff = startX - touch.clientX;
       if (diff > 30) {
-        // 触发引用
         e.preventDefault();
         isSwiping = false;
-        // 回弹效果：闪烁一下
         this.classList.add('swiped');
         setTimeout(() => this.classList.remove('swiped'), 300);
-        // 设置引用
         store.quoteMessage = msg;
         quoteContent.innerText = msg.text;
         quoteBar.style.display = 'flex';
-        // 清除旧引用标记
       }
     });
-    item.addEventListener('touchend', function() {
-      isSwiping = false;
-    });
+    item.addEventListener('touchend', function() { isSwiping = false; });
 
     chatWrap.appendChild(item);
   }
 
-  // 添加消息（同时存入store和渲染）
   function addMessage(text, isUser, time, quote) {
     const msg = {
       id: Date.now() + Math.random(),
-      text: text,
-      isUser: isUser,
-      time: time || Date.now(),
+      text, isUser, time: time || Date.now(),
       quote: quote || null
     };
     store.messages.push(msg);
     saveLocal();
-    // 渲染
     if (needTimeStamp()) addTimeDivider();
     store.lastChatTime = Date.now();
     appendMessageElement(msg);
@@ -710,14 +647,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function needTimeStamp() {
-    const now = Date.now();
-    if (store.messages.length > 0) {
-      const last = store.messages[store.messages.length - 1];
-      if (now - last.time > 10 * 60 * 1000) {
-        return true;
-      }
-    }
-    return false;
+    if (store.messages.length === 0) return false;
+    const last = store.messages[store.messages.length-1];
+    return (Date.now() - last.time) > 10*60*1000;
   }
 
   function addTimeDivider() {
@@ -729,7 +661,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getNowTime() {
     const d = new Date();
-    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
   }
 
   function getAllValidCards() {
@@ -742,25 +674,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getRandomReplyArr() {
     const pool = getAllValidCards();
-    if (pool.length === 0) return [{ text: '暂无可用字卡，请前往字卡库添加分组与词条' }];
+    if (pool.length === 0) return [{ text: '暂无可用字卡，请前往字卡库添加' }];
     let arr = [...pool];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const r = Math.floor(Math.random() * (i + 1));
+    for (let i=arr.length-1; i>0; i--) {
+      const r = Math.floor(Math.random()*(i+1));
       [arr[i], arr[r]] = [arr[r], arr[i]];
     }
-    const take = Math.floor(Math.random() * 3) + 1;
+    const take = Math.floor(Math.random()*3)+1;
     return arr.slice(0, take);
   }
 
   function sendMessage() {
     const content = inputText.value.trim();
     if (!content) return;
-
     const quoteMsg = store.quoteMessage;
-    // 清空引用
     store.quoteMessage = null;
     quoteBar.style.display = 'none';
-
     const now = Date.now();
     addMessage(content, true, now, quoteMsg);
     inputText.value = '';
@@ -773,13 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tempItem.className = 'msg-item target-msg';
     tempItem.innerHTML = `
       <div class="msg-avatar">${store.taInfo.avatarUrl ? `<img src="${store.taInfo.avatarUrl}" loading="lazy">` : ''}</div>
-      <div class="msg-bubble-wrap">
-        <div class="msg-bubble">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-        </div>
-      </div>
+      <div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>
     `;
     chatWrap.appendChild(tempItem);
     chatWrap.scrollTop = chatWrap.scrollHeight;
@@ -788,35 +711,27 @@ document.addEventListener('DOMContentLoaded', function() {
     typingTimer = setTimeout(() => {
       tempItem.remove();
       const replyList = getRandomReplyArr();
-      // 梦角回复时也可能引用用户消息（随机）
       let quoteReply = null;
       if (Math.random() < 0.2 && store.messages.length > 1) {
-        const lastUserMsg = [...store.messages].reverse().find(m => m.isUser);
-        if (lastUserMsg) quoteReply = lastUserMsg;
+        const lastUser = [...store.messages].reverse().find(m => m.isUser);
+        if (lastUser) quoteReply = lastUser;
       }
       replyList.forEach((item, idx) => {
         setTimeout(() => {
-          const replyTime = Date.now();
-          addMessage(item.text, false, replyTime, quoteReply);
+          addMessage(item.text, false, Date.now(), quoteReply);
         }, idx * 500);
       });
       typingTimer = null;
     }, wait);
   }
 
-  if (sendBtn) {
-    sendBtn.addEventListener('click', sendMessage);
-  }
+  if (sendBtn) sendBtn.addEventListener('click', sendMessage);
   if (inputText) {
     inputText.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
     });
   }
 
-  // 引用关闭
   if (quoteClose) {
     quoteClose.addEventListener('click', function() {
       store.quoteMessage = null;
@@ -830,14 +745,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if (createGroupBtn) {
     createGroupBtn.addEventListener('click', function() {
       const name = newGroupName.value.trim();
-      if (!name) {
-        alert('请输入分组名称');
-        return;
-      }
-      if (store.groups[name]) {
-        alert('分组已存在');
-        return;
-      }
+      if (!name) { alert('请输入分组名称'); return; }
+      if (store.groups[name]) { alert('分组已存在'); return; }
       store.groups[name] = [];
       newGroupName.value = '';
       saveLocal();
@@ -854,43 +763,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const keys = Object.keys(store.groups);
     groupListWrap.innerHTML = '';
     currentGroupSelect.innerHTML = '';
-
     if (keys.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
       opt.textContent = '请先创建分组';
       currentGroupSelect.appendChild(opt);
-      cardListWrap.innerHTML = '<div style="color:#999;text-align:center;padding:20px 0;">暂无分组，请创建</div>';
+      cardListWrap.innerHTML = '<div style="color:#999;text-align:center;padding:20px 0;">暂无分组</div>';
       return;
     }
-
     keys.forEach(g => {
       const opt = document.createElement('option');
       opt.value = g;
       opt.textContent = `${g} (${store.groups[g].length}条)`;
       currentGroupSelect.appendChild(opt);
-
       const row = document.createElement('div');
       row.className = 'group-item-row';
       row.innerHTML = `<span>${g}</span><span class="del-group-btn" data-group="${g}">删除</span>`;
-      const delBtn = row.querySelector('.del-group-btn');
-      delBtn.addEventListener('click', function() {
+      row.querySelector('.del-group-btn').addEventListener('click', function() {
         const gName = this.dataset.group;
         if (confirm(`确定删除分组「${gName}」及其所有字卡吗？`)) {
           delete store.groups[gName];
-          if (store.currentSelectGroup === gName) {
-            store.currentSelectGroup = Object.keys(store.groups)[0] || '';
-          }
+          if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
           saveLocal();
           refreshGroupSelect();
         }
       });
       groupListWrap.appendChild(row);
     });
-
-    if (!keys.includes(store.currentSelectGroup)) {
-      store.currentSelectGroup = keys[0];
-    }
+    if (!keys.includes(store.currentSelectGroup)) store.currentSelectGroup = keys[0];
     currentGroupSelect.value = store.currentSelectGroup;
     currentGroupSelect.onchange = function() {
       store.currentSelectGroup = this.value;
@@ -922,11 +822,7 @@ document.addEventListener('DOMContentLoaded', function() {
       div.querySelector('.edit-btn').addEventListener('click', function() {
         const i = parseInt(this.dataset.idx);
         const res = prompt('修改字卡', list[i].text);
-        if (res && res.trim()) {
-          list[i].text = res.trim();
-          saveLocal();
-          renderCurrentCardList();
-        }
+        if (res && res.trim()) { list[i].text = res.trim(); saveLocal(); renderCurrentCardList(); }
       });
       div.querySelector('.del-btn').addEventListener('click', function() {
         const i = parseInt(this.dataset.idx);
@@ -948,15 +844,9 @@ document.addEventListener('DOMContentLoaded', function() {
     addSingleCard.addEventListener('click', function() {
       const text = newCardInput.value.trim();
       const g = store.currentSelectGroup;
-      if (!text) {
-        alert('请输入字卡内容');
-        return;
-      }
-      if (!g || !store.groups[g]) {
-        alert('请先选择或创建一个分组');
-        return;
-      }
-      store.groups[g].push({ id: Date.now() + Math.random(), text: text, disabled: false });
+      if (!text) { alert('请输入字卡内容'); return; }
+      if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
+      store.groups[g].push({ id: Date.now()+Math.random(), text, disabled: false });
       newCardInput.value = '';
       saveLocal();
       renderCurrentCardList();
@@ -973,22 +863,11 @@ document.addEventListener('DOMContentLoaded', function() {
     batchImportBtn.addEventListener('click', function() {
       const text = batchTextarea.value.trim();
       const g = store.currentSelectGroup;
-      if (!text) {
-        alert('请填入要导入的字卡，每行一条');
-        return;
-      }
-      if (!g || !store.groups[g]) {
-        alert('请先选择或创建一个分组');
-        return;
-      }
+      if (!text) { alert('请填入要导入的字卡'); return; }
+      if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
       const arr = text.split('\n').map(s => s.trim()).filter(s => s);
-      if (arr.length === 0) {
-        alert('没有有效的字卡内容');
-        return;
-      }
-      arr.forEach(t => {
-        store.groups[g].push({ id: Date.now() + Math.random(), text: t, disabled: false });
-      });
+      if (arr.length === 0) { alert('没有有效的字卡内容'); return; }
+      arr.forEach(t => { store.groups[g].push({ id: Date.now()+Math.random(), text:t, disabled:false }); });
       batchTextarea.value = '';
       saveLocal();
       renderCurrentCardList();
@@ -1002,20 +881,17 @@ document.addEventListener('DOMContentLoaded', function() {
   function renderCalendar() {
     if (!calendarGrid) return;
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
+    const year = now.getFullYear(), month = now.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
 
     calendarGrid.innerHTML = '';
-    // 填充空白
-    for (let i = 0; i < firstDay; i++) {
+    for (let i=0; i<firstDay; i++) {
       const empty = document.createElement('div');
       empty.className = 'cal-day empty';
       calendarGrid.appendChild(empty);
     }
-    // 填充日期
-    for (let d = 1; d <= daysInMonth; d++) {
+    for (let d=1; d<=daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const dateStr = dateObj.toISOString().slice(0,10);
       const dayDiv = document.createElement('div');
@@ -1030,45 +906,32 @@ document.addEventListener('DOMContentLoaded', function() {
       emojiGroup.className = 'day-emoji-group';
 
       if (taEmoji && meEmoji) {
-        // 两个都有
-        const span1 = document.createElement('span');
-        span1.className = 'emoji-single small';
-        span1.textContent = taEmoji;
-        const span2 = document.createElement('span');
-        span2.className = 'emoji-single small';
-        span2.textContent = meEmoji;
-        emojiGroup.appendChild(span1);
-        emojiGroup.appendChild(span2);
+        const s1 = document.createElement('span'); s1.className='emoji-single small'; s1.textContent=taEmoji;
+        const s2 = document.createElement('span'); s2.className='emoji-single small'; s2.textContent=meEmoji;
+        emojiGroup.appendChild(s1); emojiGroup.appendChild(s2);
       } else if (taEmoji) {
-        const span = document.createElement('span');
-        span.className = 'emoji-single large';
-        span.textContent = taEmoji;
-        emojiGroup.appendChild(span);
+        const s = document.createElement('span'); s.className='emoji-single large'; s.textContent=taEmoji;
+        emojiGroup.appendChild(s);
       } else if (meEmoji) {
-        const span = document.createElement('span');
-        span.className = 'emoji-single large';
-        span.textContent = meEmoji;
-        emojiGroup.appendChild(span);
+        const s = document.createElement('span'); s.className='emoji-single large'; s.textContent=meEmoji;
+        emojiGroup.appendChild(s);
       }
       dayDiv.appendChild(emojiGroup);
       calendarGrid.appendChild(dayDiv);
     }
 
-    // 更新顶部文字
+    // 顶部文字
     const todayStr = now.toISOString().slice(0,10);
     const todayData = store.calendar[todayStr] || {};
     calTaText.innerText = todayData.taText || 'TA今天还没有记录哦～';
     calMeText.innerText = todayData.meText || '今天有什么想说的。';
   }
 
-  // 打开心情记录弹窗
   if (openMoodModal) {
     openMoodModal.addEventListener('click', function() {
-      // 设置当前日期
       const now = new Date();
       currentDateStr = now.toISOString().slice(0,10);
       const data = store.calendar[currentDateStr] || {};
-      // 设置已有表情
       selectedMoodEmoji = data.meEmoji || null;
       moodTextInput.value = data.meText || '';
       renderMoodEmojis();
@@ -1103,23 +966,19 @@ document.addEventListener('DOMContentLoaded', function() {
       const dateStr = currentDateStr;
       if (!dateStr) return;
       const text = moodTextInput.value.trim();
-      // 用户保存的表情和文字
       const data = store.calendar[dateStr] || {};
       data.meEmoji = selectedMoodEmoji || data.meEmoji;
       data.meText = text || data.meText;
-      // 梦角自动选一个随机表情（如果有的话）
       if (!data.taEmoji) {
         const taEmojis = ['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱'];
         data.taEmoji = taEmojis[randomInt(0, taEmojis.length-1)];
       }
-      // 梦角随机选1-3句字卡作为文字
       if (!data.taText) {
         const cards = getAllValidCards();
         if (cards.length > 0) {
           const count = Math.min(randomInt(1,3), cards.length);
-          const shuffled = [...cards].sort(() => Math.random() - 0.5);
-          const selected = shuffled.slice(0, count).map(c => c.text).join(' ');
-          data.taText = selected;
+          const shuffled = [...cards].sort(() => Math.random()-0.5);
+          data.taText = shuffled.slice(0, count).map(c=>c.text).join(' ');
         } else {
           data.taText = '今天没有什么想说的～';
         }
@@ -1133,17 +992,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  DATA MANAGEMENT (导出 / 导入)
+  //  DATA MANAGEMENT
   // ============================================================
   if (exportDataBtn) {
     exportDataBtn.addEventListener('click', function() {
-      // 构建完整数据对象
-      const data = {
-        version: '1.0',
-        exportTime: new Date().toISOString(),
-        store: store
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const data = { version:'1.0', exportTime: new Date().toISOString(), store };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -1155,29 +1009,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 导入流程
-  let importFileResolve = null;
   if (importDataBtn) {
     importDataBtn.addEventListener('click', function() {
-      // 先显示确认弹窗
       importConfirmMask.style.display = 'flex';
     });
   }
-
   if (importCancelBtn) {
     importCancelBtn.addEventListener('click', function() {
       importConfirmMask.style.display = 'none';
-      if (importFileResolve) {
-        importFileResolve(null);
-        importFileResolve = null;
-      }
     });
   }
-
   if (importConfirmBtn) {
     importConfirmBtn.addEventListener('click', function() {
       importConfirmMask.style.display = 'none';
-      // 弹出文件选择
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.json';
@@ -1189,11 +1033,8 @@ document.addEventListener('DOMContentLoaded', function() {
           try {
             const data = JSON.parse(ev.target.result);
             if (data.store) {
-              // 覆盖store
               store = data.store;
-              // 重新加载所有UI
               saveLocal();
-              // 刷新界面
               renderHeaderAvatar();
               refreshAllIconPreview();
               applyBgStyle();
@@ -1207,9 +1048,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
               alert('无效的数据文件');
             }
-          } catch (err) {
-            alert('文件解析失败：' + err.message);
-          }
+          } catch (err) { alert('文件解析失败：'+err.message); }
         };
         reader.readAsText(file);
       };
@@ -1237,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function pad(n) { return String(n).padStart(2,'0'); }
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -1255,11 +1094,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const parsed = JSON.parse(raw);
         store = { ...store, ...parsed };
       }
-    } catch (e) { console.warn('Load local error', e); }
-    // 确保有messages字段
+    } catch(e) { console.warn('Load local error', e); }
     if (!store.messages) store.messages = [];
     if (!store.calendar) store.calendar = {};
-    if (!store.appIcon.calendar) store.appIcon.calendar = '';
+    if (!store.appIcon.setting) store.appIcon.setting = '';
 
     renderHeaderAvatar();
     refreshAllIconPreview();
@@ -1279,19 +1117,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function saveLocal() {
     try {
       localStorage.setItem('dreamCardStore', JSON.stringify(store));
-    } catch (e) { console.warn('Save local error', e); }
+    } catch(e) { console.warn('Save local error', e); }
   }
 
   // ============================================================
   //  INIT
   // ============================================================
-  // 防止双击缩放
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-      e.preventDefault();
-    }
+    if (now - lastTouchEnd <= 300) e.preventDefault();
     lastTouchEnd = now;
   }, { passive: false });
 
@@ -1299,9 +1134,7 @@ document.addEventListener('DOMContentLoaded', function() {
   applyBgStyle();
 
   if (document.querySelector('.chat-page.active') && chatWrap) {
-    setTimeout(() => {
-      chatWrap.scrollTop = chatWrap.scrollHeight;
-    }, 100);
+    setTimeout(() => { chatWrap.scrollTop = chatWrap.scrollHeight; }, 100);
   }
 
   console.log('✅ 梦角字卡传讯已启动 | 动画:', store.animEnabled ? '开启' : '关闭');
