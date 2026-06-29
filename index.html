@@ -102,7 +102,7 @@
     </div>
   </div>
 
-  <!-- ===== 设置页（数据管理、聊天设置） ===== -->
+<!-- ===== 设置页（数据管理） ===== -->
   <div class="page setting-page">
     <div class="page-header">
       <button class="back-btn">←</button>
@@ -116,12 +116,29 @@
         </div>
         <div style="font-size:12px; color:#999; margin-top:8px;">导出为JSON文件，导入将覆盖当前所有数据</div>
       </div>
+      <!-- 可选保留动画开关，但动画开关也在外观设置中，此处可移除 -->
+      <!-- <div class="setting-block">
+        <h4 class="block-title">页面切换动画</h4>
+        <div class="toggle-row">
+          <span class="toggle-label">启用平滑切换</span>
+          <div class="toggle-switch active" id="animToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+<!-- ===== 聊天设置页（独立） ===== -->
+  <div class="page chat-set-page">
+    <div class="page-header">
+      <button class="back-btn chat-set-back">←</button>
+    </div>
+    <div class="setting-container">
       <div class="setting-block">
         <h4 class="block-title">聊天设置</h4>
         <div class="set-block-item" id="blockTa">关于TA</div>
         <div class="set-block-item" id="blockMe">关于我</div>
         <div class="set-block-item" id="blockDelay">回复时长</div>
-        <div class="set-block-item" id="blockStatus">当前状态</div>
         <div class="set-block-item">
           <div class="block-title">聊天背景壁纸</div>
           <div class="wallpaper-row reverse">
