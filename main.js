@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateAnimToggleUI(){ if(!animToggle) return; store.animEnabled?animToggle.classList.add('active'):animToggle.classList.remove('active'); document.body.classList.toggle('no-transition',!store.animEnabled); }
   if(animToggle) animToggle.addEventListener('click',function(){ store.animEnabled=!store.animEnabled; updateAnimToggleUI(); saveLocal(); });
 
-  // ========== 图片弹窗（含表情添加） ==========
+  // ========== 图片弹窗 ==========
   function openImageModal(title,targetKey){
     currentEditTarget=targetKey; modalTitle.innerText=title; localImageFile.value='';
     let existing='';
@@ -215,19 +215,15 @@ document.addEventListener('DOMContentLoaded', function() {
       chatWrap.appendChild(div);
       return;
     }
-    // 判断是否为纯表情消息（内容只包含一个[emoji:xxx]）
     const isEmojiOnly = /^\[emoji:.+\]$/.test(msg.text.trim());
     const item=document.createElement('div');
     item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
-    if(isEmojiOnly){
-      item.classList.add('emoji-only');
-    }
+    if(isEmojiOnly) item.classList.add('emoji-only');
     item.dataset.msgId=msg.id;
     let quoteHtml='';
     if(msg.quote){ quoteHtml=`<div class="msg-quote">📎 ${escapeHtml(msg.quote.text)}</div>`; }
     let html='';
     if(isEmojiOnly){
-      // 直接显示大图
       const src=msg.text.match(/\[emoji:(.+?)\]/)[1];
       html=`<img class="emoji-big" src="${src}" loading="lazy">`;
     } else {
@@ -238,18 +234,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
     item.innerHTML=`<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div><div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
-    // 引用滑动：从左向右滑（diff < -30）
+    // 引用滑动：从左向右滑（diff < -30），不阻止默认滚动
     let startX=0, isSwiping=false;
-    item.addEventListener('touchstart',function(e){ const touch=e.touches[0]; startX=touch.clientX; isSwiping=true; });
-    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const touch=e.touches[0]; const diff=startX-touch.clientX; if(diff < -30){ // 从左向右滑
-      e.preventDefault();
+    item.addEventListener('touchstart',function(e){ startX=e.touches[0].clientX; isSwiping=true; }, {passive:true});
+    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const diff=startX-e.touches[0].clientX; if(diff < -30){ // 从左向右滑
+      e.preventDefault(); // 只有触发引用时才阻止滚动
       isSwiping=false;
-      // 回弹效果：平移然后复位
       this.style.transition='transform 0.2s ease';
       this.style.transform='translateX(20px)';
       setTimeout(()=>{ this.style.transform=''; }, 300);
       quoteMsg=msg; quoteContent.innerText=msg.text; quoteBar.style.display='flex';
-    } });
+    } }, {passive:false});
     item.addEventListener('touchend',function(){ isSwiping=false; });
     chatWrap.appendChild(item);
   }
@@ -309,42 +304,34 @@ document.addEventListener('DOMContentLoaded', function() {
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
   if(quoteClose) quoteClose.addEventListener('click',function(){ quoteMsg=null; quoteBar.style.display='none'; });
 
-  // ========== 拍一拍（双击消息头像） ==========
+  // ========== 拍一拍（使用 click 检测双击，不影响滚动） ==========
   function handlePat(avatarEl, isUser){
-    // isUser: 头像所属消息的发送者是否为用户
-    // 发起者始终是“我”（用户），目标是头像所属人
     const initiator=store.myInfo.name;
     let targetName='';
     if(isUser){
-      targetName=store.myInfo.name; // 拍自己
+      targetName=store.myInfo.name;
     } else {
-      targetName=store.taInfo.name; // 拍对方
+      targetName=store.taInfo.name;
     }
     const suffix=store.chatSettings.patSuffix||'拍了拍';
     const patText=`${initiator} 拍了拍 ${targetName} ${suffix}`;
     addMessage(patText, false, Date.now(), null, true, false);
   }
-  let lastTapTime=0;
-  chatWrap.addEventListener('touchstart', function(e){
-    const avatar=e.target.closest('.msg-avatar');
-    if(!avatar) return;
-    const now=Date.now();
-    if(now-lastTapTime<400){
-      e.preventDefault();
-      const msgItem=avatar.closest('.msg-item');
-      if(!msgItem) return;
-      const isUser=msgItem.classList.contains('user-msg');
-      handlePat(avatar, isUser);
-      lastTapTime=0;
-    } else { lastTapTime=now; }
-  }, {passive:false});
   let clickCount=0, clickTimer=null;
   chatWrap.addEventListener('click', function(e){
     const avatar=e.target.closest('.msg-avatar');
     if(!avatar) return;
     clickCount++;
-    if(clickCount===2){ clearTimeout(clickTimer); clickCount=0; const msgItem=avatar.closest('.msg-item'); if(!msgItem) return; const isUser=msgItem.classList.contains('user-msg'); handlePat(avatar, isUser); }
-    else { clickTimer=setTimeout(()=>{ clickCount=0; }, 400); }
+    if(clickCount===2){
+      clearTimeout(clickTimer);
+      clickCount=0;
+      const msgItem=avatar.closest('.msg-item');
+      if(!msgItem) return;
+      const isUser=msgItem.classList.contains('user-msg');
+      handlePat(avatar, isUser);
+    } else {
+      clickTimer=setTimeout(()=>{ clickCount=0; }, 400);
+    }
   });
 
   // ========== 视频通话 ==========
