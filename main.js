@@ -205,12 +205,12 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
-  // 点击事件 -> 碎片
+  // 点击事件 -> 碎片（使用 passive:true 避免阻塞）
   document.addEventListener('click',function(e){
     if(!particleEnabled) return;
     emitParticles(e.clientX,e.clientY,12+Math.floor(Math.random()*8));
   });
-  // 触摸事件 -> 碎片 + 拖尾
+  // 触摸事件 -> 碎片 + 拖尾（使用 passive:true）
   let lastTouchX=0,lastTouchY=0;
   document.addEventListener('touchstart',function(e){
     if(!particleEnabled) return;
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ===== 图片选择弹窗（新样式） =====
+  // ===== 图片选择弹窗 =====
   function openImageModal(title,targetKey){
     currentEditTarget=targetKey; modalTitle.innerText=title;
     localImageFile.value='';
@@ -398,15 +398,12 @@ document.addEventListener('DOMContentLoaded', function() {
       store.delay.max=val+20;
       saveLocal();
     });
-    // 加载时设置
     const loadDelay=function(){
       const min=store.delay.min||20;
       delayRange.value=min;
       delayRangeValue.textContent=min+'秒';
     };
-    // 延迟加载等待store初始化
     setTimeout(loadDelay,100);
-    // 保存按钮也保存延时
     if(saveChatSetting) saveChatSetting.addEventListener('click',function(){ 
       const val=parseInt(delayRange.value);
       store.delay.min=val;
