@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     myInfo:{name:"我",avatarUrl:""},
     delay:{min:20,max:120},
     chatBg:"",
-    appIcon:{chat:"",card:"",theme:"",mail:"",calendar:"",setting:""},
+    appIcon:{chat:"",card:"",theme:"",mail:"",calendar:"",setting:"",placeholder:""},
     wallpaper:"",
     groups:{},
     currentSelectGroup:"",
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     videoCall:{active:false, caller:"", startTime:null, answered:false, folded:false, timer:null},
     isTyping: false,
-    // 首页个人资料
     profile:{
       cover:"",
       avatar:"",
@@ -29,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
       location:"爱尔兰",
       locationIcon:"https://i.ibb.co/pjyVcqxM/position.png",
       signature:"浅尝辄止 是命运轻轻放过了我"
-    }
+    },
+    decoImage:""
   };
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -54,17 +54,24 @@ document.addEventListener('DOMContentLoaded', function() {
   const headerTaAvatar=$('#headerTaAvatar'), headerMyAvatar=$('#headerMyAvatar'), currentStatusText=$('#currentStatusText');
   const animToggle=$('#animToggle'), quoteBar=$('#quoteBar'), quoteContent=$('#quoteContent'), quoteClose=$('#quoteClose');
   const calendarGrid=$('#calendarGrid'), calTaText=$('#calTaText'), calMeText=$('#calMeText'), openMoodModal=$('#openMoodModal'), moodModal=$('#moodModal'), moodEmojiGrid=$('#moodEmojiGrid'), moodTextInput=$('#moodTextInput'), closeMoodModal=$('#closeMoodModal'), saveMoodModal=$('#saveMoodModal');
-  const exportDataBtn=$('#exportDataBtn'), importDataBtn=$('#importDataBtn'), importConfirmMask=$('#importConfirmMask'), importCancelBtn=$('#importCancelBtn'), importConfirmBtn=$('#importConfirmBtn');
+  const exportDataBtn=$('#exportDataBtn'), importDataBtn=$('#importDataBtn');
+  const exportChatBtn=$('#exportChatBtn'), importChatBtn=$('#importChatBtn');
+  const exportCardsBtn=$('#exportCardsBtn'), importCardsBtn=$('#importCardsBtn');
+  const importConfirmMask=$('#importConfirmMask'), importConfirmTitle=$('#importConfirmTitle'), importConfirmMsg=$('#importConfirmMsg'), importCancelBtn=$('#importCancelBtn'), importConfirmBtn=$('#importConfirmBtn');
   const videoWindow=$('#videoWindow'), videoBg=$('#videoBg'), videoTimer=$('#videoTimer'), videoFoldBtn=$('#videoFoldBtn'), videoAvatar=$('#videoAvatar'), videoHangupBtn=$('#videoHangupBtn');
   const videoAnswerArea=$('#videoAnswerArea'), videoAnswerBtn=$('#videoAnswerBtn'), videoRejectBtn=$('#videoRejectBtn');
   const videoCapsule=$('#videoCapsule'), capsuleTimer=$('#capsuleTimer'), capsuleExpand=$('#capsuleExpand');
-  // 首页资料卡片元素
   const profileCover=$('#profileCover'), coverImage=$('#coverImage'), profileAvatar=$('#profileAvatar'), avatarImage=$('#avatarImage');
   const profileName=$('#profileName'), profileLocation=$('#profileLocation'), locationText=$('#locationText'), locationIcon=$('#locationIcon');
   const profileSignature=$('#profileSignature');
+  const decoImage=$('#decoImage'), decoImg=$('#decoImg');
+  const fontFileInput=$('#fontFileInput'), applyFontBtn=$('#applyFontBtn');
+  const placeholderApp=$('#placeholderApp'), placeholderIcon=$('#placeholderIcon');
+  const bottomBarItems=$$('.bar-item');
 
   let currentEditTarget=null, currentMailTab='sent', typingTimer=null, letterTimer=null, selectedMoodEmoji=null, currentDateStr=null;
   let quoteMsg=null, videoTimerInterval=null;
+  let importCallback=null; // 用于导入确认后的回调
 
   // ========== 页面切换 ==========
   function switchPage(pageName) {
@@ -80,7 +87,25 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ========== 导航 ==========
+  // 首页应用卡片
   $$('.app-card').forEach(c=>c.addEventListener('click',function(e){ e.preventDefault(); const t=this.dataset.target; if(t) switchPage(t); }));
+  // 底栏项
+  bottomBarItems.forEach(item=>{
+    if(item.classList.contains('placeholder')) return;
+    item.addEventListener('click',function(e){
+      const target=this.dataset.target;
+      if(target) switchPage(target);
+    });
+  });
+  // 占位app点击更换图标
+  if(placeholderApp){
+    placeholderApp.addEventListener('click',function(e){
+      if(e.target.closest('.bar-item.placeholder')){
+        openImageModal('更换占位图标','placeholder');
+      }
+    });
+  }
+  // 所有返回按钮
   $$('.back-btn').forEach(b=>b.addEventListener('click',function(e){ e.stopPropagation(); switchPage('home-page'); }));
   if(chatSetBack) chatSetBack.addEventListener('click',function(e){ e.stopPropagation(); switchPage('chat-page'); });
   if(openChatSettingPage) openChatSettingPage.addEventListener('click',function(){ switchPage('chat-set-page'); });
@@ -98,12 +123,13 @@ document.addEventListener('DOMContentLoaded', function() {
     else if(targetKey==='videoBg') existing=store.chatSettings.videoBg;
     else if(targetKey==='profileCover') existing=store.profile.cover;
     else if(targetKey==='profileAvatar') existing=store.profile.avatar;
+    else if(targetKey==='decoImage') existing=store.decoImage;
     else existing=store.appIcon[targetKey]||'';
     imageLinkInput.value=existing; imageSelectMask.style.display='flex';
   }
   if(openWallpaperModal) openWallpaperModal.addEventListener('click',()=>openImageModal('设置主页壁纸','wallpaper'));
   if(openChatBgModal) openChatBgModal.addEventListener('click',()=>openImageModal('设置聊天背景','chatBg'));
-  changeIconBtns.forEach(b=>b.addEventListener('click',function(){ const type=this.dataset.type; const map={chat:'聊天',card:'字卡',theme:'外观',mail:'信箱',calendar:'日历',setting:'设置'}; openImageModal('更改 '+map[type],type); }));
+  changeIconBtns.forEach(b=>b.addEventListener('click',function(){ const type=this.dataset.type; const map={chat:'聊天',card:'字卡',theme:'外观',mail:'信箱',calendar:'日历',setting:'设置',placeholder:'占位'}; openImageModal('更改 '+map[type],type); }));
   if(closeImageModal) closeImageModal.addEventListener('click',function(){ imageSelectMask.style.display='none'; currentEditTarget=null; });
   if(confirmImageBtn) confirmImageBtn.addEventListener('click',async function(){
     let url='';
@@ -115,17 +141,20 @@ document.addEventListener('DOMContentLoaded', function() {
     else if(currentEditTarget==='videoBg'){ store.chatSettings.videoBg=url; applyVideoBg(); }
     else if(currentEditTarget==='profileCover'){ store.profile.cover=url; coverImage.src=url; }
     else if(currentEditTarget==='profileAvatar'){ store.profile.avatar=url; avatarImage.src=url; }
+    else if(currentEditTarget==='decoImage'){ store.decoImage=url; decoImg.src=url; }
     else if(currentEditTarget==='emoji'){ store.emojiList.push(url); renderEmojiGrid(); }
     else{ store.appIcon[currentEditTarget]=url; refreshAllIconPreview(); }
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
 
-  // ========== 文本编辑弹窗（首页资料卡） ==========
+  // ========== 装饰图点击 ==========
+  if(decoImage) decoImage.addEventListener('click',()=>openImageModal('更换装饰图','decoImage'));
+
+  // ========== 文本编辑弹窗 ==========
   function openEditText(title, currentValue, callback){
     editTextTitle.innerText=title;
     editTextInput.value=currentValue;
     editTextMask.style.display='flex';
-    // 移除旧监听，避免重复绑定
     const newSave=function(){
       const val=editTextInput.value.trim();
       if(val) callback(val);
@@ -140,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if(profileAvatar) profileAvatar.addEventListener('click',()=>openImageModal('选择头像','profileAvatar'));
   if(profileName) profileName.addEventListener('click',()=>openEditText('修改昵称', store.profile.name, (val)=>{ store.profile.name=val; profileName.innerText=val; saveLocal(); }));
   if(profileLocation) profileLocation.addEventListener('click',()=>{
-    // 弹出两个输入：位置文本和图标链接
     const html=`
       <div style="margin-bottom:12px;">
         <label style="font-size:14px;color:#555;">位置名称</label>
@@ -195,9 +223,32 @@ document.addEventListener('DOMContentLoaded', function() {
       const style=this.dataset.style;
       store.chatSettings.avatarStyle=style;
       saveLocal();
-      renderMessages(); // 刷新头像样式
+      renderMessages();
     });
   });
+
+  // ========== 全局字体 ==========
+  if(applyFontBtn){
+    applyFontBtn.addEventListener('click',function(){
+      const file=fontFileInput.files[0];
+      if(!file){ alert('请先选择字体文件'); return; }
+      const reader=new FileReader();
+      reader.onload=function(e){
+        const arrayBuffer=e.target.result;
+        const fontName=file.name.replace(/\.[^.]+$/,'');
+        const fontFace=new FontFace(fontName, arrayBuffer);
+        fontFace.load().then(function(loadedFace){
+          document.fonts.add(loadedFace);
+          document.body.style.fontFamily=fontName+', "Microsoft Yahei", system-ui, sans-serif';
+          // 保存字体名称到store（仅用于显示，实际无法持久化）
+          alert('字体应用成功！刷新后需重新上传');
+        }).catch(function(err){
+          alert('字体加载失败：'+err.message);
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
 
   // ========== 表情包 ==========
   function renderEmojiGrid(){
@@ -331,7 +382,20 @@ document.addEventListener('DOMContentLoaded', function() {
   function renderHeaderAvatar(){ headerTaAvatar.src=store.taInfo.avatarUrl||''; headerMyAvatar.src=store.myInfo.avatarUrl||''; updateRandomStatus(); }
   function applyBgStyle(){ document.body.style.setProperty('--wallpaper',store.wallpaper?`url(${store.wallpaper})`:'none'); document.documentElement.style.setProperty('--chat-bg',store.chatBg?`url(${store.chatBg})`:'none'); }
   function applyVideoBg(){ if(videoBg) videoBg.style.backgroundImage=store.chatSettings.videoBg?`url(${store.chatSettings.videoBg})`:'none'; }
-  function refreshAllIconPreview(){ ['chat','card','theme','mail','calendar','setting'].forEach(key=>{ const el=document.getElementById(key+'AppIcon'); const prev=document.getElementById(key+'IconPreview'); const src=store.appIcon[key]||''; if(el) el.src=src; if(prev) prev.src=src; }); }
+  function refreshAllIconPreview(){
+    const keys=['chat','card','theme','mail','calendar','setting','placeholder'];
+    keys.forEach(key=>{
+      const el=document.getElementById(key+'AppIcon');
+      const prev=document.getElementById(key+'IconPreview');
+      const src=store.appIcon[key]||'';
+      if(el) el.src=src;
+      if(prev) prev.src=src;
+    });
+    // 占位底栏图标
+    if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
+    // 装饰图
+    if(decoImg) decoImg.src=store.decoImage||'';
+  }
   function parseEmojiText(text){ return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>`<img class="msg-emoji-inside" src="${src}" loading="lazy">`); }
   function randomAttachEmoji(){ if(store.emojiList.length===0) return null; if(Math.random()<0.25) return store.emojiList[randomInt(0,store.emojiList.length-1)]; return null; }
 
@@ -404,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let quoteHtml='';
-    if(msg.quote){ quoteHtml=`<div class="msg-quote">${escapeHtml(msg.quote.text)}</div>`; } // 移除📎
+    if(msg.quote){ quoteHtml=`<div class="msg-quote">${escapeHtml(msg.quote.text)}</div>`; }
     let html='';
     if(isEmojiOnly){
       const src=msg.text.match(/\[emoji:(.+?)\]/)[1];
@@ -421,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar ${avatarClass}" style="visibility:hidden;"></div>` : avatarHtml;
     item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
 
-    // 引用长按滑动（不变）
+    // 引用长按滑动
     let longPressTimer=null;
     let isLongPress=false;
     let touchStartX=0, touchStartY=0;
@@ -702,18 +766,51 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-  // 视频按钮使用图片
+  // 视频按钮
   const videoCallBtn=document.createElement('button');
   videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.padding='4px'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.minWidth='40px'; videoCallBtn.style.display='flex'; videoCallBtn.style.alignItems='center'; videoCallBtn.style.justifyContent='center';
   videoCallBtn.innerHTML='<img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" style="width:24px;height:24px;">';
   videoCallBtn.addEventListener('click',function(){ initiateVideoCall('me'); });
   document.querySelector('.emoji-btn-wrapper').appendChild(videoCallBtn);
 
-  // ========== 字卡管理 ==========
+  // ========== 字卡管理（编辑/删除/屏蔽 改为图片按钮） ==========
   if(createGroupBtn) createGroupBtn.addEventListener('click',function(){ const name=newGroupName.value.trim(); if(!name){alert('请输入分组名称');return;} if(store.groups[name]){alert('分组已存在');return;} store.groups[name]=[]; newGroupName.value=''; saveLocal(); refreshGroupSelect(); });
   if(newGroupName) newGroupName.addEventListener('keydown',function(e){ if(e.key==='Enter') createGroupBtn.click(); });
   function refreshGroupSelect(){ const keys=Object.keys(store.groups); groupListWrap.innerHTML=''; currentGroupSelect.innerHTML=''; if(keys.length===0){ const opt=document.createElement('option'); opt.value=''; opt.textContent='请先创建分组'; currentGroupSelect.appendChild(opt); cardListWrap.innerHTML='<div style="color:#999;text-align:center;padding:20px 0;">暂无分组</div>'; return; } keys.forEach(g=>{ const opt=document.createElement('option'); opt.value=g; opt.textContent=`${g} (${store.groups[g].length}条)`; currentGroupSelect.appendChild(opt); const row=document.createElement('div'); row.className='group-item-row'; row.innerHTML=`<span>${g}</span><span class="del-group-btn" data-group="${g}">删除</span>`; row.querySelector('.del-group-btn').addEventListener('click',function(){ const gName=this.dataset.group; if(confirm(`确定删除分组「${gName}」及其所有字卡吗？`)){ delete store.groups[gName]; if(store.currentSelectGroup===gName) store.currentSelectGroup=Object.keys(store.groups)[0]||''; saveLocal(); refreshGroupSelect(); } }); groupListWrap.appendChild(row); }); if(!keys.includes(store.currentSelectGroup)) store.currentSelectGroup=keys[0]; currentGroupSelect.value=store.currentSelectGroup; currentGroupSelect.onchange=function(){ store.currentSelectGroup=this.value; saveLocal(); renderCurrentCardList(); }; renderCurrentCardList(); }
-  function renderCurrentCardList(){ cardListWrap.innerHTML=''; const g=store.currentSelectGroup; if(!g||!store.groups[g]||store.groups[g].length===0){ cardListWrap.innerHTML='<div style="color:#999;text-align:center;padding:20px 0;">暂无字卡</div>'; return; } const list=store.groups[g]; list.forEach((card,idx)=>{ const div=document.createElement('div'); div.className=`card-item ${card.disabled?'disabled':''}`; div.innerHTML=`<div class="card-text">${escapeHtml(card.text)}</div><div class="card-opts"><button class="edit-btn" data-idx="${idx}">编辑</button><button class="del-btn" data-idx="${idx}">删除</button><button class="switch-btn" data-idx="${idx}">${card.disabled?'启用':'屏蔽'}</button></div>`; div.querySelector('.edit-btn').addEventListener('click',function(){ const i=parseInt(this.dataset.idx); const res=prompt('修改字卡',list[i].text); if(res&&res.trim()){ list[i].text=res.trim(); saveLocal(); renderCurrentCardList(); } }); div.querySelector('.del-btn').addEventListener('click',function(){ const i=parseInt(this.dataset.idx); list.splice(i,1); saveLocal(); renderCurrentCardList(); }); div.querySelector('.switch-btn').addEventListener('click',function(){ const i=parseInt(this.dataset.idx); list[i].disabled=!list[i].disabled; saveLocal(); renderCurrentCardList(); }); cardListWrap.appendChild(div); }); }
+  function renderCurrentCardList(){
+    cardListWrap.innerHTML='';
+    const g=store.currentSelectGroup;
+    if(!g||!store.groups[g]||store.groups[g].length===0){ cardListWrap.innerHTML='<div style="color:#999;text-align:center;padding:20px 0;">暂无字卡</div>'; return; }
+    const list=store.groups[g];
+    list.forEach((card,idx)=>{
+      const div=document.createElement('div');
+      div.className=`card-item ${card.disabled?'disabled':''}`;
+      div.innerHTML=`
+        <div class="card-text">${escapeHtml(card.text)}</div>
+        <div class="card-opts">
+          <button class="edit-btn" data-idx="${idx}"><img src="https://i.ibb.co/sdw1Gc33/bianjiheibeifen.png" alt="编辑"></button>
+          <button class="del-btn" data-idx="${idx}"><img src="https://i.ibb.co/24WKj9F/shanchu.png" alt="删除"></button>
+          <button class="switch-btn" data-idx="${idx}"><img src="https://i.ibb.co/0pTRWNG4/Shield-pingbi.png" alt="${card.disabled?'启用':'屏蔽'}"></button>
+        </div>
+      `;
+      div.querySelector('.edit-btn').addEventListener('click',function(){
+        const i=parseInt(this.dataset.idx);
+        const res=prompt('修改字卡',list[i].text);
+        if(res&&res.trim()){ list[i].text=res.trim(); saveLocal(); renderCurrentCardList(); }
+      });
+      div.querySelector('.del-btn').addEventListener('click',function(){
+        const i=parseInt(this.dataset.idx);
+        list.splice(i,1);
+        saveLocal(); renderCurrentCardList();
+      });
+      div.querySelector('.switch-btn').addEventListener('click',function(){
+        const i=parseInt(this.dataset.idx);
+        list[i].disabled=!list[i].disabled;
+        saveLocal(); renderCurrentCardList();
+      });
+      cardListWrap.appendChild(div);
+    });
+  }
   if(addSingleCard) addSingleCard.addEventListener('click',function(){ const text=newCardInput.value.trim(); const g=store.currentSelectGroup; if(!text){alert('请输入字卡内容');return;} if(!g||!store.groups[g]){alert('请先选择或创建分组');return;} store.groups[g].push({id:Date.now()+Math.random(), text, disabled:false}); newCardInput.value=''; saveLocal(); renderCurrentCardList(); refreshGroupSelect(); });
   if(newCardInput) newCardInput.addEventListener('keydown',function(e){ if(e.key==='Enter') addSingleCard.click(); });
   if(batchImportBtn) batchImportBtn.addEventListener('click',function(){ const text=batchTextarea.value.trim(); const g=store.currentSelectGroup; if(!text){alert('请填入要导入的字卡');return;} if(!g||!store.groups[g]){alert('请先选择或创建分组');return;} const arr=text.split('\n').map(s=>s.trim()).filter(s=>s); if(arr.length===0){alert('没有有效的字卡内容');return;} arr.forEach(t=>{ store.groups[g].push({id:Date.now()+Math.random(), text:t, disabled:false}); }); batchTextarea.value=''; saveLocal(); renderCurrentCardList(); refreshGroupSelect(); });
@@ -725,16 +822,187 @@ document.addEventListener('DOMContentLoaded', function() {
   if(closeMoodModal) closeMoodModal.addEventListener('click',function(){ moodModal.style.display='none'; selectedMoodEmoji=null; });
   if(saveMoodModal) saveMoodModal.addEventListener('click',function(){ const dateStr=currentDateStr; if(!dateStr) return; const text=moodTextInput.value.trim(); const data=store.calendar[dateStr]||{}; data.meEmoji=selectedMoodEmoji||data.meEmoji; data.meText=text||data.meText; if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱']; data.taEmoji=taEmojis[randomInt(0,taEmojis.length-1)]; } if(!data.taText){ const cards=getAllValidCards(); if(cards.length>0){ const count=Math.min(randomInt(1,3),cards.length); const shuffled=[...cards].sort(()=>Math.random()-0.5); data.taText=shuffled.slice(0,count).map(c=>c.text).join(' '); } else { data.taText='今天没有什么想说的～'; } } store.calendar[dateStr]=data; saveLocal(); renderCalendar(); moodModal.style.display='none'; selectedMoodEmoji=null; });
 
-  // ========== 数据管理 ==========
-  if(exportDataBtn) exportDataBtn.addEventListener('click',function(){ const data={version:'1.0', exportTime:new Date().toISOString(), store}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`dreamcard_data_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
-  if(importDataBtn) importDataBtn.addEventListener('click',function(){ importConfirmMask.style.display='flex'; });
-  if(importCancelBtn) importCancelBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; });
-  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; const input=document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange=function(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=function(ev){ try{ const data=JSON.parse(ev.target.result); if(data.store){ store=data.store; saveLocal(); renderHeaderAvatar(); refreshAllIconPreview(); applyBgStyle(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); renderCalendar(); applyVideoBg(); renderMail(); // 更新个人资料UI
-        coverImage.src=store.profile.cover||''; avatarImage.src=store.profile.avatar||''; profileName.innerText=store.profile.name||'TATA'; locationText.innerText=store.profile.location||'爱尔兰'; locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png'; profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
-        // 头像样式
-        const style=store.chatSettings.avatarStyle||'circle';
-        styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
-        alert('数据导入成功！'); } else { alert('无效的数据文件'); } } catch(err){ alert('文件解析失败：'+err.message); } }; reader.readAsText(file); }; input.click(); });
+  // ========== 导入导出功能 ==========
+  // 通用导入确认
+  function showImportConfirm(title, msg, callback){
+    importConfirmTitle.innerText=title;
+    importConfirmMsg.innerText=msg;
+    importConfirmMask.style.display='flex';
+    importCallback=callback;
+  }
+  if(importCancelBtn) importCancelBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; importCallback=null; });
+  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){
+    importConfirmMask.style.display='none';
+    if(importCallback){
+      const cb=importCallback;
+      importCallback=null;
+      cb();
+    }
+  });
+
+  // 导出聊天记录
+  if(exportChatBtn){
+    exportChatBtn.addEventListener('click',function(){
+      const data={messages:store.messages};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`chat_history_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  // 导入聊天记录
+  if(importChatBtn){
+    importChatBtn.addEventListener('click',function(){
+      showImportConfirm('导入聊天记录','导入将覆盖当前所有聊天消息，是否继续？', function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.messages){
+                store.messages=data.messages;
+                saveLocal();
+                renderMessages();
+                alert('聊天记录导入成功！');
+              } else {
+                alert('无效的数据文件');
+              }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
+
+  // 导出字卡
+  if(exportCardsBtn){
+    exportCardsBtn.addEventListener('click',function(){
+      const data={groups:store.groups};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`cards_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  // 导入字卡
+  if(importCardsBtn){
+    importCardsBtn.addEventListener('click',function(){
+      showImportConfirm('导入字卡','导入将覆盖当前所有字卡分组及内容，是否继续？', function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.groups){
+                store.groups=data.groups;
+                // 重置当前选中的分组
+                const keys=Object.keys(store.groups);
+                if(keys.length>0) store.currentSelectGroup=keys[0];
+                else store.currentSelectGroup='';
+                saveLocal();
+                refreshGroupSelect();
+                alert('字卡导入成功！');
+              } else {
+                alert('无效的数据文件');
+              }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
+
+  // 导出全部数据
+  if(exportDataBtn){
+    exportDataBtn.addEventListener('click',function(){
+      const data={store:store};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`full_data_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  // 导入全部数据
+  if(importDataBtn){
+    importDataBtn.addEventListener('click',function(){
+      showImportConfirm('导入全部数据','导入将覆盖所有当前数据，是否继续？', function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.store){
+                store=data.store;
+                saveLocal();
+                // 刷新所有UI
+                renderHeaderAvatar();
+                refreshAllIconPreview();
+                applyBgStyle();
+                refreshGroupSelect();
+                renderEmojiGrid();
+                renderInbox();
+                renderMessages();
+                updateAnimToggleUI();
+                renderCalendar();
+                applyVideoBg();
+                renderMail();
+                // 个人资料UI
+                coverImage.src=store.profile.cover||'';
+                avatarImage.src=store.profile.avatar||'';
+                profileName.innerText=store.profile.name||'TATA';
+                locationText.innerText=store.profile.location||'爱尔兰';
+                locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
+                profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
+                decoImg.src=store.decoImage||'';
+                // 头像样式
+                const style=store.chatSettings.avatarStyle||'circle';
+                styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
+                alert('数据导入成功！');
+              } else {
+                alert('无效的数据文件');
+              }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
 
   // ========== 工具 ==========
   function fileToDataUrl(file){ return new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(file); }); }
@@ -744,13 +1012,52 @@ document.addEventListener('DOMContentLoaded', function() {
   function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
 
   // ========== 存储 ==========
-  function loadLocal(){ try{ const raw=localStorage.getItem('dreamCardStore'); if(raw){ const parsed=JSON.parse(raw); store={...store,...parsed}; } }catch(e){console.warn('Load local error',e);} if(!store.messages) store.messages=[]; if(!store.calendar) store.calendar={}; if(!store.appIcon.setting) store.appIcon.setting=''; if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'}; if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'}; renderHeaderAvatar(); refreshAllIconPreview(); if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||''; if(chatBgPreview) chatBgPreview.src=store.chatBg||''; applyBgStyle(); applyVideoBg(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); scheduleLetterReplies(); renderCalendar(); renderMail(); // 个人资料UI
-    coverImage.src=store.profile.cover||''; avatarImage.src=store.profile.avatar||''; profileName.innerText=store.profile.name; locationText.innerText=store.profile.location; locationIcon.src=store.profile.locationIcon; profileSignature.innerText=store.profile.signature;
+  function loadLocal(){
+    try{
+      const raw=localStorage.getItem('dreamCardStore');
+      if(raw){
+        const parsed=JSON.parse(raw);
+        store={...store,...parsed};
+      }
+    }catch(e){console.warn('Load local error',e);}
+    if(!store.messages) store.messages=[];
+    if(!store.calendar) store.calendar={};
+    if(!store.appIcon.setting) store.appIcon.setting='';
+    if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'};
+    if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'};
+    renderHeaderAvatar();
+    refreshAllIconPreview();
+    if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||'';
+    if(chatBgPreview) chatBgPreview.src=store.chatBg||'';
+    applyBgStyle();
+    applyVideoBg();
+    refreshGroupSelect();
+    renderEmojiGrid();
+    renderInbox();
+    renderMessages();
+    updateAnimToggleUI();
+    scheduleLetterReplies();
+    renderCalendar();
+    renderMail();
+    // 个人资料UI
+    coverImage.src=store.profile.cover||'';
+    avatarImage.src=store.profile.avatar||'';
+    profileName.innerText=store.profile.name||'TATA';
+    locationText.innerText=store.profile.location||'爱尔兰';
+    locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
+    profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
+    decoImg.src=store.decoImage||'';
+    // 占位图标
+    if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
     // 头像样式
     const style=store.chatSettings.avatarStyle||'circle';
     styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
   }
-  function saveLocal(){ try{ localStorage.setItem('dreamCardStore',JSON.stringify(store)); }catch(e){console.warn('Save local error',e);} }
+  function saveLocal(){
+    try{
+      localStorage.setItem('dreamCardStore',JSON.stringify(store));
+    }catch(e){console.warn('Save local error',e);}
+  }
 
   // ========== 防缩放 ==========
   let lastTouchEnd=0; document.addEventListener('touchend',function(e){ const now=Date.now(); if(now-lastTouchEnd<=300) e.preventDefault(); lastTouchEnd=now; },{passive:false}); document.addEventListener('gesturestart',function(e){ e.preventDefault(); },{passive:false}); document.querySelectorAll('input,textarea').forEach(el=>el.style.fontSize='16px');
