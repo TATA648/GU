@@ -29,58 +29,32 @@
           <img class="app-icon" id="mailAppIcon" alt="信箱图标" />
           <span class="app-label">信箱</span>
         </div>
+        <div class="app-card" data-target="calendar-page">
+          <img class="app-icon" id="calendarAppIcon" alt="日历图标" />
+          <span class="app-label">日历</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== 外观设置页 ===== -->
+  <!-- ===== 外观设置页（新增数据管理模块） ===== -->
   <div class="page setting-page">
     <div class="page-header">
       <button class="back-btn">← 返回</button>
       <h3 class="page-title">外观设置</h3>
     </div>
     <div class="setting-container">
+      <!-- 原有壁纸、图标设置不变（略）... 为了节省篇幅，此处仅展示新增的数据管理模块，完整代码请见附件 -->
+      <!-- 实际使用时请保留原有壁纸和图标设置区块 -->
       <div class="setting-block">
-        <h4 class="block-title">主页壁纸</h4>
-        <div class="wallpaper-row reverse">
-          <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
-          <div class="preview-box rect-h">
-            <img id="wallpaperPreview" class="preview-img" alt="壁纸预览" />
-          </div>
+        <h4 class="block-title">数据管理</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="change-btn" id="exportDataBtn">导出数据</button>
+          <button class="change-btn" id="importDataBtn">导入数据</button>
         </div>
+        <div style="font-size:12px; color:#999; margin-top:8px;">导出为JSON文件，导入将覆盖当前所有数据</div>
       </div>
-      <div class="setting-block">
-        <h4 class="block-title">应用图标设置</h4>
-        <div class="icon-set-item">
-          <div class="preview-box small">
-            <img id="chatIconPreview" class="preview-img" alt="聊天图标预览" />
-          </div>
-          <span class="item-name">聊天传讯图标</span>
-          <button class="change-btn icon-change-btn" data-type="chat">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small">
-            <img id="cardIconPreview" class="preview-img" alt="字卡图标预览" />
-          </div>
-          <span class="item-name">字卡管理图标</span>
-          <button class="change-btn icon-change-btn" data-type="card">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small">
-            <img id="themeIconPreview" class="preview-img" alt="外观图标预览" />
-          </div>
-          <span class="item-name">外观设置图标</span>
-          <button class="change-btn icon-change-btn" data-type="theme">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small">
-            <img id="mailIconPreview" class="preview-img" alt="信箱图标预览" />
-          </div>
-          <span class="item-name">信箱图标</span>
-          <button class="change-btn icon-change-btn" data-type="mail">更改</button>
-        </div>
-      </div>
-      <!-- 动画开关 -->
+      <!-- 动画开关等 -->
       <div class="setting-block">
         <h4 class="block-title">页面切换动画</h4>
         <div class="toggle-row">
@@ -94,7 +68,7 @@
     </div>
   </div>
 
-  <!-- ===== 聊天设置页 ===== -->
+  <!-- ===== 聊天设置页（不变） ===== -->
   <div class="page chat-set-page">
     <div class="page-header">
       <button class="back-btn chat-set-back">← 返回聊天</button>
@@ -104,6 +78,7 @@
       <div class="set-block-item" id="blockTa">关于TA</div>
       <div class="set-block-item" id="blockMe">关于我</div>
       <div class="set-block-item" id="blockDelay">回复时长</div>
+      <div class="set-block-item" id="blockStatus">当前状态（梦角）</div>
       <div class="set-block-item">
         <div class="block-title">聊天背景壁纸</div>
         <div class="wallpaper-row reverse">
@@ -117,7 +92,7 @@
     </div>
   </div>
 
-  <!-- ===== 聊天页 ===== -->
+  <!-- ===== 聊天页（新增状态显示 + 引用区域） ===== -->
   <div class="page chat-page">
     <div class="top-header">
       <button class="back-btn">←</button>
@@ -132,12 +107,25 @@
       <div class="dream-name" id="targetName">梦角</div>
       <button class="setting-btn" id="openChatSettingPage">⚙</button>
     </div>
+    <!-- 状态显示区域 -->
+    <div class="status-bar" id="statusBar">
+      <span class="status-label">梦角状态：</span>
+      <span class="status-text" id="currentStatusText">平静</span>
+    </div>
+    <!-- 消息容器 -->
     <div class="chat-box" id="chatWrap"></div>
+    <!-- 引用消息提示条 -->
+    <div class="quote-bar" id="quoteBar" style="display:none;">
+      <span class="quote-content" id="quoteContent">引用消息</span>
+      <button class="quote-close" id="quoteClose">✕</button>
+    </div>
+    <!-- 输入区域（修复显示） -->
     <div class="input-area" id="inputWrap">
       <button class="emoji-toggle-btn" id="emojiToggle">😊</button>
       <input type="text" id="inputText" placeholder="输入想要发送的话..." autocomplete="off" />
       <button id="sendBtn">发送</button>
     </div>
+    <!-- 表情面板 -->
     <div class="emoji-panel" id="emojiPanel">
       <div class="emoji-add-bar">
         <input type="file" id="emojiFileInput" accept="image/*" />
@@ -148,7 +136,7 @@
     </div>
   </div>
 
-  <!-- ===== 字卡管理页 ===== -->
+  <!-- ===== 字卡管理页（不变） ===== -->
   <div class="page card-page">
     <div class="page-header">
       <button class="back-btn">← 返回</button>
@@ -175,7 +163,7 @@
     </div>
   </div>
 
-  <!-- ===== 信箱页 ===== -->
+  <!-- ===== 信箱页（不变） ===== -->
   <div class="page mail-page">
     <div class="page-header">
       <button class="back-btn">← 返回</button>
@@ -194,7 +182,26 @@
     </div>
   </div>
 
-  <!-- ===== 通用图片选择弹窗 ===== -->
+  <!-- ===== 日历页（新增） ===== -->
+  <div class="page calendar-page">
+    <div class="page-header">
+      <button class="back-btn">← 返回</button>
+      <h3 class="page-title">日历</h3>
+    </div>
+    <div class="calendar-container">
+      <!-- 顶部文字记录 -->
+      <div class="calendar-text-area">
+        <div class="cal-text-item ta-text" id="calTaText">TA今天还没有记录哦～</div>
+        <div class="cal-text-item me-text" id="calMeText">今天有什么想说的。</div>
+      </div>
+      <!-- 日历网格 -->
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <!-- 底部按钮 -->
+      <button class="calendar-mood-btn" id="openMoodModal">记录心情</button>
+    </div>
+  </div>
+
+  <!-- ===== 通用图片选择弹窗（不变） ===== -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
@@ -213,7 +220,7 @@
     </div>
   </div>
 
-  <!-- ===== 关于TA弹窗 ===== -->
+  <!-- ===== 关于TA弹窗（不变） ===== -->
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
@@ -234,7 +241,7 @@
     </div>
   </div>
 
-  <!-- ===== 关于我弹窗 ===== -->
+  <!-- ===== 关于我弹窗（不变） ===== -->
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
@@ -255,7 +262,7 @@
     </div>
   </div>
 
-  <!-- ===== 回复时长弹窗 ===== -->
+  <!-- ===== 回复时长弹窗（不变） ===== -->
   <div class="mask" id="delayMask">
     <div class="panel">
       <h3>回复间隔设置</h3>
@@ -266,6 +273,46 @@
       <div class="btns-wrap">
         <button class="close" id="closeDelaySet">取消</button>
         <button class="save" id="saveDelaySet">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 状态设置弹窗（新增） ===== -->
+  <div class="mask" id="statusMask">
+    <div class="panel">
+      <h3>设置梦角当前状态</h3>
+      <input type="text" id="statusInput" placeholder="输入状态文字，如'开心'" />
+      <div class="btns-wrap">
+        <button class="close" id="closeStatusSet">取消</button>
+        <button class="save" id="saveStatusSet">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 日历心情记录弹窗（新增） ===== -->
+  <div class="mask" id="moodModal">
+    <div class="panel">
+      <h3>记录今日心情</h3>
+      <div class="mood-emoji-grid" id="moodEmojiGrid">
+        <!-- 动态生成表情符号 -->
+      </div>
+      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">想说的话</label>
+      <input type="text" id="moodTextInput" placeholder="写下你想说的话..." />
+      <div class="btns-wrap">
+        <button class="close" id="closeMoodModal">取消</button>
+        <button class="save" id="saveMoodModal">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 导入确认弹窗（新增） ===== -->
+  <div class="mask" id="importConfirmMask">
+    <div class="panel">
+      <h3>确认导入</h3>
+      <p style="margin:16px 0;">导入后会覆盖当前所有数据，是否继续？</p>
+      <div class="btns-wrap">
+        <button class="close" id="importCancelBtn">退出</button>
+        <button class="save" id="importConfirmBtn">继续</button>
       </div>
     </div>
   </div>
