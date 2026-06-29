@@ -2,30 +2,33 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>梦角字卡传讯</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- 默认首页：仅图标，点击跳转 -->
+<!-- 默认首页：无底部导航，仅图标点击跳转 -->
 <div class="page home-page active">
   <div class="home-container">
     <h2 class="home-title">梦角工具箱</h2>
     <div class="app-grid">
       <div class="app-card" data-target="chat-page">
         <img class="app-icon" id="chatAppIcon" alt="聊天图标">
+        <span class="app-label">聊天传讯</span>
       </div>
       <div class="app-card" data-target="card-page">
         <img class="app-icon" id="cardAppIcon" alt="字卡图标">
+        <span class="app-label">字卡管理</span>
       </div>
       <div class="app-card" data-target="setting-page">
         <img class="app-icon" id="themeAppIcon" alt="外观设置">
+        <span class="app-label">外观设置</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 外观设置页面：统一配置所有应用图标 -->
+<!-- 外观设置页面 -->
 <div class="page setting-page">
   <div class="setting-container">
     <h3>外观图标配置</h3>
@@ -88,15 +91,15 @@
   </div>
 </div>
 
-<!-- 底部Tab导航 -->
-<div class="tab-bar">
+<!-- 底部Tab导航：首页隐藏，仅子页面显示 -->
+<div class="tab-bar" id="tabBarWrap">
   <div class="tab-item" data-page="home-page">首页</div>
   <div class="tab-item" data-page="chat-page">聊天</div>
   <div class="tab-item" data-page="card-page">字卡库</div>
   <div class="tab-item" data-page="setting-page">外观</div>
 </div>
 
-<!-- 全局设置弹窗：昵称、文字头像、延迟配置 -->
+<!-- 全局设置弹窗 -->
 <div class="mask" id="mask">
   <div class="panel">
     <h3>基础设置 & 回复时长配置</h3>
