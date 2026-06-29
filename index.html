@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>梦角字卡传讯</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- 顶部固定头部 -->
+<div class="top-header">
+  <div class="avatar" id="avatarText">角</div>
+  <div class="dream-name" id="targetName">梦角</div>
+  <button class="setting-btn" id="openSet">⚙</button>
+</div>
+
+<!-- 聊天页面 -->
+<div class="page chat-page active">
+  <div class="chat-box" id="chatWrap"></div>
+  <div class="input-area">
+    <input type="text" id="inputText" placeholder="输入想要发送的话...">
+    <button id="sendBtn">发送</button>
+  </div>
+</div>
+
+<!-- 字卡管理页面 -->
+<div class="page card-page">
+  <div class="card-container">
+    <div class="card-add-bar">
+      <input type="text" id="newCardInput" placeholder="添加单条字卡">
+      <button id="addSingleCard">添加</button>
+    </div>
+    <div class="batch-import-wrap">
+      <textarea id="batchTextarea" placeholder="批量导入，一行一条"></textarea>
+      <button id="batchImportBtn">批量导入</button>
+    </div>
+    <div class="card-list-title">全部字卡（可编辑、删除、屏蔽）</div>
+    <div class="card-list" id="cardListWrap"></div>
+  </div>
+</div>
+
+<!-- 底部Tab导航 -->
+<div class="tab-bar">
+  <div class="tab-item active" data-page="chat-page">聊天</div>
+  <div class="tab-item" data-page="card-page">字卡库</div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="mask" id="mask">
+  <div class="panel">
+    <h3>基础设置 & 回复时长配置</h3>
+    <label>梦角昵称</label>
+    <input type="text" id="nameInput">
+    <label>头像单字</label>
+    <input type="text" id="headText" maxlength="1">
+    <label>最小等待秒数</label>
+    <input type="number" id="minDelaySec" min="1" value="20">
+    <label>最大等待秒数</label>
+    <input type="number" id="maxDelaySec" min="1" value="60">
+    <div class="btns-wrap">
+      <button class="close" id="closeSet">取消</button>
+      <button class="save" id="saveSet">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
