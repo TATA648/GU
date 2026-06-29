@@ -84,7 +84,7 @@
     </div>
   </div>
 
-  <!-- ===== 聊天设置页（独立） ===== -->
+  <!-- ===== 聊天设置页 ===== -->
   <div class="page chat-set-page">
     <div class="page-header"><button class="back-btn chat-set-back">←</button></div>
     <div class="setting-container">
@@ -121,21 +121,20 @@
       <button class="setting-btn" id="openChatSettingPage">⋮</button>
     </div>
     <div class="chat-box" id="chatWrap"></div>
-    <!-- 引用条 -->
     <div class="quote-bar" id="quoteBar" style="display:none;">
       <span class="quote-content" id="quoteContent">引用消息</span>
       <button class="quote-close" id="quoteClose">✕</button>
     </div>
-    <!-- 输入栏 -->
+    <!-- 输入栏：左侧相册按钮 + 输入框 + 右侧功能按钮 -->
     <div class="input-area" id="inputWrap">
-      <button class="emoji-toggle-btn" id="emojiToggle">😊</button>
+      <button class="album-btn" id="albumBtn">📷</button>
       <input type="text" id="inputText" placeholder="输入想要发送的话..." autocomplete="off" />
       <div class="emoji-btn-wrapper">
         <button class="emoji-send-btn" id="emojiSendBtn">😊</button>
         <button id="sendBtn">发送</button>
       </div>
     </div>
-    <!-- 表情面板（含加号） -->
+    <!-- 表情面板（保持不变） -->
     <div class="emoji-panel" id="emojiPanel">
       <div class="emoji-grid" id="emojiGrid"></div>
     </div>
@@ -153,7 +152,6 @@
         <button class="video-reject-btn" id="videoRejectBtn">拒接</button>
       </div>
     </div>
-    <!-- 胶囊状态 -->
     <div class="video-capsule" id="videoCapsule" style="display:none;">
       <span class="capsule-timer" id="capsuleTimer">00:00:00</span>
       <button class="capsule-expand" id="capsuleExpand">⤴</button>
@@ -184,7 +182,7 @@
     </div>
   </div>
 
-  <!-- ===== 信箱页（改造） ===== -->
+  <!-- ===== 信箱页 ===== -->
   <div class="page mail-page">
     <div class="page-header"><button class="back-btn">←</button></div>
     <div class="mail-container">
