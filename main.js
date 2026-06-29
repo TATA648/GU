@@ -1096,4 +1096,270 @@ document.addEventListener('DOMContentLoaded', function() {
     const data=store.calendar[dateStr]||{};
     data.meEmoji=selectedMoodEmoji||data.meEmoji;
     data.meText=text||data.meText;
-    if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','
+    if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱']; data.taEmoji=taEmojis[randomInt(0,taEmojis.length-1)]; }
+    if(!data.taText){ const cards=getAllValidCards(); if(cards.length>0){ const count=Math.min(randomInt(1,3),cards.length); const shuffled=[...cards].sort(()=>Math.random()-0.5); data.taText=shuffled.slice(0,count).map(c=>c.text).join(' '); } else { data.taText='今天没有什么想说的～'; } }
+    store.calendar[dateStr]=data;
+    saveLocal();
+    renderCalendar();
+    openMoodModal.textContent = '修改';
+    moodModal.style.display='none';
+    selectedMoodEmoji=null;
+  });
+
+  // ===== 导入导出 =====
+  function showImportConfirm(title,msg,callback){
+    importConfirmTitle.innerText=title;
+    importConfirmMsg.innerText=msg;
+    importConfirmMask.style.display='flex';
+    importCallback=callback;
+  }
+  if(importCancelBtn) importCancelBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; importCallback=null; });
+  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){
+    importConfirmMask.style.display='none';
+    if(importCallback){
+      const cb=importCallback;
+      importCallback=null;
+      cb();
+    }
+  });
+
+  if(exportChatBtn){
+    exportChatBtn.addEventListener('click',function(){
+      const data={messages:store.messages};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`chat_history_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  if(importChatBtn){
+    importChatBtn.addEventListener('click',function(){
+      showImportConfirm('导入聊天记录','导入将覆盖当前所有聊天消息，是否继续？',function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.messages){
+                store.messages=data.messages;
+                saveLocal();
+                renderMessages();
+                alert('聊天记录导入成功！');
+              } else { alert('无效的数据文件'); }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
+
+  if(exportCardsBtn){
+    exportCardsBtn.addEventListener('click',function(){
+      const data={groups:store.groups};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`cards_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  if(importCardsBtn){
+    importCardsBtn.addEventListener('click',function(){
+      showImportConfirm('导入字卡','导入将覆盖当前所有字卡分组及内容，是否继续？',function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.groups){
+                store.groups=data.groups;
+                const keys=Object.keys(store.groups);
+                if(keys.length>0) store.currentSelectGroup=keys[0];
+                else store.currentSelectGroup='';
+                saveLocal();
+                refreshGroupSelect();
+                alert('字卡导入成功！');
+              } else { alert('无效的数据文件'); }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
+
+  if(exportDataBtn){
+    exportDataBtn.addEventListener('click',function(){
+      const data={store:store};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`full_data_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+  if(importDataBtn){
+    importDataBtn.addEventListener('click',function(){
+      showImportConfirm('导入全部数据','导入将覆盖所有当前数据，是否继续？',function(){
+        const input=document.createElement('input');
+        input.type='file';
+        input.accept='.json';
+        input.onchange=function(e){
+          const file=e.target.files[0];
+          if(!file) return;
+          const reader=new FileReader();
+          reader.onload=function(ev){
+            try{
+              const data=JSON.parse(ev.target.result);
+              if(data.store){
+                store=data.store;
+                saveLocal();
+                renderHeaderAvatar();
+                refreshAllIconPreview();
+                applyBgStyle();
+                refreshGroupSelect();
+                renderEmojiGrid();
+                renderInbox();
+                renderMessages();
+                updateAnimToggleUI();
+                renderCalendar();
+                applyVideoBg();
+                renderMail();
+                coverImage.src=store.profile.cover||'';
+                avatarImage.src=store.profile.avatar||'';
+                profileName.innerText=store.profile.name||'TATA';
+                locationText.innerText=store.profile.location||'爱尔兰';
+                locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
+                profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
+                decoImg.src=store.decoImage||'';
+                const style=store.chatSettings.avatarStyle||'circle';
+                styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
+                alert('数据导入成功！');
+              } else { alert('无效的数据文件'); }
+            }catch(err){ alert('解析失败：'+err.message); }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      });
+    });
+  }
+
+  // ===== 工具 =====
+  function fileToDataUrl(file){ return new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(file); }); }
+  function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function formatTime(ts){ const d=new Date(ts); return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
+
+  // ===== 存储 =====
+  function loadLocal(){
+    try{
+      const raw=localStorage.getItem('dreamCardStore');
+      if(raw){
+        const parsed=JSON.parse(raw);
+        store=deepMerge(store, parsed);
+      }
+    }catch(e){console.warn('Load local error',e);}
+    if(!store.messages) store.messages=[];
+    if(!store.calendar) store.calendar={};
+    if(!store.appIcon) store.appIcon={};
+    if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'};
+    if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'};
+    if(!store.groups) store.groups={};
+    if(!store.letters) store.letters=[];
+    if(!store.inbox) store.inbox=[];
+    if(!store.emojiList) store.emojiList=[];
+    if(!store.appliedFont) store.appliedFont='';
+    if(store.rippleEnabled===undefined) store.rippleEnabled=true;
+
+    renderHeaderAvatar();
+    refreshAllIconPreview();
+    if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||'';
+    if(chatBgPreview) chatBgPreview.src=store.chatBg||'';
+    applyBgStyle();
+    applyVideoBg();
+    refreshGroupSelect();
+    renderEmojiGrid();
+    renderInbox();
+    renderMessages();
+    updateAnimToggleUI();
+    scheduleLetterReplies();
+    renderCalendar();
+    renderMail();
+    coverImage.src=store.profile.cover||'';
+    avatarImage.src=store.profile.avatar||'';
+    profileName.innerText=store.profile.name||'TATA';
+    locationText.innerText=store.profile.location||'爱尔兰';
+    locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
+    profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
+    decoImg.src=store.decoImage||'';
+    if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
+    const style=store.chatSettings.avatarStyle||'circle';
+    styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
+    // 恢复粒子状态
+    if(rippleToggle){
+      if(store.rippleEnabled!==undefined) particleEnabled=store.rippleEnabled;
+      if(particleEnabled) {
+        rippleToggle.classList.add('active');
+        if(!particleCanvas) initParticleCanvas();
+        else particleCanvas.style.display='block';
+      } else {
+        rippleToggle.classList.remove('active');
+        if(particleCanvas) particleCanvas.style.display='none';
+      }
+    }
+    // 恢复心情按钮文字
+    if(openMoodModal){
+      const todayStr=new Date().toISOString().slice(0,10);
+      const hasRecord = store.calendar[todayStr] && (store.calendar[todayStr].meEmoji || store.calendar[todayStr].meText);
+      openMoodModal.textContent = hasRecord ? '修改' : '记录心情';
+    }
+    // 恢复延时进度条
+    if(delayRange){
+      const min=store.delay.min||20;
+      delayRange.value=min;
+      delayRangeValue.textContent=min+'秒';
+    }
+  }
+
+  function saveLocal(){
+    try{
+      localStorage.setItem('dreamCardStore',JSON.stringify(store));
+    }catch(e){console.warn('Save local error',e);}
+  }
+
+  window.addEventListener('beforeunload',function(){ saveLocal(); });
+
+  let lastTouchEnd=0; document.addEventListener('touchend',function(e){ const now=Date.now(); if(now-lastTouchEnd<=300) e.preventDefault(); lastTouchEnd=now; },{passive:false}); document.addEventListener('gesturestart',function(e){ e.preventDefault(); },{passive:false}); document.querySelectorAll('input,textarea').forEach(el=>el.style.fontSize='16px');
+
+  loadLocal(); applyBgStyle(); applyVideoBg();
+  if(document.querySelector('.chat-page.active')&&chatWrap) setTimeout(()=>chatWrap.scrollTop=chatWrap.scrollHeight,100);
+  console.log('✅ 梦角字卡传讯已启动 | 动画:', store.animEnabled?'开启':'关闭');
+});
