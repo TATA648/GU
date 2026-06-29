@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
       patSuffix:"拍了拍",
       videoBg:""
     },
-    videoCall:{active:false, caller:"", startTime:null, answered:false, folded:false, timer:null}
+    videoCall:{active:false, caller:"", startTime:null, answered:false, folded:false, timer:null},
+    isTyping: false  // 新增：是否正在等待回复
   };
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -206,7 +207,33 @@ document.addEventListener('DOMContentLoaded', function() {
   function refreshAllIconPreview(){ ['chat','card','theme','mail','calendar','setting'].forEach(key=>{ const el=document.getElementById(key+'AppIcon'); const prev=document.getElementById(key+'IconPreview'); const src=store.appIcon[key]||''; if(el) el.src=src; if(prev) prev.src=src; }); }
   function parseEmojiText(text){ return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>`<img class="msg-emoji-inside" src="${src}" loading="lazy">`); }
   function randomAttachEmoji(){ if(store.emojiList.length===0) return null; if(Math.random()<0.25) return store.emojiList[randomInt(0,store.emojiList.length-1)]; return null; }
-  function renderMessages(){ if(!chatWrap) return; chatWrap.innerHTML=''; let lastTime=0; store.messages.forEach(msg=>{ if(msg.time-lastTime>10*60*1000){ const div=document.createElement('div'); div.className='time-divider'; div.innerText=formatTime(msg.time); chatWrap.appendChild(div); } lastTime=msg.time; appendMessageElement(msg); }); chatWrap.scrollTop=chatWrap.scrollHeight; }
+
+  // 渲染消息，如果正在输入则显示占位
+  function renderMessages(){
+    if(!chatWrap) return;
+    chatWrap.innerHTML='';
+    let lastTime=0;
+    store.messages.forEach(msg=>{
+      if(msg.time-lastTime>10*60*1000){
+        const div=document.createElement('div');
+        div.className='time-divider';
+        div.innerText=formatTime(msg.time);
+        chatWrap.appendChild(div);
+      }
+      lastTime=msg.time;
+      appendMessageElement(msg);
+    });
+    // 如果正在等待回复，添加占位
+    if(store.isTyping){
+      const tempItem=document.createElement('div');
+      tempItem.className='msg-item target-msg typing-placeholder';
+      tempItem.innerHTML=`<div class="msg-avatar">${store.taInfo.avatarUrl?`<img src="${store.taInfo.avatarUrl}" loading="lazy">`:''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
+      chatWrap.appendChild(tempItem);
+    }
+    chatWrap.scrollTop=chatWrap.scrollHeight;
+  }
+
+  // 添加消息元素（支持头像合并）
   function appendMessageElement(msg){
     if(msg.system){
       const div=document.createElement('div');
@@ -220,6 +247,19 @@ document.addEventListener('DOMContentLoaded', function() {
     item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
     if(isEmojiOnly) item.classList.add('emoji-only');
     item.dataset.msgId=msg.id;
+
+    // 判断是否需要隐藏头像（与上一条消息合并）
+    let hideAvatar=false;
+    const msgs=store.messages;
+    const idx=msgs.indexOf(msg);
+    if(idx>0){
+      const prev=msgs[idx-1];
+      // 上一条不是系统消息，且发送者相同，且时间差小于3秒
+      if(!prev.system && prev.isUser===msg.isUser && (msg.time-prev.time)<3000){
+        hideAvatar=true;
+      }
+    }
+
     let quoteHtml='';
     if(msg.quote){ quoteHtml=`<div class="msg-quote">📎 ${escapeHtml(msg.quote.text)}</div>`; }
     let html='';
@@ -233,12 +273,16 @@ document.addEventListener('DOMContentLoaded', function() {
       if(emojiSrc&&msg.text.trim()===''){ html=`<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`; } else if(emojiSrc){ html+=`<img class="msg-emoji-inside" src="${emojiSrc}">`; }
     }
     const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
-    item.innerHTML=`<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div><div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
-    // 引用滑动：从左向右滑（diff < -30），不阻止默认滚动
+    const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
+    // 如果隐藏头像，用空白占位保持对齐
+    const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
+    item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
+
+    // 引用滑动：从左向右滑（diff < -30）
     let startX=0, isSwiping=false;
     item.addEventListener('touchstart',function(e){ startX=e.touches[0].clientX; isSwiping=true; }, {passive:true});
-    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const diff=startX-e.touches[0].clientX; if(diff < -30){ // 从左向右滑
-      e.preventDefault(); // 只有触发引用时才阻止滚动
+    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const diff=startX-e.touches[0].clientX; if(diff < -30){
+      e.preventDefault();
       isSwiping=false;
       this.style.transition='transform 0.2s ease';
       this.style.transform='translateX(20px)';
@@ -248,6 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
     item.addEventListener('touchend',function(){ isSwiping=false; });
     chatWrap.appendChild(item);
   }
+
   function addMessage(text,isUser,time,quote,system,isRed){
     const msg={id:Date.now()+Math.random(), text, isUser, time:time||Date.now(), quote:quote||null, system:system||false, isRed:isRed||false};
     store.messages.push(msg); saveLocal();
@@ -277,28 +322,35 @@ document.addEventListener('DOMContentLoaded', function() {
   function getNowTime(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
   function getAllValidCards(){ let list=[]; Object.values(store.groups).forEach(arr=>{ list=list.concat(arr.filter(item=>!item.disabled)); }); return list; }
   function getRandomReplyArr(){ const pool=getAllValidCards(); if(pool.length===0) return [{text:'暂无可用字卡，请前往字卡库添加'}]; let arr=[...pool]; for(let i=arr.length-1;i>0;i--){ const r=Math.floor(Math.random()*(i+1)); [arr[i],arr[r]]=[arr[r],arr[i]]; } const take=Math.floor(Math.random()*3)+1; return arr.slice(0,take); }
+
   function sendMessageByText(text){
     const quote=quoteMsg; quoteMsg=null; quoteBar.style.display='none';
     const now=Date.now();
     addMessage(text, true, now, quote);
     inputText.value='';
     updateRandomStatus();
+    // 设置 typing 状态
+    store.isTyping=true;
+    renderMessages(); // 立即刷新显示占位
+
     const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
-    const tempItem=document.createElement('div');
-    tempItem.className='msg-item target-msg';
-    tempItem.innerHTML=`<div class="msg-avatar">${store.taInfo.avatarUrl?`<img src="${store.taInfo.avatarUrl}" loading="lazy">`:''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
-    chatWrap.appendChild(tempItem); chatWrap.scrollTop=chatWrap.scrollHeight;
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer=setTimeout(()=>{
-      tempItem.remove();
+      store.isTyping=false; // 清除占位
       const replyList=getRandomReplyArr();
       let quoteReply=null;
       if(Math.random()<0.2 && store.messages.length>1){ const lastUser=[...store.messages].reverse().find(m=>m.isUser); if(lastUser) quoteReply=lastUser; }
-      replyList.forEach((item,idx)=>{ setTimeout(()=>{ addMessage(item.text, false, Date.now(), quoteReply); }, idx*500); });
+      // 清除之前的占位（如果存在）
+      const placeholder=chatWrap.querySelector('.typing-placeholder');
+      if(placeholder) placeholder.remove();
+      replyList.forEach((item,idx)=>{
+        setTimeout(()=>{ addMessage(item.text, false, Date.now(), quoteReply); }, idx*500);
+      });
       setTimeout(()=>{ updateRandomStatus(); }, replyList.length*500+100);
       typingTimer=null;
     }, wait);
   }
+
   function sendMessage(){ const content=inputText.value.trim(); if(!content) return; sendMessageByText(content); }
   if(sendBtn) sendBtn.addEventListener('click',sendMessage);
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
