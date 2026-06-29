@@ -35,24 +35,47 @@
     <h3 class="page-title">外观设置</h3>
   </div>
   <div class="setting-container">
-    <div class="icon-input-item">
-      <label>聊天图标链接</label>
-      <input type="text" id="chatIconUrl" placeholder="粘贴图片URL">
+    <!-- 壁纸区块 -->
+    <div class="setting-block">
+      <h4 class="block-title">主页壁纸</h4>
+      <div class="wallpaper-row">
+        <div class="preview-box">
+          <img id="wallpaperPreview" class="preview-img" alt="壁纸预览">
+        </div>
+        <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
+      </div>
     </div>
-    <div class="icon-input-item">
-      <label>字卡库图标链接</label>
-      <input type="text" id="cardIconUrl" placeholder="粘贴图片URL">
+
+    <!-- 图标区块 -->
+    <div class="setting-block">
+      <h4 class="block-title">应用图标设置</h4>
+      <div class="icon-set-item">
+        <div class="preview-box small">
+          <img id="chatIconPreview" class="preview-img" alt="聊天图标预览">
+        </div>
+        <span class="item-name">聊天传讯图标</span>
+        <button class="change-btn" data-type="chat">更改</button>
+      </div>
+      <div class="icon-set-item">
+        <div class="preview-box small">
+          <img id="cardIconPreview" class="preview-img" alt="字卡图标预览">
+        </div>
+        <span class="item-name">字卡管理图标</span>
+        <button class="change-btn" data-type="card">更改</button>
+      </div>
+      <div class="icon-set-item">
+        <div class="preview-box small">
+          <img id="themeIconPreview" class="preview-img" alt="外观图标预览">
+        </div>
+        <span class="item-name">外观设置图标</span>
+        <button class="change-btn" data-type="theme">更改</button>
+      </div>
     </div>
-    <div class="icon-input-item">
-      <label>外观设置图标链接</label>
-      <input type="text" id="themeIconUrl" placeholder="粘贴图片URL">
-    </div>
-    <button id="saveThemeBtn" class="save-theme">保存外观配置</button>
-    <div class="tip-text">保存后刷新页面即可生效</div>
+    <div class="tip-text">所有设置保存后刷新页面生效</div>
   </div>
 </div>
 
-<!-- 聊天页顶部栏：fixed固定定位，永远悬浮顶部不会消失 -->
+<!-- 聊天页顶部栏 -->
 <div class="top-header">
   <button class="back-btn">←</button>
   <div class="avatar-box" id="avatarClickEdit">
@@ -99,8 +122,24 @@
   </div>
 </div>
 
-<!-- 底部Tab栏 彻底删除，注释保留结构不渲染 -->
-<!-- <div class="tab-bar" id="tabBarWrap"></div> -->
+<!-- 通用图片选择弹窗：壁纸、图标、头像共用 -->
+<div class="mask" id="imageSelectMask">
+  <div class="panel image-panel">
+    <h3 id="modalTitle">选择图片</h3>
+    <div class="upload-item">
+      <label>上传本地图片</label>
+      <input type="file" id="localImageFile" accept="image/*">
+    </div>
+    <div class="link-item">
+      <label>填入图片链接</label>
+      <input type="text" id="imageLinkInput" placeholder="粘贴网络图片地址">
+    </div>
+    <div class="btns-wrap">
+      <button class="close" id="closeImageModal">取消</button>
+      <button class="save" id="confirmImageBtn">确定使用</button>
+    </div>
+  </div>
+</div>
 
 <!-- 全局设置弹窗 -->
 <div class="mask" id="mask">
@@ -121,12 +160,18 @@
   </div>
 </div>
 
-<!-- 头像单独修改弹窗 -->
+<!-- 头像修改弹窗 -->
 <div class="mask" id="avatarMask">
-  <div class="panel">
+  <div class="panel image-panel">
     <h3>修改角色头像</h3>
-    <label>头像图片链接</label>
-    <input type="text" id="avatarUrlInput" placeholder="粘贴网络图片地址">
+    <div class="upload-item">
+      <label>上传本地图片</label>
+      <input type="file" id="avatarLocalFile" accept="image/*">
+    </div>
+    <div class="link-item">
+      <label>填入图片链接</label>
+      <input type="text" id="avatarLinkInput" placeholder="粘贴网络图片地址">
+    </div>
     <div class="btns-wrap">
       <button class="close" id="closeAvatarSet">取消</button>
       <button class="save" id="saveAvatarBtn">确定使用该头像</button>
