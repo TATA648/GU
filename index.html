@@ -160,7 +160,6 @@
       <button class="back-btn chat-set-back"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
     </div>
     <div class="chat-setting-container">
-      <!-- HE / ME 合并栏 -->
       <div class="chat-set-item he-me-row">
         <button class="he-me-btn" id="heBtn">HE</button>
         <button class="he-me-btn" id="meBtn">ME</button>
@@ -326,7 +325,7 @@
   </div>
 
   <!-- ===== 弹窗区 ===== -->
-  <!-- 通用图片选择弹窗（新样式） -->
+  <!-- 通用图片选择弹窗 -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
@@ -361,7 +360,7 @@
     </div>
   </div>
 
-  <!-- 关于TA（保留但通过 HE 触发） -->
+  <!-- 关于TA（通过HE触发） -->
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
@@ -372,7 +371,7 @@
     </div>
   </div>
 
-  <!-- 关于我（保留但通过 ME 触发） -->
+  <!-- 关于我（通过ME触发） -->
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
@@ -382,9 +381,6 @@
       <div class="btns-wrap"><button class="close" id="closeMeSet">取消</button><button class="save" id="saveMeSet">保存</button></div>
     </div>
   </div>
-
-  <!-- 回复时长已改用进度条，弹窗保留但不使用 -->
-  <div class="mask" id="delayMask" style="display:none;"></div>
 
   <!-- 拍一拍后缀 -->
   <div class="mask" id="patMask">
