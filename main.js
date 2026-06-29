@@ -27,15 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const topHeader=$('.top-header'), chatWrap=$('#chatWrap'), inputText=$('#inputText'), sendBtn=$('#sendBtn');
   const emojiSendBtn=$('#emojiSendBtn'), emojiPanel=$('#emojiPanel'), emojiGrid=$('#emojiGrid');
   const albumBtn=$('#albumBtn');
-  const imageSelectMask=$('#imageSelectMask'), modalTitle=$('#modalTitle'), localImageFile=$('#localImageFile'), imageLinkInput=$('#imageLinkInput'), closeImageModal=$('#closeImageModal'), confirmImageBtn=$('#confirmImageBtn');
+  const imageSelectMask=$('#imageSelectMask'), modalTitle=$('#modalTitle'), imagePreviewBox=$('#imagePreviewBox'), imagePreviewImg=$('#imagePreviewImg'), imagePreviewPlaceholder=$('#imagePreviewPlaceholder');
+  const localImageBtn=$('#localImageBtn'), localImageFile=$('#localImageFile'), imageLinkInput=$('#imageLinkInput'), closeImageModal=$('#closeImageModal'), confirmImageBtn=$('#confirmImageBtn');
   const editTextMask=$('#editTextMask'), editTextTitle=$('#editTextTitle'), editTextInput=$('#editTextInput'), closeEditText=$('#closeEditText'), saveEditText=$('#saveEditText');
   const wallpaperPreview=$('#wallpaperPreview'), openWallpaperModal=$('#openWallpaperModal'), chatBgPreview=$('#chatBgPreview'), openChatBgModal=$('#openChatBgModal');
   const changeIconBtns=$$('.icon-change-btn');
   const openChatSettingPage=$('#openChatSettingPage'), saveChatSetting=$('#saveChatSetting'), chatSetBack=$('.chat-set-back');
-  const blockTa=$('#blockTa'), blockMe=$('#blockMe'), blockDelay=$('#blockDelay'), blockPatSuffix=$('#blockPatSuffix'), blockVideoBg=$('#blockVideoBg');
+  const heBtn=$('#heBtn'), meBtn=$('#meBtn');
+  const blockDelay=$('#blockDelay'), delayRange=$('#delayRange'), delayRangeValue=$('#delayRangeValue');
+  const blockPatSuffix=$('#blockPatSuffix'), blockVideoBg=$('#blockVideoBg');
   const taMask=$('#taMask'), taAvatarFile=$('#taAvatarFile'), taAvatarLink=$('#taAvatarLink'), taNameInput=$('#taNameInput'), closeTaSet=$('#closeTaSet'), saveTaSet=$('#saveTaSet');
   const meMask=$('#meMask'), meAvatarFile=$('#meAvatarFile'), meAvatarLink=$('#meAvatarLink'), meNameInput=$('#meNameInput'), closeMeSet=$('#closeMeSet'), saveMeSet=$('#saveMeSet');
-  const delayMask=$('#delayMask'), minDelayInput=$('#minDelayInput'), maxDelayInput=$('#maxDelayInput'), closeDelaySet=$('#closeDelaySet'), saveDelaySet=$('#saveDelaySet');
   const patMask=$('#patMask'), patSuffixInput=$('#patSuffixInput'), closePatSet=$('#closePatSet'), savePatSet=$('#savePatSet');
   const videoBgMask=$('#videoBgMask'), videoBgFile=$('#videoBgFile'), videoBgLink=$('#videoBgLink'), closeVideoBg=$('#closeVideoBg'), saveVideoBg=$('#saveVideoBg');
   const mailTabs=$$('.mail-tab'), sentList=$('#sentList'), inboxWrap=$('#inboxWrap'), mailAddBtn=$('#mailAddBtn');
@@ -52,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const videoWindow=$('#videoWindow'), videoBg=$('#videoBg'), videoTimer=$('#videoTimer'), videoFoldBtn=$('#videoFoldBtn'), videoAvatar=$('#videoAvatar'), videoHangupBtn=$('#videoHangupBtn');
   const videoAnswerArea=$('#videoAnswerArea'), videoAnswerBtn=$('#videoAnswerBtn'), videoRejectBtn=$('#videoRejectBtn');
   const videoCapsule=$('#videoCapsule'), capsuleTimer=$('#capsuleTimer'), capsuleExpand=$('#capsuleExpand');
+  const videoTopBtn=$('#videoTopBtn');
   const profileCover=$('#profileCover'), coverImage=$('#coverImage'), profileAvatar=$('#profileAvatar'), avatarImage=$('#avatarImage');
   const profileName=$('#profileName'), profileLocation=$('#profileLocation'), locationText=$('#locationText'), locationIcon=$('#locationIcon');
   const profileSignature=$('#profileSignature');
@@ -100,55 +103,160 @@ document.addEventListener('DOMContentLoaded', function() {
       if(target) switchPage(target);
     });
   });
-  // 占位图标不可点击 - 已移除事件
 
   $$('.back-btn').forEach(b=>b.addEventListener('click',function(e){ e.stopPropagation(); switchPage('home-page'); }));
   if(chatSetBack) chatSetBack.addEventListener('click',function(e){ e.stopPropagation(); switchPage('chat-page'); });
   if(openChatSettingPage) openChatSettingPage.addEventListener('click',function(){ switchPage('chat-set-page'); });
+  if(videoTopBtn) videoTopBtn.addEventListener('click',function(){ initiateVideoCall('me'); });
 
   function updateAnimToggleUI(){ if(!animToggle) return; store.animEnabled?animToggle.classList.add('active'):animToggle.classList.remove('active'); document.body.classList.toggle('no-transition',!store.animEnabled); }
   if(animToggle) animToggle.addEventListener('click',function(){ store.animEnabled=!store.animEnabled; updateAnimToggleUI(); saveLocal(); });
 
-  // 涟漪特效
-  let rippleEnabled = true;
-  if(rippleToggle){
-    if(store.rippleEnabled!==undefined) rippleEnabled=store.rippleEnabled;
-    if(rippleEnabled) rippleToggle.classList.add('active');
-    rippleToggle.addEventListener('click',function(){
-      rippleEnabled=!rippleEnabled;
-      this.classList.toggle('active');
-      store.rippleEnabled=rippleEnabled;
-      saveLocal();
-    });
+  // ===== 粒子特效（Canvas 碎片 + 拖尾） =====
+  let particleEnabled = true;
+  let particleCtx=null, particleCanvas=null, particles=[], trails=[], particleAnimId=null;
+  
+  function initParticleCanvas(){
+    if(particleCanvas) return;
+    particleCanvas=document.createElement('canvas');
+    particleCanvas.id='particleCanvas';
+    particleCanvas.style.position='fixed';
+    particleCanvas.style.top='0';
+    particleCanvas.style.left='0';
+    particleCanvas.style.width='100%';
+    particleCanvas.style.height='100%';
+    particleCanvas.style.pointerEvents='none';
+    particleCanvas.style.zIndex='9998';
+    document.body.appendChild(particleCanvas);
+    particleCtx=particleCanvas.getContext('2d');
+    resizeParticleCanvas();
+    window.addEventListener('resize',resizeParticleCanvas);
+    particleLoop();
   }
+  function resizeParticleCanvas(){
+    if(!particleCanvas) return;
+    particleCanvas.width=window.innerWidth;
+    particleCanvas.height=window.innerHeight;
+  }
+  function particleLoop(){
+    if(!particleCtx) return;
+    particleCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
+    // 更新拖尾
+    for(let i=trails.length-1;i>=0;i--){
+      const t=trails[i];
+      t.x+=t.vx;
+      t.y+=t.vy;
+      t.life-=0.02;
+      t.vy+=0.02;
+      if(t.life<=0){ trails.splice(i,1); continue; }
+      const alpha=t.life*0.4;
+      particleCtx.beginPath();
+      particleCtx.arc(t.x,t.y,t.size*t.life,0,Math.PI*2);
+      particleCtx.fillStyle='rgba(150,150,170,'+alpha+')';
+      particleCtx.fill();
+    }
+    // 更新碎片
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.05;
+      p.life-=0.015;
+      p.vx*=0.99;
+      p.vy*=0.99;
+      if(p.life<=0){ particles.splice(i,1); continue; }
+      const alpha=p.life*0.7;
+      const size=p.size*p.life;
+      particleCtx.globalAlpha=alpha;
+      particleCtx.fillStyle=p.color || 'rgba(180,180,200,0.6)';
+      particleCtx.beginPath();
+      particleCtx.arc(p.x,p.y,size,0,Math.PI*2);
+      particleCtx.fill();
+      particleCtx.globalAlpha=1;
+    }
+    particleAnimId=requestAnimationFrame(particleLoop);
+  }
+  function emitParticles(x,y,count,color){
+    if(!particleEnabled || !particleCtx) return;
+    for(let i=0;i<count;i++){
+      const angle=Math.random()*Math.PI*2;
+      const speed=1+Math.random()*4;
+      particles.push({
+        x:x+(Math.random()-0.5)*4,
+        y:y+(Math.random()-0.5)*4,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed-0.5,
+        size:3+Math.random()*5,
+        life:0.6+Math.random()*0.6,
+        color:color || 'rgba(180,180,200,0.6)'
+      });
+    }
+  }
+  function emitTrail(x,y){
+    if(!particleEnabled || !particleCtx) return;
+    for(let i=0;i<2;i++){
+      trails.push({
+        x:x+(Math.random()-0.5)*3,
+        y:y+(Math.random()-0.5)*3,
+        vx:(Math.random()-0.5)*0.8,
+        vy:-0.5-Math.random()*0.5,
+        size:2+Math.random()*3,
+        life:0.5+Math.random()*0.3
+      });
+    }
+  }
+  // 点击事件 -> 碎片
   document.addEventListener('click',function(e){
-    if(!rippleEnabled) return;
-    const ripple=document.createElement('div');
-    ripple.className='ripple';
-    const size=20+Math.random()*30;
-    ripple.style.width=size+'px';
-    ripple.style.height=size+'px';
-    ripple.style.left=(e.clientX-size/2)+'px';
-    ripple.style.top=(e.clientY-size/2)+'px';
-    document.body.appendChild(ripple);
-    setTimeout(()=>ripple.remove(),800);
+    if(!particleEnabled) return;
+    emitParticles(e.clientX,e.clientY,12+Math.floor(Math.random()*8));
   });
+  // 触摸事件 -> 碎片 + 拖尾
+  let lastTouchX=0,lastTouchY=0;
   document.addEventListener('touchstart',function(e){
-    if(!rippleEnabled) return;
+    if(!particleEnabled) return;
     const touch=e.touches[0];
-    const ripple=document.createElement('div');
-    ripple.className='ripple';
-    const size=20+Math.random()*30;
-    ripple.style.width=size+'px';
-    ripple.style.height=size+'px';
-    ripple.style.left=(touch.clientX-size/2)+'px';
-    ripple.style.top=(touch.clientY-size/2)+'px';
-    document.body.appendChild(ripple);
-    setTimeout(()=>ripple.remove(),800);
+    if(touch){
+      emitParticles(touch.clientX,touch.clientY,10+Math.floor(Math.random()*6));
+      lastTouchX=touch.clientX;
+      lastTouchY=touch.clientY;
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!particleEnabled) return;
+    const touch=e.touches[0];
+    if(touch){
+      emitTrail(touch.clientX,touch.clientY);
+      if(Math.random()<0.3) emitParticles(touch.clientX,touch.clientY,2);
+      lastTouchX=touch.clientX;
+      lastTouchY=touch.clientY;
+    }
   },{passive:true});
 
+  if(rippleToggle){
+    if(store.rippleEnabled!==undefined) particleEnabled=store.rippleEnabled;
+    if(particleEnabled) {
+      rippleToggle.classList.add('active');
+      initParticleCanvas();
+    }
+    rippleToggle.addEventListener('click',function(){
+      particleEnabled=!particleEnabled;
+      this.classList.toggle('active');
+      store.rippleEnabled=particleEnabled;
+      saveLocal();
+      if(particleEnabled){
+        if(!particleCanvas) initParticleCanvas();
+      }else{
+        if(particleCanvas) particleCanvas.style.display='none';
+        if(particleAnimId){ cancelAnimationFrame(particleAnimId); particleAnimId=null; }
+      }
+    });
+  }
+
+  // ===== 图片选择弹窗（新样式） =====
   function openImageModal(title,targetKey){
-    currentEditTarget=targetKey; modalTitle.innerText=title; localImageFile.value='';
+    currentEditTarget=targetKey; modalTitle.innerText=title;
+    localImageFile.value='';
+    imageLinkInput.value='';
     let existing='';
     if(targetKey==='wallpaper') existing=store.wallpaper;
     else if(targetKey==='chatBg') existing=store.chatBg;
@@ -157,7 +265,41 @@ document.addEventListener('DOMContentLoaded', function() {
     else if(targetKey==='profileAvatar') existing=store.profile.avatar;
     else if(targetKey==='decoImage') existing=store.decoImage;
     else existing=store.appIcon[targetKey]||'';
-    imageLinkInput.value=existing; imageSelectMask.style.display='flex';
+    imageLinkInput.value=existing;
+    updateImagePreview(existing);
+    imageSelectMask.style.display='flex';
+  }
+  function updateImagePreview(url){
+    if(url && url.trim()){
+      imagePreviewImg.src=url;
+      imagePreviewBox.classList.add('has-image');
+    }else{
+      imagePreviewImg.src='';
+      imagePreviewBox.classList.remove('has-image');
+    }
+  }
+  if(localImageBtn){
+    localImageBtn.addEventListener('click',function(){
+      localImageFile.click();
+    });
+  }
+  if(localImageFile){
+    localImageFile.addEventListener('change',function(e){
+      const file=e.target.files[0];
+      if(!file) return;
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        const url=ev.target.result;
+        updateImagePreview(url);
+        imageLinkInput.value='';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  if(imageLinkInput){
+    imageLinkInput.addEventListener('input',function(){
+      updateImagePreview(this.value);
+    });
   }
   if(openWallpaperModal) openWallpaperModal.addEventListener('click',()=>openImageModal('设置主页壁纸','wallpaper'));
   if(openChatBgModal) openChatBgModal.addEventListener('click',()=>openImageModal('设置聊天背景','chatBg'));
@@ -165,9 +307,12 @@ document.addEventListener('DOMContentLoaded', function() {
   if(closeImageModal) closeImageModal.addEventListener('click',function(){ imageSelectMask.style.display='none'; currentEditTarget=null; });
   if(confirmImageBtn) confirmImageBtn.addEventListener('click',async function(){
     let url='';
-    if(localImageFile.files&&localImageFile.files[0]) url=await fileToDataUrl(localImageFile.files[0]);
-    else if(imageLinkInput.value.trim()) url=imageLinkInput.value.trim();
-    if(!url) return;
+    if(localImageFile.files&&localImageFile.files[0]){
+      url=await fileToDataUrl(localImageFile.files[0]);
+    }else if(imageLinkInput.value.trim()){
+      url=imageLinkInput.value.trim();
+    }
+    if(!url){ alert('请选择图片或输入链接'); return; }
     if(currentEditTarget==='wallpaper'){ store.wallpaper=url; wallpaperPreview.src=url; }
     else if(currentEditTarget==='chatBg'){ store.chatBg=url; chatBgPreview.src=url; }
     else if(currentEditTarget==='videoBg'){ store.chatSettings.videoBg=url; applyVideoBg(); }
@@ -179,6 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
 
+  // ===== 文本编辑弹窗 =====
   function openEditText(title,currentValue,callback){
     editTextTitle.innerText=title;
     editTextInput.value=currentValue;
@@ -192,6 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
     closeEditText.onclick=function(){ editTextMask.style.display='none'; };
   }
 
+  // ===== 个人资料 =====
   if(profileCover) profileCover.addEventListener('click',()=>openImageModal('选择封面','profileCover'));
   if(profileAvatar) profileAvatar.addEventListener('click',()=>openImageModal('选择头像','profileAvatar'));
   if(profileName) profileName.addEventListener('click',()=>openEditText('修改昵称', store.profile.name, (val)=>{ store.profile.name=val; profileName.innerText=val; saveLocal(); }));
@@ -224,23 +371,62 @@ document.addEventListener('DOMContentLoaded', function() {
   if(profileSignature) profileSignature.addEventListener('click',()=>openEditText('修改签名', store.profile.signature, (val)=>{ store.profile.signature=val; profileSignature.innerText=val; saveLocal(); }));
   if(decoImage) decoImage.addEventListener('click',()=>openImageModal('更换装饰图','decoImage'));
 
-  if(blockTa) blockTa.addEventListener('click',()=>{ taNameInput.value=store.taInfo.name; taAvatarLink.value=store.taInfo.avatarUrl||''; taAvatarFile.value=''; taMask.style.display='flex'; });
+  // ===== 聊天设置：HE/ME =====
+  if(heBtn) heBtn.addEventListener('click',function(){ 
+    taNameInput.value=store.taInfo.name; 
+    taAvatarLink.value=store.taInfo.avatarUrl||''; 
+    taAvatarFile.value=''; 
+    taMask.style.display='flex'; 
+  });
+  if(meBtn) meBtn.addEventListener('click',function(){ 
+    meNameInput.value=store.myInfo.name; 
+    meAvatarLink.value=store.myInfo.avatarUrl||''; 
+    meAvatarFile.value=''; 
+    meMask.style.display='flex'; 
+  });
   if(closeTaSet) closeTaSet.addEventListener('click',()=>taMask.style.display='none');
   if(saveTaSet) saveTaSet.addEventListener('click',async function(){ store.taInfo.name=taNameInput.value.trim()||'梦角'; let url=store.taInfo.avatarUrl; if(taAvatarFile.files&&taAvatarFile.files[0]) url=await fileToDataUrl(taAvatarFile.files[0]); else if(taAvatarLink.value.trim()) url=taAvatarLink.value.trim(); store.taInfo.avatarUrl=url; renderHeaderAvatar(); saveLocal(); taMask.style.display='none'; });
-  if(blockMe) blockMe.addEventListener('click',()=>{ meNameInput.value=store.myInfo.name; meAvatarLink.value=store.myInfo.avatarUrl||''; meAvatarFile.value=''; meMask.style.display='flex'; });
   if(closeMeSet) closeMeSet.addEventListener('click',()=>meMask.style.display='none');
   if(saveMeSet) saveMeSet.addEventListener('click',async function(){ store.myInfo.name=meNameInput.value.trim()||'我'; let url=store.myInfo.avatarUrl; if(meAvatarFile.files&&meAvatarFile.files[0]) url=await fileToDataUrl(meAvatarFile.files[0]); else if(meAvatarLink.value.trim()) url=meAvatarLink.value.trim(); store.myInfo.avatarUrl=url; renderHeaderAvatar(); saveLocal(); meMask.style.display='none'; });
-  if(blockDelay) blockDelay.addEventListener('click',()=>{ minDelayInput.value=store.delay.min; maxDelayInput.value=store.delay.max; delayMask.style.display='flex'; });
-  if(closeDelaySet) closeDelaySet.addEventListener('click',()=>delayMask.style.display='none');
-  if(saveDelaySet) saveDelaySet.addEventListener('click',function(){ let min=Math.max(Number(minDelayInput.value)||20,20); let max=Math.min(Number(maxDelayInput.value)||120,120); if(min>max)[min,max]=[max,min]; store.delay.min=min; store.delay.max=max; saveLocal(); delayMask.style.display='none'; });
+
+  // ===== 回复时长进度条 =====
+  if(delayRange){
+    delayRange.addEventListener('input',function(){
+      const val=parseInt(this.value);
+      delayRangeValue.textContent=val+'秒';
+      store.delay.min=val;
+      store.delay.max=val+20;
+      saveLocal();
+    });
+    // 加载时设置
+    const loadDelay=function(){
+      const min=store.delay.min||20;
+      delayRange.value=min;
+      delayRangeValue.textContent=min+'秒';
+    };
+    // 延迟加载等待store初始化
+    setTimeout(loadDelay,100);
+    // 保存按钮也保存延时
+    if(saveChatSetting) saveChatSetting.addEventListener('click',function(){ 
+      const val=parseInt(delayRange.value);
+      store.delay.min=val;
+      store.delay.max=val+20;
+      saveLocal();
+    });
+  }
+
+  // ===== 拍一拍后缀 =====
   if(blockPatSuffix) blockPatSuffix.addEventListener('click',()=>{ patSuffixInput.value=store.chatSettings.patSuffix||'拍了拍'; patMask.style.display='flex'; });
   if(closePatSet) closePatSet.addEventListener('click',()=>patMask.style.display='none');
   if(savePatSet) savePatSet.addEventListener('click',function(){ const val=patSuffixInput.value.trim(); if(val){ store.chatSettings.patSuffix=val; saveLocal(); } patMask.style.display='none'; });
+
+  // ===== 视频背景 =====
   if(blockVideoBg) blockVideoBg.addEventListener('click',()=>{ videoBgLink.value=store.chatSettings.videoBg||''; videoBgFile.value=''; videoBgMask.style.display='flex'; });
   if(closeVideoBg) closeVideoBg.addEventListener('click',()=>videoBgMask.style.display='none');
   if(saveVideoBg) saveVideoBg.addEventListener('click',async function(){ let url=''; if(videoBgFile.files&&videoBgFile.files[0]) url=await fileToDataUrl(videoBgFile.files[0]); else if(videoBgLink.value.trim()) url=videoBgLink.value.trim(); if(url){ store.chatSettings.videoBg=url; applyVideoBg(); saveLocal(); } videoBgMask.style.display='none'; });
   if(saveChatSetting) saveChatSetting.addEventListener('click',function(){ applyBgStyle(); saveLocal(); renderHeaderAvatar(); switchPage('chat-page'); });
 
+  // ===== 头像样式 =====
   const styleOptions=$$('.style-option');
   styleOptions.forEach(opt=>{
     opt.addEventListener('click',function(){
@@ -253,6 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // ===== 字体 =====
   if(applyFontBtn){
     applyFontBtn.addEventListener('click',function(){
       const file=fontFileInput.files[0];
@@ -276,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // ===== 表情包 =====
   function renderEmojiGrid(){
     emojiGrid.innerHTML='';
     const addDiv=document.createElement('div');
@@ -297,6 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(emojiSendBtn) emojiSendBtn.addEventListener('click',function(e){ e.stopPropagation(); emojiPanel.classList.toggle('show'); });
   document.addEventListener('click',function(e){ if(emojiPanel&&!emojiPanel.contains(e.target)&&e.target!==emojiSendBtn) emojiPanel.classList.remove('show'); });
 
+  // ===== 相册 =====
   if(albumBtn){
     albumBtn.addEventListener('click',function(){
       const input=document.createElement('input');
@@ -317,6 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // ===== 发送图片 =====
   function sendImageMessage(imageUrl){
     const quote=quoteMsg; quoteMsg=null; quoteBar.style.display='none';
     const now=Date.now();
@@ -324,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRandomStatus();
     store.isTyping=true;
     renderMessages();
-    const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
+    const min=store.delay.min*1000, max=(store.delay.min+20)*1000, wait=Math.floor(Math.random()*(max-min)+min);
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer=setTimeout(()=>{
       store.isTyping=false;
@@ -341,8 +531,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }, wait);
   }
 
+  // ===== 信箱 =====
   function renderMail(){ renderSentList(); renderInbox(); updateBadge(); }
-  
   function renderSentList(){
     if(!sentList) return;
     sentList.innerHTML='';
@@ -359,13 +549,11 @@ document.addEventListener('DOMContentLoaded', function() {
       sentList.appendChild(div);
     });
   }
-
   function updateBadge(){
     if(!inboxBadge) return;
     const unreadCount = store.inbox.filter(item => !item.read).length;
     inboxBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
   }
-
   function renderInbox(){
     if(!inboxWrap) return;
     inboxWrap.innerHTML='';
@@ -459,6 +647,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function scheduleLetterReplies(){ if(letterTimer){ clearTimeout(letterTimer); letterTimer=null; } const now=Date.now(); let earliest=Infinity; store.letters.forEach(l=>{ if(!l.done&&l.replyTime>now&&l.replyTime<earliest) earliest=l.replyTime; }); if(earliest!==Infinity){ const delay=earliest-now+1000; letterTimer=setTimeout(()=>{ processLetterReplies(); },Math.max(delay,1000)); } }
   function processLetterReplies(){ const allCards=getAllValidCards(); let changed=false; store.letters.forEach(letter=>{ if(letter.done||Date.now()<letter.replyTime) return; letter.done=true; letter.replied=true; changed=true; const count=randomInt(5,20); let reply=[]; for(let i=0;i<count;i++){ if(allCards.length===0) reply.push('（暂无字卡）'); else reply.push(allCards[randomInt(0,allCards.length-1)].text); } store.inbox.push({replyText:reply.join(''), originText:letter.text, time:letter.replyTime, read:false, originLetterId:Date.now()+Math.random()}); }); if(changed){ saveLocal(); renderInbox(); renderSentList(); } scheduleLetterReplies(); }
 
+  // ===== 聊天核心 =====
   function updateRandomStatus(){ const allCards=getAllValidCards(); if(allCards.length>0){ const idx=randomInt(0,allCards.length-1); store.currentStatus=allCards[idx].text; } else { store.currentStatus='暂无状态字卡'; } if(currentStatusText) currentStatusText.innerText=store.currentStatus; }
   function renderHeaderAvatar(){ headerTaAvatar.src=store.taInfo.avatarUrl||''; headerMyAvatar.src=store.myInfo.avatarUrl||''; updateRandomStatus(); }
   function applyBgStyle(){ document.body.style.setProperty('--wallpaper',store.wallpaper?`url(${store.wallpaper})`:'none'); document.documentElement.style.setProperty('--chat-bg',store.chatBg?`url(${store.chatBg})`:'none'); }
@@ -643,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
     store.isTyping=true;
     renderMessages();
 
-    const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
+    const min=store.delay.min*1000, max=(store.delay.min+20)*1000, wait=Math.floor(Math.random()*(max-min)+min);
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer=setTimeout(()=>{
       store.isTyping=false;
@@ -665,13 +854,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
   if(quoteClose) quoteClose.addEventListener('click',function(){ quoteMsg=null; quoteBar.style.display='none'; });
 
-  // 视频按钮插入到发送按钮后面
-  const videoCallBtn=document.createElement('button');
-  videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.padding='4px'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.minWidth='40px'; videoCallBtn.style.display='flex'; videoCallBtn.style.alignItems='center'; videoCallBtn.style.justifyContent='center';
-  videoCallBtn.innerHTML='<img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" style="width:24px;height:24px;">';
-  videoCallBtn.addEventListener('click',function(){ initiateVideoCall('me'); });
-  if(sendBtn) sendBtn.parentNode.insertBefore(videoCallBtn, sendBtn.nextSibling);
-
+  // ===== 拍一拍（双击消息头像） =====
   function handlePat(avatarEl,isUser){
     const initiator=store.myInfo.name;
     let targetName='';
@@ -697,6 +880,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // ===== 视频通话 =====
   function startVideoTimer(){
     if(videoTimerInterval) clearInterval(videoTimerInterval);
     const start=Date.now();
@@ -846,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // ===== 字卡 =====
   if(createGroupBtn) createGroupBtn.addEventListener('click',function(){ const name=newGroupName.value.trim(); if(!name){alert('请输入分组名称');return;} if(store.groups[name]){alert('分组已存在');return;} store.groups[name]=[]; newGroupName.value=''; saveLocal(); refreshGroupSelect(); });
   if(newGroupName) newGroupName.addEventListener('keydown',function(e){ if(e.key==='Enter') createGroupBtn.click(); });
   function refreshGroupSelect(){ const keys=Object.keys(store.groups); groupListWrap.innerHTML=''; currentGroupSelect.innerHTML=''; if(keys.length===0){ const opt=document.createElement('option'); opt.value=''; opt.textContent='请先创建分组'; currentGroupSelect.appendChild(opt); cardListWrap.innerHTML='<div style="color:#999;text-align:center;padding:20px 0;">暂无分组</div>'; return; } keys.forEach(g=>{ const opt=document.createElement('option'); opt.value=g; opt.textContent=`${g} (${store.groups[g].length}条)`; currentGroupSelect.appendChild(opt); const row=document.createElement('div'); row.className='group-item-row'; row.innerHTML=`<span>${g}</span><span class="del-group-btn" data-group="${g}">删除</span>`; row.querySelector('.del-group-btn').addEventListener('click',function(){ const gName=this.dataset.group; if(confirm(`确定删除分组「${gName}」及其所有字卡吗？`)){ delete store.groups[gName]; if(store.currentSelectGroup===gName) store.currentSelectGroup=Object.keys(store.groups)[0]||''; saveLocal(); refreshGroupSelect(); } }); groupListWrap.appendChild(row); }); if(!keys.includes(store.currentSelectGroup)) store.currentSelectGroup=keys[0]; currentGroupSelect.value=store.currentSelectGroup; currentGroupSelect.onchange=function(){ store.currentSelectGroup=this.value; saveLocal(); renderCurrentCardList(); }; renderCurrentCardList(); }
@@ -887,6 +1072,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(newCardInput) newCardInput.addEventListener('keydown',function(e){ if(e.key==='Enter') addSingleCard.click(); });
   if(batchImportBtn) batchImportBtn.addEventListener('click',function(){ const text=batchTextarea.value.trim(); const g=store.currentSelectGroup; if(!text){alert('请填入要导入的字卡');return;} if(!g||!store.groups[g]){alert('请先选择或创建分组');return;} const arr=text.split('\n').map(s=>s.trim()).filter(s=>s); if(arr.length===0){alert('没有有效的字卡内容');return;} arr.forEach(t=>{ store.groups[g].push({id:Date.now()+Math.random(), text:t, disabled:false}); }); batchTextarea.value=''; saveLocal(); renderCurrentCardList(); refreshGroupSelect(); });
 
+  // ===== 日历 =====
   function renderCalendar(){ if(!calendarGrid) return; const now=new Date(); const year=now.getFullYear(), month=now.getMonth(); const firstDay=new Date(year,month,1).getDay(); const daysInMonth=new Date(year,month+1,0).getDate(); calendarGrid.innerHTML=''; for(let i=0;i<firstDay;i++){ const empty=document.createElement('div'); empty.className='cal-day empty'; calendarGrid.appendChild(empty); } for(let d=1;d<=daysInMonth;d++){ const dateObj=new Date(year,month,d); const dateStr=dateObj.toISOString().slice(0,10); const dayDiv=document.createElement('div'); dayDiv.className='cal-day'; dayDiv.innerHTML=`<div class="day-number">${d}</div>`; const data=store.calendar[dateStr]||{}; const taEmoji=data.taEmoji||''; const meEmoji=data.meEmoji||''; const emojiGroup=document.createElement('div'); emojiGroup.className='day-emoji-group'; if(taEmoji&&meEmoji){ const s1=document.createElement('span'); s1.className='emoji-single small'; s1.textContent=taEmoji; const s2=document.createElement('span'); s2.className='emoji-single small'; s2.textContent=meEmoji; emojiGroup.appendChild(s1); emojiGroup.appendChild(s2); } else if(taEmoji){ const s=document.createElement('span'); s.className='emoji-single large'; s.textContent=taEmoji; emojiGroup.appendChild(s); } else if(meEmoji){ const s=document.createElement('span'); s.className='emoji-single large'; s.textContent=meEmoji; emojiGroup.appendChild(s); } dayDiv.appendChild(emojiGroup); calendarGrid.appendChild(dayDiv); } const todayStr=now.toISOString().slice(0,10); const todayData=store.calendar[todayStr]||{}; calTaText.innerText=todayData.taText||'TA今天还没有记录哦～'; calMeText.innerText=todayData.meText||'今天有什么想说的。'; }
   
   if(openMoodModal) {
@@ -910,255 +1096,4 @@ document.addEventListener('DOMContentLoaded', function() {
     const data=store.calendar[dateStr]||{};
     data.meEmoji=selectedMoodEmoji||data.meEmoji;
     data.meText=text||data.meText;
-    if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱']; data.taEmoji=taEmojis[randomInt(0,taEmojis.length-1)]; }
-    if(!data.taText){ const cards=getAllValidCards(); if(cards.length>0){ const count=Math.min(randomInt(1,3),cards.length); const shuffled=[...cards].sort(()=>Math.random()-0.5); data.taText=shuffled.slice(0,count).map(c=>c.text).join(' '); } else { data.taText='今天没有什么想说的～'; } }
-    store.calendar[dateStr]=data;
-    saveLocal();
-    renderCalendar();
-    openMoodModal.textContent = '修改';
-    moodModal.style.display='none';
-    selectedMoodEmoji=null;
-  });
-
-  function showImportConfirm(title,msg,callback){
-    importConfirmTitle.innerText=title;
-    importConfirmMsg.innerText=msg;
-    importConfirmMask.style.display='flex';
-    importCallback=callback;
-  }
-  if(importCancelBtn) importCancelBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; importCallback=null; });
-  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){
-    importConfirmMask.style.display='none';
-    if(importCallback){
-      const cb=importCallback;
-      importCallback=null;
-      cb();
-    }
-  });
-
-  if(exportChatBtn){
-    exportChatBtn.addEventListener('click',function(){
-      const data={messages:store.messages};
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=`chat_history_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  }
-  if(importChatBtn){
-    importChatBtn.addEventListener('click',function(){
-      showImportConfirm('导入聊天记录','导入将覆盖当前所有聊天消息，是否继续？',function(){
-        const input=document.createElement('input');
-        input.type='file';
-        input.accept='.json';
-        input.onchange=function(e){
-          const file=e.target.files[0];
-          if(!file) return;
-          const reader=new FileReader();
-          reader.onload=function(ev){
-            try{
-              const data=JSON.parse(ev.target.result);
-              if(data.messages){
-                store.messages=data.messages;
-                saveLocal();
-                renderMessages();
-                alert('聊天记录导入成功！');
-              } else { alert('无效的数据文件'); }
-            }catch(err){ alert('解析失败：'+err.message); }
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      });
-    });
-  }
-
-  if(exportCardsBtn){
-    exportCardsBtn.addEventListener('click',function(){
-      const data={groups:store.groups};
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=`cards_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  }
-  if(importCardsBtn){
-    importCardsBtn.addEventListener('click',function(){
-      showImportConfirm('导入字卡','导入将覆盖当前所有字卡分组及内容，是否继续？',function(){
-        const input=document.createElement('input');
-        input.type='file';
-        input.accept='.json';
-        input.onchange=function(e){
-          const file=e.target.files[0];
-          if(!file) return;
-          const reader=new FileReader();
-          reader.onload=function(ev){
-            try{
-              const data=JSON.parse(ev.target.result);
-              if(data.groups){
-                store.groups=data.groups;
-                const keys=Object.keys(store.groups);
-                if(keys.length>0) store.currentSelectGroup=keys[0];
-                else store.currentSelectGroup='';
-                saveLocal();
-                refreshGroupSelect();
-                alert('字卡导入成功！');
-              } else { alert('无效的数据文件'); }
-            }catch(err){ alert('解析失败：'+err.message); }
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      });
-    });
-  }
-
-  if(exportDataBtn){
-    exportDataBtn.addEventListener('click',function(){
-      const data={store:store};
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=`full_data_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  }
-  if(importDataBtn){
-    importDataBtn.addEventListener('click',function(){
-      showImportConfirm('导入全部数据','导入将覆盖所有当前数据，是否继续？',function(){
-        const input=document.createElement('input');
-        input.type='file';
-        input.accept='.json';
-        input.onchange=function(e){
-          const file=e.target.files[0];
-          if(!file) return;
-          const reader=new FileReader();
-          reader.onload=function(ev){
-            try{
-              const data=JSON.parse(ev.target.result);
-              if(data.store){
-                store=data.store;
-                saveLocal();
-                renderHeaderAvatar();
-                refreshAllIconPreview();
-                applyBgStyle();
-                refreshGroupSelect();
-                renderEmojiGrid();
-                renderInbox();
-                renderMessages();
-                updateAnimToggleUI();
-                renderCalendar();
-                applyVideoBg();
-                renderMail();
-                coverImage.src=store.profile.cover||'';
-                avatarImage.src=store.profile.avatar||'';
-                profileName.innerText=store.profile.name||'TATA';
-                locationText.innerText=store.profile.location||'爱尔兰';
-                locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
-                profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
-                decoImg.src=store.decoImage||'';
-                const style=store.chatSettings.avatarStyle||'circle';
-                styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
-                alert('数据导入成功！');
-              } else { alert('无效的数据文件'); }
-            }catch(err){ alert('解析失败：'+err.message); }
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      });
-    });
-  }
-
-  function fileToDataUrl(file){ return new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(file); }); }
-  function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-  function formatTime(ts){ const d=new Date(ts); return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
-
-  function loadLocal(){
-    try{
-      const raw=localStorage.getItem('dreamCardStore');
-      if(raw){
-        const parsed=JSON.parse(raw);
-        store=deepMerge(store, parsed);
-      }
-    }catch(e){console.warn('Load local error',e);}
-    if(!store.messages) store.messages=[];
-    if(!store.calendar) store.calendar={};
-    if(!store.appIcon) store.appIcon={};
-    if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'};
-    if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'};
-    if(!store.groups) store.groups={};
-    if(!store.letters) store.letters=[];
-    if(!store.inbox) store.inbox=[];
-    if(!store.emojiList) store.emojiList=[];
-    if(!store.appliedFont) store.appliedFont='';
-    if(store.rippleEnabled===undefined) store.rippleEnabled=true;
-
-    renderHeaderAvatar();
-    refreshAllIconPreview();
-    if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||'';
-    if(chatBgPreview) chatBgPreview.src=store.chatBg||'';
-    applyBgStyle();
-    applyVideoBg();
-    refreshGroupSelect();
-    renderEmojiGrid();
-    renderInbox();
-    renderMessages();
-    updateAnimToggleUI();
-    scheduleLetterReplies();
-    renderCalendar();
-    renderMail();
-    coverImage.src=store.profile.cover||'';
-    avatarImage.src=store.profile.avatar||'';
-    profileName.innerText=store.profile.name||'TATA';
-    locationText.innerText=store.profile.location||'爱尔兰';
-    locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png';
-    profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
-    decoImg.src=store.decoImage||'';
-    if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
-    const style=store.chatSettings.avatarStyle||'circle';
-    styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
-    // 恢复涟漪状态
-    if(rippleToggle){
-      if(store.rippleEnabled!==undefined) rippleEnabled=store.rippleEnabled;
-      if(rippleEnabled) rippleToggle.classList.add('active');
-      else rippleToggle.classList.remove('active');
-    }
-    // 恢复心情按钮文字
-    if(openMoodModal){
-      const todayStr=new Date().toISOString().slice(0,10);
-      const hasRecord = store.calendar[todayStr] && (store.calendar[todayStr].meEmoji || store.calendar[todayStr].meText);
-      openMoodModal.textContent = hasRecord ? '修改' : '记录心情';
-    }
-  }
-
-  function saveLocal(){
-    try{
-      localStorage.setItem('dreamCardStore',JSON.stringify(store));
-    }catch(e){console.warn('Save local error',e);}
-  }
-
-  window.addEventListener('beforeunload',function(){ saveLocal(); });
-
-  let lastTouchEnd=0; document.addEventListener('touchend',function(e){ const now=Date.now(); if(now-lastTouchEnd<=300) e.preventDefault(); lastTouchEnd=now; },{passive:false}); document.addEventListener('gesturestart',function(e){ e.preventDefault(); },{passive:false}); document.querySelectorAll('input,textarea').forEach(el=>el.style.fontSize='16px');
-
-  loadLocal(); applyBgStyle(); applyVideoBg();
-  if(document.querySelector('.chat-page.active')&&chatWrap) setTimeout(()=>chatWrap.scrollTop=chatWrap.scrollHeight,100);
-  console.log('✅ 梦角字卡传讯已启动 | 动画:', store.animEnabled?'开启':'关闭');
-});
+    if(!data.taEmoji){ const taEmojis=['😊','😌','😄','🤗','
