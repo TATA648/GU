@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- 默认首页 -->
+<!-- 首页 -->
 <div class="page home-page active">
   <div class="home-container">
     <h2 class="home-title">梦角工具箱</h2>
@@ -24,29 +24,39 @@
         <img class="app-icon" id="themeAppIcon" alt="外观设置">
         <span class="app-label">外观设置</span>
       </div>
+      <div class="app-card" data-target="mail-page">
+        <img class="app-icon" id="mailAppIcon" alt="信箱图标">
+        <span class="app-label">信箱</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 外观设置页面 -->
+<!-- 外观设置页 -->
 <div class="page setting-page">
   <div class="page-header">
     <button class="back-btn">← 返回</button>
     <h3 class="page-title">外观设置</h3>
   </div>
   <div class="setting-container">
-    <!-- 壁纸区块 -->
     <div class="setting-block">
       <h4 class="block-title">主页壁纸</h4>
-      <div class="wallpaper-row">
-        <div class="preview-box">
+      <div class="wallpaper-row reverse">
+        <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
+        <div class="preview-box rect">
           <img id="wallpaperPreview" class="preview-img" alt="壁纸预览">
         </div>
-        <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
       </div>
     </div>
-
-    <!-- 图标区块 -->
+    <div class="setting-block">
+      <h4 class="block-title">聊天背景</h4>
+      <div class="wallpaper-row reverse">
+        <button class="change-btn" id="openChatBgModal">更换聊天背景</button>
+        <div class="preview-box rect">
+          <img id="chatBgPreview" class="preview-img" alt="聊天背景预览">
+        </div>
+      </div>
+    </div>
     <div class="setting-block">
       <h4 class="block-title">应用图标设置</h4>
       <div class="icon-set-item">
@@ -70,24 +80,51 @@
         <span class="item-name">外观设置图标</span>
         <button class="change-btn icon-change-btn" data-type="theme">更改</button>
       </div>
+      <div class="icon-set-item">
+        <div class="preview-box small">
+          <img id="mailIconPreview" class="preview-img" alt="信箱图标预览">
+        </div>
+        <span class="item-name">信箱图标</span>
+        <button class="change-btn icon-change-btn" data-type="mail">更改</button>
+      </div>
     </div>
     <div class="tip-text">所有设置保存后刷新页面生效</div>
   </div>
 </div>
 
-<!-- 聊天页顶部栏 -->
-<div class="top-header">
-  <button class="back-btn">←</button>
-  <div class="avatar-box" id="avatarClickEdit">
-    <img class="avatar-img" id="avatarImg" alt="角色头像">
-    <span class="avatar-txt" id="avatarText">角</span>
+<!-- 聊天设置独立页面 -->
+<div class="page chat-set-page">
+  <div class="page-header">
+    <button class="back-btn chat-set-back">← 返回聊天</button>
+    <h3 class="page-title">聊天设置</h3>
   </div>
-  <div class="dream-name" id="targetName">梦角</div>
-  <button class="setting-btn" id="openSet">⚙</button>
+  <div class="setting-container">
+    <div class="form-item">
+      <label>梦角昵称</label>
+      <input type="text" id="setNickname">
+    </div>
+    <div class="form-item">
+      <label>最小等待秒数</label>
+      <input type="number" id="setMinDelay" min="1" value="20">
+    </div>
+    <div class="form-item">
+      <label>最大等待秒数</label>
+      <input type="number" id="setMaxDelay" min="1" value="60">
+    </div>
+    <button class="save-btn" id="saveChatSetting">保存设置</button>
+  </div>
 </div>
 
 <!-- 聊天页面 -->
 <div class="page chat-page">
+  <div class="top-header">
+    <button class="back-btn">←</button>
+    <div class="avatar-box" id="avatarClickEdit">
+      <img class="avatar-img" id="avatarImg" alt="角色头像">
+    </div>
+    <div class="dream-name" id="targetName">梦角</div>
+    <button class="setting-btn" id="openChatSettingPage">⚙</button>
+  </div>
   <div class="chat-box" id="chatWrap"></div>
   <div class="input-area" id="inputWrap">
     <input type="text" id="inputText" placeholder="输入想要发送的话...">
@@ -95,7 +132,7 @@
   </div>
 </div>
 
-<!-- 字卡+分组管理页面 -->
+<!-- 字卡管理页 -->
 <div class="page card-page">
   <div class="page-header">
     <button class="back-btn">← 返回</button>
@@ -122,7 +159,26 @@
   </div>
 </div>
 
-<!-- 通用图片选择弹窗：壁纸、图标共用 -->
+<!-- 信箱页面 -->
+<div class="page mail-page">
+  <div class="page-header">
+    <button class="back-btn">← 返回</button>
+    <h3 class="page-title">信箱</h3>
+  </div>
+  <div class="mail-container">
+    <div class="mail-tab-bar">
+      <button class="mail-tab active" data-tab="write">写信</button>
+      <button class="mail-tab" data-tab="inbox">收件箱</button>
+    </div>
+    <div class="write-box">
+      <textarea id="letterInput" placeholder="写下你想发送的信件..."></textarea>
+      <button class="send-letter-btn" id="sendLetterBtn">寄出信件</button>
+    </div>
+    <div class="inbox-box hidden" id="inboxWrap"></div>
+  </div>
+</div>
+
+<!-- 通用图片选择弹窗 -->
 <div class="mask" id="imageSelectMask">
   <div class="panel image-panel">
     <h3 id="modalTitle">选择图片</h3>
@@ -137,25 +193,6 @@
     <div class="btns-wrap">
       <button class="close" id="closeImageModal">取消</button>
       <button class="save" id="confirmImageBtn">确定使用</button>
-    </div>
-  </div>
-</div>
-
-<!-- 全局设置弹窗 -->
-<div class="mask" id="mask">
-  <div class="panel">
-    <h3>基础设置 & 回复时长配置</h3>
-    <label>梦角昵称</label>
-    <input type="text" id="nameInput">
-    <label>备用文字头像</label>
-    <input type="text" id="headText" maxlength="1">
-    <label>最小等待秒数</label>
-    <input type="number" id="minDelaySec" min="1" value="20">
-    <label>最大等待秒数</label>
-    <input type="number" id="maxDelaySec" min="1" value="60">
-    <div class="btns-wrap">
-      <button class="close" id="closeSet">取消</button>
-      <button class="save" id="saveSet">保存</button>
     </div>
   </div>
 </div>
