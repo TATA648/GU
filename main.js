@@ -16,10 +16,20 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar:{},
     chatSettings:{
       patSuffix:"拍了拍",
-      videoBg:""
+      videoBg:"",
+      avatarStyle:"circle"
     },
     videoCall:{active:false, caller:"", startTime:null, answered:false, folded:false, timer:null},
-    isTyping: false
+    isTyping: false,
+    // 首页个人资料
+    profile:{
+      cover:"",
+      avatar:"",
+      name:"TATA",
+      location:"爱尔兰",
+      locationIcon:"https://i.ibb.co/pjyVcqxM/position.png",
+      signature:"浅尝辄止 是命运轻轻放过了我"
+    }
   };
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -27,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const emojiSendBtn=$('#emojiSendBtn'), emojiPanel=$('#emojiPanel'), emojiGrid=$('#emojiGrid');
   const albumBtn=$('#albumBtn');
   const imageSelectMask=$('#imageSelectMask'), modalTitle=$('#modalTitle'), localImageFile=$('#localImageFile'), imageLinkInput=$('#imageLinkInput'), closeImageModal=$('#closeImageModal'), confirmImageBtn=$('#confirmImageBtn');
+  const editTextMask=$('#editTextMask'), editTextTitle=$('#editTextTitle'), editTextInput=$('#editTextInput'), closeEditText=$('#closeEditText'), saveEditText=$('#saveEditText');
   const wallpaperPreview=$('#wallpaperPreview'), openWallpaperModal=$('#openWallpaperModal'), chatBgPreview=$('#chatBgPreview'), openChatBgModal=$('#openChatBgModal');
   const changeIconBtns=$$('.icon-change-btn');
   const openChatSettingPage=$('#openChatSettingPage'), saveChatSetting=$('#saveChatSetting'), chatSetBack=$('.chat-set-back');
@@ -47,6 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const videoWindow=$('#videoWindow'), videoBg=$('#videoBg'), videoTimer=$('#videoTimer'), videoFoldBtn=$('#videoFoldBtn'), videoAvatar=$('#videoAvatar'), videoHangupBtn=$('#videoHangupBtn');
   const videoAnswerArea=$('#videoAnswerArea'), videoAnswerBtn=$('#videoAnswerBtn'), videoRejectBtn=$('#videoRejectBtn');
   const videoCapsule=$('#videoCapsule'), capsuleTimer=$('#capsuleTimer'), capsuleExpand=$('#capsuleExpand');
+  // 首页资料卡片元素
+  const profileCover=$('#profileCover'), coverImage=$('#coverImage'), profileAvatar=$('#profileAvatar'), avatarImage=$('#avatarImage');
+  const profileName=$('#profileName'), profileLocation=$('#profileLocation'), locationText=$('#locationText'), locationIcon=$('#locationIcon');
+  const profileSignature=$('#profileSignature');
 
   let currentEditTarget=null, currentMailTab='sent', typingTimer=null, letterTimer=null, selectedMoodEmoji=null, currentDateStr=null;
   let quoteMsg=null, videoTimerInterval=null;
@@ -81,6 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if(targetKey==='wallpaper') existing=store.wallpaper;
     else if(targetKey==='chatBg') existing=store.chatBg;
     else if(targetKey==='videoBg') existing=store.chatSettings.videoBg;
+    else if(targetKey==='profileCover') existing=store.profile.cover;
+    else if(targetKey==='profileAvatar') existing=store.profile.avatar;
     else existing=store.appIcon[targetKey]||'';
     imageLinkInput.value=existing; imageSelectMask.style.display='flex';
   }
@@ -96,10 +113,60 @@ document.addEventListener('DOMContentLoaded', function() {
     if(currentEditTarget==='wallpaper'){ store.wallpaper=url; wallpaperPreview.src=url; }
     else if(currentEditTarget==='chatBg'){ store.chatBg=url; chatBgPreview.src=url; }
     else if(currentEditTarget==='videoBg'){ store.chatSettings.videoBg=url; applyVideoBg(); }
+    else if(currentEditTarget==='profileCover'){ store.profile.cover=url; coverImage.src=url; }
+    else if(currentEditTarget==='profileAvatar'){ store.profile.avatar=url; avatarImage.src=url; }
     else if(currentEditTarget==='emoji'){ store.emojiList.push(url); renderEmojiGrid(); }
     else{ store.appIcon[currentEditTarget]=url; refreshAllIconPreview(); }
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
+
+  // ========== 文本编辑弹窗（首页资料卡） ==========
+  function openEditText(title, currentValue, callback){
+    editTextTitle.innerText=title;
+    editTextInput.value=currentValue;
+    editTextMask.style.display='flex';
+    // 移除旧监听，避免重复绑定
+    const newSave=function(){
+      const val=editTextInput.value.trim();
+      if(val) callback(val);
+      editTextMask.style.display='none';
+    };
+    saveEditText.onclick=newSave;
+    closeEditText.onclick=function(){ editTextMask.style.display='none'; };
+  }
+
+  // ========== 首页资料卡交互 ==========
+  if(profileCover) profileCover.addEventListener('click',()=>openImageModal('选择封面','profileCover'));
+  if(profileAvatar) profileAvatar.addEventListener('click',()=>openImageModal('选择头像','profileAvatar'));
+  if(profileName) profileName.addEventListener('click',()=>openEditText('修改昵称', store.profile.name, (val)=>{ store.profile.name=val; profileName.innerText=val; saveLocal(); }));
+  if(profileLocation) profileLocation.addEventListener('click',()=>{
+    // 弹出两个输入：位置文本和图标链接
+    const html=`
+      <div style="margin-bottom:12px;">
+        <label style="font-size:14px;color:#555;">位置名称</label>
+        <input type="text" id="editLocationText" value="${store.profile.location}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
+      </div>
+      <div>
+        <label style="font-size:14px;color:#555;">位置图标链接</label>
+        <input type="text" id="editLocationIcon" value="${store.profile.locationIcon}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
+      </div>
+    `;
+    const panel=document.querySelector('#editTextMask .panel');
+    const originalContent=panel.innerHTML;
+    panel.innerHTML=`<h3>修改位置</h3>${html}<div class="btns-wrap"><button class="close" id="editLocationCancel">取消</button><button class="save" id="editLocationSave">保存</button></div>`;
+    document.getElementById('editLocationCancel').onclick=function(){ panel.innerHTML=originalContent; editTextMask.style.display='none'; };
+    document.getElementById('editLocationSave').onclick=function(){
+      const newText=document.getElementById('editLocationText').value.trim();
+      const newIcon=document.getElementById('editLocationIcon').value.trim();
+      if(newText){ store.profile.location=newText; locationText.innerText=newText; }
+      if(newIcon){ store.profile.locationIcon=newIcon; locationIcon.src=newIcon; }
+      saveLocal();
+      panel.innerHTML=originalContent;
+      editTextMask.style.display='none';
+    };
+    editTextMask.style.display='flex';
+  });
+  if(profileSignature) profileSignature.addEventListener('click',()=>openEditText('修改签名', store.profile.signature, (val)=>{ store.profile.signature=val; profileSignature.innerText=val; saveLocal(); }));
 
   // ========== 聊天设置 ==========
   if(blockTa) blockTa.addEventListener('click',()=>{ taNameInput.value=store.taInfo.name; taAvatarLink.value=store.taInfo.avatarUrl||''; taAvatarFile.value=''; taMask.style.display='flex'; });
@@ -118,6 +185,19 @@ document.addEventListener('DOMContentLoaded', function() {
   if(closeVideoBg) closeVideoBg.addEventListener('click',()=>videoBgMask.style.display='none');
   if(saveVideoBg) saveVideoBg.addEventListener('click',async function(){ let url=''; if(videoBgFile.files&&videoBgFile.files[0]) url=await fileToDataUrl(videoBgFile.files[0]); else if(videoBgLink.value.trim()) url=videoBgLink.value.trim(); if(url){ store.chatSettings.videoBg=url; applyVideoBg(); saveLocal(); } videoBgMask.style.display='none'; });
   if(saveChatSetting) saveChatSetting.addEventListener('click',function(){ applyBgStyle(); saveLocal(); renderHeaderAvatar(); switchPage('chat-page'); });
+
+  // ========== 头像样式选择 ==========
+  const styleOptions=$$('.style-option');
+  styleOptions.forEach(opt=>{
+    opt.addEventListener('click',function(){
+      styleOptions.forEach(o=>o.classList.remove('active'));
+      this.classList.add('active');
+      const style=this.dataset.style;
+      store.chatSettings.avatarStyle=style;
+      saveLocal();
+      renderMessages(); // 刷新头像样式
+    });
+  });
 
   // ========== 表情包 ==========
   function renderEmojiGrid(){
@@ -141,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(emojiSendBtn) emojiSendBtn.addEventListener('click',function(e){ e.stopPropagation(); emojiPanel.classList.toggle('show'); });
   document.addEventListener('click',function(e){ if(emojiPanel&&!emojiPanel.contains(e.target)&&e.target!==emojiSendBtn) emojiPanel.classList.remove('show'); });
 
-  // ========== 相册按钮（新增） ==========
+  // ========== 相册按钮 ==========
   if(albumBtn){
     albumBtn.addEventListener('click',function(){
       const input=document.createElement('input');
@@ -156,19 +236,18 @@ document.addEventListener('DOMContentLoaded', function() {
           sendImageMessage(dataUrl);
         };
         reader.readAsDataURL(file);
-        input.value=''; // 清空以便重复选择
+        input.value='';
       };
       input.click();
     });
   }
 
-  // ========== 发送图片消息 ==========
+  // ========== 发送图片 ==========
   function sendImageMessage(imageUrl){
     const quote=quoteMsg; quoteMsg=null; quoteBar.style.display='none';
     const now=Date.now();
     addMessage('', true, now, quote, false, false, imageUrl);
     updateRandomStatus();
-    // 自动回复（与文本消息相同逻辑）
     store.isTyping=true;
     renderMessages();
     const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
@@ -273,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(store.isTyping){
       const tempItem=document.createElement('div');
       tempItem.className='msg-item target-msg typing-placeholder';
-      tempItem.innerHTML=`<div class="msg-avatar">${store.taInfo.avatarUrl?`<img src="${store.taInfo.avatarUrl}" loading="lazy">`:''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
+      tempItem.innerHTML=`<div class="msg-avatar ${store.chatSettings.avatarStyle==='square'?'square':''}">${store.taInfo.avatarUrl?`<img src="${store.taInfo.avatarUrl}" loading="lazy">`:''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
       chatWrap.appendChild(tempItem);
     }
     chatWrap.scrollTop=chatWrap.scrollHeight;
@@ -287,12 +366,10 @@ document.addEventListener('DOMContentLoaded', function() {
       chatWrap.appendChild(div);
       return;
     }
-    // 判断是否为图片消息
     if(msg.imageUrl){
       const item=document.createElement('div');
       item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
       const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
-      // 检查是否合并头像
       let hideAvatar=false;
       const msgs=store.messages;
       const idx=msgs.indexOf(msg);
@@ -302,8 +379,9 @@ document.addEventListener('DOMContentLoaded', function() {
           hideAvatar=true;
         }
       }
-      const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
-      const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
+      const avatarClass=store.chatSettings.avatarStyle==='square'?'square':'';
+      const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar ${avatarClass}" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
+      const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar ${avatarClass}" style="visibility:hidden;"></div>` : avatarHtml;
       item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap"><img class="msg-image" src="${msg.imageUrl}" loading="lazy"></div>`;
       chatWrap.appendChild(item);
       return;
@@ -326,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let quoteHtml='';
-    if(msg.quote){ quoteHtml=`<div class="msg-quote">📎 ${escapeHtml(msg.quote.text)}</div>`; }
+    if(msg.quote){ quoteHtml=`<div class="msg-quote">${escapeHtml(msg.quote.text)}</div>`; } // 移除📎
     let html='';
     if(isEmojiOnly){
       const src=msg.text.match(/\[emoji:(.+?)\]/)[1];
@@ -338,11 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if(emojiSrc&&msg.text.trim()===''){ html=`<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`; } else if(emojiSrc){ html+=`<img class="msg-emoji-inside" src="${emojiSrc}">`; }
     }
     const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
-    const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
-    const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
+    const avatarClass=store.chatSettings.avatarStyle==='square'?'square':'';
+    const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar ${avatarClass}" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
+    const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar ${avatarClass}" style="visibility:hidden;"></div>` : avatarHtml;
     item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
 
-    // 引用长按滑动
+    // 引用长按滑动（不变）
     let longPressTimer=null;
     let isLongPress=false;
     let touchStartX=0, touchStartY=0;
@@ -396,7 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
     store.lastChatTime=Date.now();
     appendMessageElement(msg);
     chatWrap.scrollTop=chatWrap.scrollHeight;
-    // 角色主动拍一拍
     if(!system && !isUser && Math.random()<0.1) {
       setTimeout(()=>{
         const target=Math.random()<0.5?'user':'ta';
@@ -408,7 +486,6 @@ document.addEventListener('DOMContentLoaded', function() {
         addMessage(patText, false, Date.now(), null, true, false);
       }, 1500);
     }
-    // 随机发起视频
     if(!system && !isUser && Math.random()<0.05) {
       setTimeout(()=>{ initiateVideoCall('ta'); }, 1000);
     }
@@ -450,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
   if(quoteClose) quoteClose.addEventListener('click',function(){ quoteMsg=null; quoteBar.style.display='none'; });
 
-  // ========== 拍一拍（双击检测） ==========
+  // ========== 拍一拍 ==========
   function handlePat(avatarEl, isUser){
     const initiator=store.myInfo.name;
     let targetName='';
@@ -625,9 +702,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
+  // 视频按钮使用图片
   const videoCallBtn=document.createElement('button');
-  videoCallBtn.textContent='📹';
-  videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.fontSize='22px'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.padding='0 8px';
+  videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.padding='4px'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.minWidth='40px'; videoCallBtn.style.display='flex'; videoCallBtn.style.alignItems='center'; videoCallBtn.style.justifyContent='center';
+  videoCallBtn.innerHTML='<img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" style="width:24px;height:24px;">';
   videoCallBtn.addEventListener('click',function(){ initiateVideoCall('me'); });
   document.querySelector('.emoji-btn-wrapper').appendChild(videoCallBtn);
 
@@ -651,7 +729,12 @@ document.addEventListener('DOMContentLoaded', function() {
   if(exportDataBtn) exportDataBtn.addEventListener('click',function(){ const data={version:'1.0', exportTime:new Date().toISOString(), store}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`dreamcard_data_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
   if(importDataBtn) importDataBtn.addEventListener('click',function(){ importConfirmMask.style.display='flex'; });
   if(importCancelBtn) importCancelBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; });
-  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; const input=document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange=function(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=function(ev){ try{ const data=JSON.parse(ev.target.result); if(data.store){ store=data.store; saveLocal(); renderHeaderAvatar(); refreshAllIconPreview(); applyBgStyle(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); renderCalendar(); applyVideoBg(); renderMail(); alert('数据导入成功！'); } else { alert('无效的数据文件'); } } catch(err){ alert('文件解析失败：'+err.message); } }; reader.readAsText(file); }; input.click(); });
+  if(importConfirmBtn) importConfirmBtn.addEventListener('click',function(){ importConfirmMask.style.display='none'; const input=document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange=function(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=function(ev){ try{ const data=JSON.parse(ev.target.result); if(data.store){ store=data.store; saveLocal(); renderHeaderAvatar(); refreshAllIconPreview(); applyBgStyle(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); renderCalendar(); applyVideoBg(); renderMail(); // 更新个人资料UI
+        coverImage.src=store.profile.cover||''; avatarImage.src=store.profile.avatar||''; profileName.innerText=store.profile.name||'TATA'; locationText.innerText=store.profile.location||'爱尔兰'; locationIcon.src=store.profile.locationIcon||'https://i.ibb.co/pjyVcqxM/position.png'; profileSignature.innerText=store.profile.signature||'浅尝辄止 是命运轻轻放过了我';
+        // 头像样式
+        const style=store.chatSettings.avatarStyle||'circle';
+        styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
+        alert('数据导入成功！'); } else { alert('无效的数据文件'); } } catch(err){ alert('文件解析失败：'+err.message); } }; reader.readAsText(file); }; input.click(); });
 
   // ========== 工具 ==========
   function fileToDataUrl(file){ return new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(file); }); }
@@ -661,7 +744,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function escapeHtml(text){ const div=document.createElement('div'); div.textContent=text; return div.innerHTML; }
 
   // ========== 存储 ==========
-  function loadLocal(){ try{ const raw=localStorage.getItem('dreamCardStore'); if(raw){ const parsed=JSON.parse(raw); store={...store,...parsed}; } }catch(e){console.warn('Load local error',e);} if(!store.messages) store.messages=[]; if(!store.calendar) store.calendar={}; if(!store.appIcon.setting) store.appIcon.setting=''; if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:''}; renderHeaderAvatar(); refreshAllIconPreview(); if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||''; if(chatBgPreview) chatBgPreview.src=store.chatBg||''; applyBgStyle(); applyVideoBg(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); scheduleLetterReplies(); renderCalendar(); renderMail(); }
+  function loadLocal(){ try{ const raw=localStorage.getItem('dreamCardStore'); if(raw){ const parsed=JSON.parse(raw); store={...store,...parsed}; } }catch(e){console.warn('Load local error',e);} if(!store.messages) store.messages=[]; if(!store.calendar) store.calendar={}; if(!store.appIcon.setting) store.appIcon.setting=''; if(!store.chatSettings) store.chatSettings={patSuffix:'拍了拍',videoBg:'',avatarStyle:'circle'}; if(!store.profile) store.profile={cover:'',avatar:'',name:'TATA',location:'爱尔兰',locationIcon:'https://i.ibb.co/pjyVcqxM/position.png',signature:'浅尝辄止 是命运轻轻放过了我'}; renderHeaderAvatar(); refreshAllIconPreview(); if(wallpaperPreview) wallpaperPreview.src=store.wallpaper||''; if(chatBgPreview) chatBgPreview.src=store.chatBg||''; applyBgStyle(); applyVideoBg(); refreshGroupSelect(); renderEmojiGrid(); renderInbox(); renderMessages(); updateAnimToggleUI(); scheduleLetterReplies(); renderCalendar(); renderMail(); // 个人资料UI
+    coverImage.src=store.profile.cover||''; avatarImage.src=store.profile.avatar||''; profileName.innerText=store.profile.name; locationText.innerText=store.profile.location; locationIcon.src=store.profile.locationIcon; profileSignature.innerText=store.profile.signature;
+    // 头像样式
+    const style=store.chatSettings.avatarStyle||'circle';
+    styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
+  }
   function saveLocal(){ try{ localStorage.setItem('dreamCardStore',JSON.stringify(store)); }catch(e){console.warn('Save local error',e);} }
 
   // ========== 防缩放 ==========
