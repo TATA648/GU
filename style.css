@@ -39,7 +39,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .emoji-btn-wrapper { display:flex; align-items:center; gap:4px; }
 .emoji-send-btn { border:none; background:transparent; font-size:24px; cursor:pointer; padding:4px; min-height:40px; min-width:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; transition:background 0.15s; }
 .emoji-send-btn:active { background:#eee; }
-.emoji-toggle-btn { display:none; } /* 旧按钮隐藏 */
+.emoji-toggle-btn { display:none; }
 
 /* ===== 表情面板 ===== */
 .emoji-panel { display:none; position:fixed; left:0; bottom:60px; width:100%; background:#fff; border-top:1px solid #eee; padding:12px; max-height:200px; overflow-y:auto; z-index:97; box-shadow:0 -2px 10px rgba(0,0,0,0.06); }
@@ -49,9 +49,15 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .emoji-item img { width:100%; height:100%; object-fit:cover; }
 .emoji-item.add-btn { background:#e8e0f0; display:flex; align-items:center; justify-content:center; font-size:28px; color:#663399; border:2px dashed #a87bc9; }
 
+/* ===== 表情大图（纯表情） ===== */
+.msg-item.emoji-only .msg-bubble-wrap { max-width:100%; }
+.msg-item.emoji-only .msg-bubble-wrap .msg-bubble { display:none; }
+.emoji-big { width:60px; height:60px; border-radius:12px; object-fit:cover; }
+
 /* ===== 视频小窗 ===== */
-.video-window { position:fixed; top:80px; right:12px; width:240px; height:320px; background:#1a1a2e; border-radius:16px; z-index:9999; box-shadow:0 8px 30px rgba(0,0,0,0.5); display:none; flex-direction:column; overflow:hidden; }
+.video-window { position:fixed; top:80px; right:12px; width:240px; height:320px; background:#1a1a2e; border-radius:16px; z-index:9999; box-shadow:0 8px 30px rgba(0,0,0,0.5); display:none; flex-direction:column; overflow:hidden; cursor:grab; touch-action:none; }
 .video-window.active { display:flex; }
+.video-window.dragging { cursor:grabbing; }
 .video-bg { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0.6; }
 .video-header { display:flex; justify-content:space-between; padding:6px 10px; background:rgba(0,0,0,0.5); color:#fff; font-size:13px; z-index:2; }
 .video-timer { font-weight:600; }
@@ -67,9 +73,8 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .capsule-expand { background:none; border:none; color:#fff; font-size:16px; cursor:pointer; }
 
 /* ===== 消息 ===== */
-.time-divider { width:100%; text-align:center; margin:16px 0; font-size:12px; color:#aaa; }
+.time-divider { width:100%; text-align:center; margin:16px 0; font-size:12px; color:#aaa; font-weight:300; }
 .msg-item { margin-bottom:10px; display:flex; max-width:82%; gap:8px; animation:msgIn 0.2s ease; touch-action:pan-y; }
-.msg-item.swiped { background:rgba(168,123,201,0.1); border-radius:10px; transition:background 0.2s; }
 @keyframes msgIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
 .user-msg { flex-direction:row-reverse; margin-left:auto; }
 .target-msg { align-items:flex-start; }
@@ -85,7 +90,10 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .typing-dot:nth-child(2){animation-delay:0.2s;}
 .typing-dot:nth-child(3){animation-delay:0.4s;}
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
-.time-text { font-size:11px; color:#aaa; padding:0 6px; align-self:flex-end; }
+
+/* ===== 拍一拍与系统消息 ===== */
+.pat-message { text-align:center; font-size:8px; color:#888; padding:6px 0; margin:4px 0; width:100%; background:transparent; font-weight:200; }
+.pat-message.red { color:#e74c3c; font-weight:400; }
 
 /* ===== 首页图标 ===== */
 .home-container { padding:40px 20px; display:flex; flex-direction:column; gap:40px; }
@@ -196,20 +204,20 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .del-btn { background:#ffdddd; color:#c33; }
 .switch-btn { background:#eef6ff; color:#2879d8; }
 
-/* ===== 日历 ===== */
-.calendar-container { flex:1; padding:16px; display:flex; flex-direction:column; gap:8px; background:#fff; }
-.calendar-text-area { background:#f8f4fb; border-radius:12px; padding:10px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
-.cal-text-item { font-size:13px; padding:3px 0; color:#333; }
+/* ===== 日历（紧凑） ===== */
+.calendar-container { flex:1; padding:16px; display:flex; flex-direction:column; gap:6px; background:#fff; }
+.calendar-text-area { background:#f8f4fb; border-radius:12px; padding:8px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+.cal-text-item { font-size:13px; padding:2px 0; color:#333; }
 .cal-text-item.ta-text { color:#663399; font-weight:500; }
 .cal-text-item.me-text { color:#555; }
-.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; background:#faf8fc; border-radius:12px; padding:6px; flex:1; overflow-y:auto; width:100%; }
-.cal-day { aspect-ratio:1/1.1; background:#fff; border-radius:6px; padding:3px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.04); font-size:11px; color:#333; position:relative; min-width:0; }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; background:#faf8fc; border-radius:12px; padding:4px; flex:1; overflow-y:auto; width:100%; }
+.cal-day { aspect-ratio:1/1.1; background:#fff; border-radius:4px; padding:2px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.04); font-size:11px; color:#333; position:relative; min-width:0; }
 .cal-day.empty { background:transparent; box-shadow:none; }
 .cal-day .day-number { font-weight:600; font-size:12px; margin-bottom:1px; }
-.cal-day .day-emoji-group { display:flex; justify-content:center; gap:2px; flex-wrap:wrap; margin-top:1px; }
-.cal-day .day-emoji-group .emoji-single { font-size:15px; line-height:1.2; }
-.cal-day .day-emoji-group .emoji-single.large { font-size:22px; }
-.cal-day .day-emoji-group .emoji-single.small { font-size:12px; }
+.cal-day .day-emoji-group { display:flex; justify-content:center; gap:1px; flex-wrap:wrap; margin-top:1px; }
+.cal-day .day-emoji-group .emoji-single { font-size:14px; line-height:1.2; }
+.cal-day .day-emoji-group .emoji-single.large { font-size:20px; }
+.cal-day .day-emoji-group .emoji-single.small { font-size:11px; }
 .calendar-mood-btn { background:#a87bc9; color:#fff; border:none; border-radius:30px; padding:10px; font-size:15px; cursor:pointer; transition:background 0.15s ease; min-height:44px; }
 .calendar-mood-btn:active { background:#8e64b0; }
 .mood-emoji-grid { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:8px 0; }
@@ -233,36 +241,17 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
   .top-header { min-height:60px; }
   .header-avatar { width:30px; height:30px; }
   .status-bar { font-size:12px; }
-  .cal-day .day-emoji-group .emoji-single { font-size:13px; }
+  .cal-day .day-emoji-group .emoji-single { font-size:12px; }
   .cal-day .day-emoji-group .emoji-single.large { font-size:18px; }
   .chat-box { padding-bottom:70px; }
   .setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page { padding-top:50px; }
   .video-window { width:180px; height:240px; top:72px; right:8px; }
   .video-avatar { width:60px; height:60px; }
   .emoji-item { width:50px; height:50px; }
+  .emoji-big { width:50px; height:50px; }
 }
 @media (max-width:360px) {
   .app-grid { gap:12px; }
   .app-card { width:80px; padding:10px 6px; }
   .app-icon { width:48px !important; height:48px !important; }
-}
-/* ===== 视频小窗拖动 ===== */
-.video-window {
-  cursor: grab;
-  touch-action: none;
-}
-.video-window.dragging {
-  cursor: grabbing;
-}
-
-/* ===== 拍一拍系统消息 ===== */
-.pat-message {
-  text-align: center;
-  color: #e74c3c;
-  font-size: 12px;
-  padding: 8px 0;
-  margin: 6px 0;
-  width: 100%;
-  background: transparent;
-  font-weight: 500;
 }
