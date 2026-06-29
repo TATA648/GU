@@ -1,7 +1,6 @@
 let store = {
   base: {
     name: "梦角",
-    head: "角",
     avatarUrl: "",
     minDelay: 20,
     maxDelay: 60
@@ -9,11 +8,15 @@ let store = {
   appIcon: {
     chat: "",
     card: "",
-    theme: ""
+    theme: "",
+    mail: ""
   },
   wallpaper: "",
+  chatBg: "",
   groups: {},
-  currentSelectGroup: ""
+  currentSelectGroup: "",
+  letters: [],
+  inbox: []
 };
 
 const topHeader = document.querySelector('.top-header');
@@ -21,20 +24,8 @@ const chatWrap = document.getElementById('chatWrap');
 const inputText = document.getElementById('inputText');
 const sendBtn = document.getElementById('sendBtn');
 const inputWrap = document.getElementById('inputWrap');
-const mask = document.getElementById('mask');
-const openSet = document.getElementById('openSet');
-const closeSet = document.getElementById('closeSet');
-const saveSet = document.getElementById('saveSet');
-const nameInput = document.getElementById('nameInput');
-const headText = document.getElementById('headText');
-const minDelaySec = document.getElementById('minDelaySec');
-const maxDelaySec = document.getElementById('maxDelaySec');
-const targetName = document.getElementById('targetName');
-const avatarImg = document.getElementById('avatarImg');
-const avatarText = document.getElementById('avatarText');
-const avatarClickEdit = document.getElementById('avatarClickEdit');
 
-// 通用图片弹窗
+// 图片弹窗
 const imageSelectMask = document.getElementById('imageSelectMask');
 const modalTitle = document.getElementById('modalTitle');
 const localImageFile = document.getElementById('localImageFile');
@@ -49,18 +40,37 @@ const avatarLinkInput = document.getElementById('avatarLinkInput');
 const closeAvatarSet = document.getElementById('closeAvatarSet');
 const saveAvatarBtn = document.getElementById('saveAvatarBtn');
 
-// 壁纸
+// 壁纸、聊天背景
 const wallpaperPreview = document.getElementById('wallpaperPreview');
 const openWallpaperModal = document.getElementById('openWallpaperModal');
+const chatBgPreview = document.getElementById('chatBgPreview');
+const openChatBgModal = document.getElementById('openChatBgModal');
 
 // 图标预览
 const chatIconPreview = document.getElementById('chatIconPreview');
 const cardIconPreview = document.getElementById('cardIconPreview');
 const themeIconPreview = document.getElementById('themeIconPreview');
+const mailIconPreview = document.getElementById('mailIconPreview');
 const chatAppIcon = document.getElementById('chatAppIcon');
 const cardAppIcon = document.getElementById('cardAppIcon');
 const themeAppIcon = document.getElementById('themeAppIcon');
+const mailAppIcon = document.getElementById('mailAppIcon');
 const changeIconBtns = document.querySelectorAll('.icon-change-btn');
+
+// 聊天设置页
+const openChatSettingPage = document.getElementById('openChatSettingPage');
+const setNickname = document.getElementById('setNickname');
+const setMinDelay = document.getElementById('setMinDelay');
+const setMaxDelay = document.getElementById('setMaxDelay');
+const saveChatSetting = document.getElementById('saveChatSetting');
+const chatSetBack = document.querySelector('.chat-set-back');
+
+// 信箱
+const mailTabs = document.querySelectorAll('.mail-tab');
+const letterInput = document.getElementById('letterInput');
+const sendLetterBtn = document.getElementById('sendLetterBtn');
+const inboxWrap = document.getElementById('inboxWrap');
+let currentMailTab = 'write';
 
 let currentEditTarget = null;
 
@@ -69,16 +79,18 @@ function switchPage(pageName) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelector(`.${pageName}`).classList.add('active');
   topHeader.classList.toggle('show', pageName === 'chat-page');
+  document.body.classList.toggle('home-bg', pageName === 'home-page');
 }
 
-// 返回按钮
+// 返回首页
 document.querySelectorAll('.back-btn').forEach(btn => {
   btn.onclick = function() {
     switchPage('home-page');
   }
 });
+chatSetBack.onclick = () => switchPage('chat-page');
 
-// 首页卡片跳转
+// 首页图标跳转
 document.querySelectorAll('.app-card').forEach(card => {
   card.onclick = function() {
     const target = this.dataset.target;
@@ -86,7 +98,7 @@ document.querySelectorAll('.app-card').forEach(card => {
   }
 });
 
-// 打开壁纸弹窗
+// 打开主页壁纸弹窗
 openWallpaperModal.onclick = function() {
   currentEditTarget = 'wallpaper';
   modalTitle.innerText = '设置主页壁纸';
@@ -94,8 +106,16 @@ openWallpaperModal.onclick = function() {
   imageLinkInput.value = store.wallpaper;
   imageSelectMask.style.display = 'flex';
 };
+// 打开聊天背景弹窗
+openChatBgModal.onclick = function() {
+  currentEditTarget = 'chatBg';
+  modalTitle.innerText = '设置聊天背景';
+  localImageFile.value = '';
+  imageLinkInput.value = store.chatBg;
+  imageSelectMask.style.display = 'flex';
+};
 
-// 图标修改按钮
+// 图标修改
 changeIconBtns.forEach(btn => {
   btn.onclick = function() {
     const type = this.dataset.type;
@@ -112,7 +132,6 @@ closeImageModal.onclick = function() {
   currentEditTarget = null;
 };
 
-// 确认图片
 confirmImageBtn.onclick = async function() {
   let url = '';
   if(localImageFile.files[0]) {
@@ -124,18 +143,24 @@ confirmImageBtn.onclick = async function() {
 
   if(currentEditTarget === 'wallpaper') {
     store.wallpaper = url;
-    document.body.style.setProperty('--wallpaper', `url(${url})`);
     wallpaperPreview.src = url;
+  } else if(currentEditTarget === 'chatBg') {
+    store.chatBg = url;
+    chatBgPreview.src = url;
   } else {
     store.appIcon[currentEditTarget] = url;
     refreshAllIconPreview();
   }
   saveLocal();
+  applyBgStyle();
   imageSelectMask.style.display = 'none';
   currentEditTarget = null;
 };
 
-// 头像点击打开弹窗
+// 头像修改
+const avatarImg = document.getElementById('avatarImg');
+const avatarClickEdit = document.getElementById('avatarClickEdit');
+const targetName = document.getElementById('targetName');
 avatarClickEdit.onclick = function() {
   avatarLocalFile.value = '';
   avatarLinkInput.value = store.base.avatarUrl;
@@ -159,7 +184,6 @@ saveAvatarBtn.onclick = async function() {
   avatarMask.style.display = 'none';
 };
 
-// 文件转base64
 function fileToDataUrl(file) {
   return new Promise(resolve => {
     const reader = new FileReader();
@@ -172,10 +196,112 @@ function refreshAllIconPreview() {
   chatAppIcon.src = store.appIcon.chat;
   cardAppIcon.src = store.appIcon.card;
   themeAppIcon.src = store.appIcon.theme;
+  mailAppIcon.src = store.appIcon.mail;
   chatIconPreview.src = store.appIcon.chat;
   cardIconPreview.src = store.appIcon.card;
   themeIconPreview.src = store.appIcon.theme;
+  mailIconPreview.src = store.appIcon.mail;
 }
+
+function applyBgStyle() {
+  document.body.style.setProperty('--wallpaper', store.wallpaper ? `url(${store.wallpaper})` : 'none');
+  document.documentElement.style.setProperty('--chat-bg', store.chatBg ? `url(${store.chatBg})` : 'none');
+}
+
+// 聊天设置页面打开
+openChatSettingPage.onclick = function() {
+  setNickname.value = store.base.name;
+  setMinDelay.value = store.base.minDelay;
+  setMaxDelay.value = store.base.maxDelay;
+  switchPage('chat-set-page');
+};
+saveChatSetting.onclick = function() {
+  let min = Number(setMinDelay.value) || 1;
+  let max = Number(setMaxDelay.value) || min;
+  store.base.name = setNickname.value.trim() || '梦角';
+  store.base.minDelay = Math.min(min, max);
+  store.base.maxDelay = Math.max(min, max);
+  renderHeader();
+  saveLocal();
+  switchPage('chat-page');
+};
+
+// 信箱标签切换
+mailTabs.forEach(tab => {
+  tab.onclick = function() {
+    mailTabs.forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    currentMailTab = this.dataset.tab;
+    document.querySelector('.write-box').classList.toggle('hidden', currentMailTab !== 'write');
+    inboxWrap.classList.toggle('hidden', currentMailTab !== 'inbox');
+    renderInbox();
+  }
+});
+
+// 发送信件
+sendLetterBtn.onclick = function() {
+  const text = letterInput.value.trim();
+  if(!text) return;
+  const len = text.length;
+  // 12h ~ 24h
+  const delayHour = 12 + (len / 500) * 12;
+  const realDelay = Math.min(Math.max(delayHour, 12), 24) * 3600 * 1000;
+  const create = Date.now();
+  const replyTime = create + realDelay;
+  store.letters.push({
+    text,
+    create,
+    replyTime,
+    done: false
+  });
+  letterInput.value = '';
+  saveLocal();
+  setTimeout(()=>processLetterReply(), realDelay);
+};
+
+// 信件到期生成回信
+function processLetterReply() {
+  const allCards = getAllValidCards();
+  store.letters.forEach(letter => {
+    if(letter.done || Date.now() < letter.replyTime) return;
+    letter.done = true;
+    const count = randomInt(5, 20);
+    let reply = [];
+    for(let i=0;i<count;i++) {
+      const idx = randomInt(0, allCards.length - 1);
+      reply.push(allCards[idx].text);
+    }
+    store.inbox.push({
+      replyText: reply.join(''),
+      originText: letter.text,
+      time: letter.replyTime
+    });
+  });
+  saveLocal();
+  renderInbox();
+}
+
+function renderInbox() {
+  inboxWrap.innerHTML = '';
+  [...store.inbox].reverse().forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'letter-item';
+    div.innerHTML = `
+      <div class="letter-time">${formatTime(item.time)}</div>
+      <div class="letter-content">${item.replyText}</div>
+    `;
+    inboxWrap.appendChild(div);
+  });
+}
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function pad(n) {return String(n).padStart(2,'0');}
 
 // 键盘适配
 window.visualViewport.addEventListener('resize', () => {
@@ -187,41 +313,42 @@ window.visualViewport.addEventListener('resize', () => {
   }
 });
 
-function loadLocal() {
+function loadLocal(){
   const raw = localStorage.getItem('dreamCardStore');
   if(raw) store = JSON.parse(raw);
   renderHeader();
   refreshAllIconPreview();
   wallpaperPreview.src = store.wallpaper;
-  if(store.wallpaper) document.body.style.setProperty('--wallpaper', `url(${store.wallpaper})`);
+  chatBgPreview.src = store.chatBg;
+  applyBgStyle();
   refreshGroupSelect();
+  renderInbox();
 }
-function saveLocal() {
+function saveLocal(){
   localStorage.setItem('dreamCardStore', JSON.stringify(store));
 }
 
-function renderHeader() {
+function renderHeader(){
   targetName.innerText = store.base.name;
-  avatarText.innerText = store.base.head;
-  if(store.base.avatarUrl) {
+  if(store.base.avatarUrl){
     avatarImg.src = store.base.avatarUrl;
     avatarImg.classList.add('show');
-  } else {
+  }else{
     avatarImg.classList.remove('show');
   }
 }
 
-function getNowTime() {
+function getNowTime(){
   const d = new Date();
   let h = String(d.getHours()).padStart(2,'0');
   let m = String(d.getMinutes()).padStart(2,'0');
   return h + ':' + m;
 }
 
-function addBubble(text, isUser, time, isTyping = false) {
+function addBubble(text, isUser, time, isTyping = false){
   const item = document.createElement('div');
   item.className = `msg-item ${isUser ? 'user-msg' : 'target-msg'}`;
-  if(isTyping) {
+  if(isTyping){
     item.innerHTML = `
       <div class="msg-bubble">
         <span class="typing-dot"></span>
@@ -230,7 +357,7 @@ function addBubble(text, isUser, time, isTyping = false) {
       </div>
       <div class="time-text">${time}</div>
     `;
-  } else {
+  }else{
     item.innerHTML = `
       <div class="msg-bubble">${text}</div>
       <div class="time-text">${time}</div>
@@ -241,7 +368,7 @@ function addBubble(text, isUser, time, isTyping = false) {
   return item;
 }
 
-function getAllValidCards() {
+function getAllValidCards(){
   let list = [];
   Object.values(store.groups).forEach(arr => {
     list = list.concat(arr.filter(item => !item.disabled));
@@ -249,11 +376,11 @@ function getAllValidCards() {
   return list;
 }
 
-function getRandomReplyArr() {
+function getRandomReplyArr(){
   const pool = getAllValidCards();
   if(pool.length === 0) return ["暂无可用字卡，请前往字卡库添加分组与词条"];
   let arr = [...pool];
-  for(let i = arr.length - 1; i > 0; i--) {
+  for(let i = arr.length - 1; i > 0; i--){
     const r = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[r]] = [arr[r], arr[i]];
   }
@@ -261,7 +388,7 @@ function getRandomReplyArr() {
   return arr.slice(0, take);
 }
 
-function sendMessage() {
+function sendMessage(){
   const content = inputText.value.trim();
   if(!content) return;
   addBubble(content, true, getNowTime());
@@ -286,30 +413,7 @@ inputText.onkeydown = e => {
   if(e.key === 'Enter') sendMessage();
 };
 
-// 基础设置弹窗
-openSet.onclick = function() {
-  nameInput.value = store.base.name;
-  headText.value = store.base.head;
-  minDelaySec.value = store.base.minDelay;
-  maxDelaySec.value = store.base.maxDelay;
-  mask.style.display = 'flex';
-};
-closeSet.onclick = function() {
-  mask.style.display = 'none';
-};
-saveSet.onclick = function() {
-  let min = Number(minDelaySec.value) || 1;
-  let max = Number(maxDelaySec.value) || min;
-  store.base.name = nameInput.value.trim() || '梦角';
-  store.base.head = headText.value.trim() || '角';
-  store.base.minDelay = Math.min(min, max);
-  store.base.maxDelay = Math.max(min, max);
-  renderHeader();
-  saveLocal();
-  mask.style.display = 'none';
-};
-
-// 分组
+// 字卡分组逻辑
 const newGroupName = document.getElementById('newGroupName');
 const createGroupBtn = document.getElementById('createGroupBtn');
 const groupListWrap = document.getElementById('groupListWrap');
@@ -329,7 +433,7 @@ createGroupBtn.onclick = function() {
   refreshGroupSelect();
 };
 
-function refreshGroupSelect() {
+function refreshGroupSelect(){
   const keys = Object.keys(store.groups);
   groupListWrap.innerHTML = '';
   currentGroupSelect.innerHTML = '';
@@ -360,7 +464,7 @@ function refreshGroupSelect() {
   renderCurrentCardList();
 }
 
-function renderCurrentCardList() {
+function renderCurrentCardList(){
   cardListWrap.innerHTML = '';
   const g = store.currentSelectGroup;
   if(!g || !store.groups[g]) return;
@@ -425,3 +529,4 @@ batchImportBtn.onclick = function() {
 };
 
 loadLocal();
+setInterval(()=>processLetterReply(), 10000);
