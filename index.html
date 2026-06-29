@@ -41,72 +41,37 @@
     </div>
   </div>
 
-  <!-- ===== 外观设置页（壁纸、图标、动画） ===== -->
+  <!-- ===== 外观设置页 ===== -->
   <div class="page appearance-page">
-    <div class="page-header">
-      <button class="back-btn">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn">←</button></div>
     <div class="setting-container">
       <div class="setting-block">
         <h4 class="block-title">主页壁纸</h4>
         <div class="wallpaper-row reverse">
           <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
-          <div class="preview-box rect-h">
-            <img id="wallpaperPreview" class="preview-img" alt="壁纸预览" />
-          </div>
+          <div class="preview-box rect-h"><img id="wallpaperPreview" class="preview-img" alt="壁纸预览" /></div>
         </div>
       </div>
       <div class="setting-block">
         <h4 class="block-title">应用图标设置</h4>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="chatIconPreview" class="preview-img" alt="聊天图标" /></div>
-          <span class="item-name">聊天传讯</span>
-          <button class="change-btn icon-change-btn" data-type="chat">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="cardIconPreview" class="preview-img" alt="字卡图标" /></div>
-          <span class="item-name">字卡管理</span>
-          <button class="change-btn icon-change-btn" data-type="card">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="themeIconPreview" class="preview-img" alt="外观图标" /></div>
-          <span class="item-name">外观设置</span>
-          <button class="change-btn icon-change-btn" data-type="theme">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="mailIconPreview" class="preview-img" alt="信箱图标" /></div>
-          <span class="item-name">信箱</span>
-          <button class="change-btn icon-change-btn" data-type="mail">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="calendarIconPreview" class="preview-img" alt="日历图标" /></div>
-          <span class="item-name">日历</span>
-          <button class="change-btn icon-change-btn" data-type="calendar">更改</button>
-        </div>
-        <div class="icon-set-item">
-          <div class="preview-box small"><img id="settingIconPreview" class="preview-img" alt="设置图标" /></div>
-          <span class="item-name">设置</span>
-          <button class="change-btn icon-change-btn" data-type="setting">更改</button>
-        </div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="chatIconPreview" class="preview-img" /></div><span class="item-name">聊天</span><button class="change-btn icon-change-btn" data-type="chat">更改</button></div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="cardIconPreview" class="preview-img" /></div><span class="item-name">字卡</span><button class="change-btn icon-change-btn" data-type="card">更改</button></div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="themeIconPreview" class="preview-img" /></div><span class="item-name">外观</span><button class="change-btn icon-change-btn" data-type="theme">更改</button></div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="mailIconPreview" class="preview-img" /></div><span class="item-name">信箱</span><button class="change-btn icon-change-btn" data-type="mail">更改</button></div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="calendarIconPreview" class="preview-img" /></div><span class="item-name">日历</span><button class="change-btn icon-change-btn" data-type="calendar">更改</button></div>
+        <div class="icon-set-item"><div class="preview-box small"><img id="settingIconPreview" class="preview-img" /></div><span class="item-name">设置</span><button class="change-btn icon-change-btn" data-type="setting">更改</button></div>
       </div>
       <div class="setting-block">
         <h4 class="block-title">页面切换动画</h4>
-        <div class="toggle-row">
-          <span class="toggle-label">启用平滑切换</span>
-          <div class="toggle-switch active" id="animToggle">
-            <div class="toggle-knob"></div>
-          </div>
-        </div>
+        <div class="toggle-row"><span class="toggle-label">启用平滑切换</span><div class="toggle-switch active" id="animToggle"><div class="toggle-knob"></div></div></div>
       </div>
       <div class="tip-text">所有设置保存后刷新页面生效</div>
     </div>
   </div>
 
-<!-- ===== 设置页（数据管理） ===== -->
+  <!-- ===== 设置页（数据管理） ===== -->
   <div class="page setting-page">
-    <div class="page-header">
-      <button class="back-btn">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn">←</button></div>
     <div class="setting-container">
       <div class="setting-block">
         <h4 class="block-title">数据管理</h4>
@@ -116,36 +81,25 @@
         </div>
         <div style="font-size:12px; color:#999; margin-top:8px;">导出为JSON文件，导入将覆盖当前所有数据</div>
       </div>
-      <!-- 可选保留动画开关，但动画开关也在外观设置中，此处可移除 -->
-      <!-- <div class="setting-block">
-        <h4 class="block-title">页面切换动画</h4>
-        <div class="toggle-row">
-          <span class="toggle-label">启用平滑切换</span>
-          <div class="toggle-switch active" id="animToggle">
-            <div class="toggle-knob"></div>
-          </div>
-        </div>
-      </div> -->
     </div>
   </div>
-<!-- ===== 聊天设置页（独立） ===== -->
+
+  <!-- ===== 聊天设置页（独立） ===== -->
   <div class="page chat-set-page">
-    <div class="page-header">
-      <button class="back-btn chat-set-back">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn chat-set-back">←</button></div>
     <div class="setting-container">
       <div class="setting-block">
         <h4 class="block-title">聊天设置</h4>
         <div class="set-block-item" id="blockTa">关于TA</div>
         <div class="set-block-item" id="blockMe">关于我</div>
         <div class="set-block-item" id="blockDelay">回复时长</div>
+        <div class="set-block-item" id="blockPatSuffix">我的拍一拍后缀</div>
+        <div class="set-block-item" id="blockVideoBg">视频通话背景</div>
         <div class="set-block-item">
           <div class="block-title">聊天背景壁纸</div>
           <div class="wallpaper-row reverse">
             <button class="change-btn" id="openChatBgModal">更换背景</button>
-            <div class="preview-box rect-v">
-              <img id="chatBgPreview" class="preview-img" alt="竖版聊天背景" />
-            </div>
+            <div class="preview-box rect-v"><img id="chatBgPreview" class="preview-img" alt="竖版聊天背景" /></div>
           </div>
         </div>
         <button class="save-btn" id="saveChatSetting">保存全部设置</button>
@@ -153,46 +107,62 @@
     </div>
   </div>
 
-  <!-- ===== 聊天页（顶部双头像、状态、消息、引用条、输入栏） ===== -->
+  <!-- ===== 聊天页 ===== -->
   <div class="page chat-page">
     <div class="top-header">
       <button class="back-btn">←</button>
       <div class="header-center">
         <div class="header-avatar-group">
-          <div class="header-avatar"><img id="headerTaAvatar" alt="角色头像" /></div>
-          <div class="header-avatar"><img id="headerMyAvatar" alt="我的头像" /></div>
+          <div class="header-avatar" id="taAvatar"><img id="headerTaAvatar" alt="角色头像" /></div>
+          <div class="header-avatar" id="myAvatar"><img id="headerMyAvatar" alt="我的头像" /></div>
         </div>
-        <div class="status-bar" id="statusBar">
-          <span class="status-text" id="currentStatusText">平静</span>
-        </div>
+        <div class="status-bar"><span class="status-text" id="currentStatusText">平静</span></div>
       </div>
       <button class="setting-btn" id="openChatSettingPage">⋮</button>
     </div>
     <div class="chat-box" id="chatWrap"></div>
+    <!-- 引用条 -->
     <div class="quote-bar" id="quoteBar" style="display:none;">
       <span class="quote-content" id="quoteContent">引用消息</span>
       <button class="quote-close" id="quoteClose">✕</button>
     </div>
+    <!-- 输入栏 -->
     <div class="input-area" id="inputWrap">
       <button class="emoji-toggle-btn" id="emojiToggle">😊</button>
       <input type="text" id="inputText" placeholder="输入想要发送的话..." autocomplete="off" />
-      <button id="sendBtn">发送</button>
-    </div>
-    <div class="emoji-panel" id="emojiPanel">
-      <div class="emoji-add-bar">
-        <input type="file" id="emojiFileInput" accept="image/*" />
-        <input type="text" id="emojiLinkInput" placeholder="粘贴表情链接" />
-        <button id="addEmojiBtn">添加表情</button>
+      <div class="emoji-btn-wrapper">
+        <button class="emoji-send-btn" id="emojiSendBtn">😊</button>
+        <button id="sendBtn">发送</button>
       </div>
-      <div class="emoji-list" id="emojiList"></div>
+    </div>
+    <!-- 表情面板（含加号） -->
+    <div class="emoji-panel" id="emojiPanel">
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+    <!-- 视频小窗 -->
+    <div class="video-window" id="videoWindow" style="display:none;">
+      <div class="video-bg" id="videoBg"></div>
+      <div class="video-header">
+        <span class="video-timer" id="videoTimer">00:00:00</span>
+        <button class="video-fold-btn" id="videoFoldBtn">−</button>
+      </div>
+      <div class="video-avatar"><img id="videoAvatar" src="" alt="对方头像" /></div>
+      <button class="video-hangup" id="videoHangupBtn">挂断</button>
+      <div class="video-answer" id="videoAnswerArea" style="display:none;">
+        <button class="video-answer-btn" id="videoAnswerBtn">接听</button>
+        <button class="video-reject-btn" id="videoRejectBtn">拒接</button>
+      </div>
+    </div>
+    <!-- 胶囊状态 -->
+    <div class="video-capsule" id="videoCapsule" style="display:none;">
+      <span class="capsule-timer" id="capsuleTimer">00:00:00</span>
+      <button class="capsule-expand" id="capsuleExpand">⤴</button>
     </div>
   </div>
 
   <!-- ===== 字卡管理页 ===== -->
   <div class="page card-page">
-    <div class="page-header">
-      <button class="back-btn">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn">←</button></div>
     <div class="card-container">
       <div class="group-op-bar">
         <input type="text" id="newGroupName" placeholder="新建分组名称" autocomplete="off" />
@@ -214,29 +184,30 @@
     </div>
   </div>
 
-  <!-- ===== 信箱页 ===== -->
+  <!-- ===== 信箱页（改造） ===== -->
   <div class="page mail-page">
-    <div class="page-header">
-      <button class="back-btn">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn">←</button></div>
     <div class="mail-container">
       <div class="mail-tab-bar">
-        <button class="mail-tab active" data-tab="write">写信</button>
+        <button class="mail-tab active" data-tab="sent">寄出</button>
         <button class="mail-tab" data-tab="inbox">收件箱</button>
       </div>
-      <div class="write-box">
-        <textarea id="letterInput" placeholder="写下你想发送的信件..."></textarea>
-        <button class="send-letter-btn" id="sendLetterBtn">寄出信件</button>
+      <div class="mail-list-wrap">
+        <div class="sent-box" id="sentBox">
+          <div class="mail-list-header">
+            <span>已寄出</span>
+            <button class="mail-add-btn" id="mailAddBtn">＋</button>
+          </div>
+          <div class="sent-list" id="sentList"></div>
+        </div>
+        <div class="inbox-box hidden" id="inboxWrap"></div>
       </div>
-      <div class="inbox-box hidden" id="inboxWrap"></div>
     </div>
   </div>
 
   <!-- ===== 日历页 ===== -->
   <div class="page calendar-page">
-    <div class="page-header">
-      <button class="back-btn">←</button>
-    </div>
+    <div class="page-header"><button class="back-btn">←</button></div>
     <div class="calendar-container">
       <div class="calendar-text-area">
         <div class="cal-text-item ta-text" id="calTaText">TA今天还没有记录哦～</div>
@@ -252,18 +223,9 @@
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
-      <div class="upload-item">
-        <label>上传本地图片</label>
-        <input type="file" id="localImageFile" accept="image/*" />
-      </div>
-      <div class="link-item">
-        <label>填入图片链接</label>
-        <input type="text" id="imageLinkInput" placeholder="粘贴网络图片地址" autocomplete="off" />
-      </div>
-      <div class="btns-wrap">
-        <button class="close" id="closeImageModal">取消</button>
-        <button class="save" id="confirmImageBtn">确定使用</button>
-      </div>
+      <div class="upload-item"><label>上传本地图片</label><input type="file" id="localImageFile" accept="image/*" /></div>
+      <div class="link-item"><label>填入图片链接</label><input type="text" id="imageLinkInput" placeholder="粘贴网络图片地址" autocomplete="off" /></div>
+      <div class="btns-wrap"><button class="close" id="closeImageModal">取消</button><button class="save" id="confirmImageBtn">确定使用</button></div>
     </div>
   </div>
 
@@ -271,20 +233,10 @@
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
-      <div class="upload-item">
-        <label>角色头像（本地上传）</label>
-        <input type="file" id="taAvatarFile" accept="image/*" />
-      </div>
-      <div class="link-item">
-        <label>角色头像（图片链接）</label>
-        <input type="text" id="taAvatarLink" placeholder="粘贴头像链接" autocomplete="off" />
-      </div>
-      <label style="font-size:14px;color:#444;">角色昵称</label>
-      <input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
-      <div class="btns-wrap">
-        <button class="close" id="closeTaSet">取消</button>
-        <button class="save" id="saveTaSet">保存</button>
-      </div>
+      <div class="upload-item"><label>角色头像（本地上传）</label><input type="file" id="taAvatarFile" accept="image/*" /></div>
+      <div class="link-item"><label>角色头像（图片链接）</label><input type="text" id="taAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
+      <label style="font-size:14px;color:#444;">角色昵称</label><input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
+      <div class="btns-wrap"><button class="close" id="closeTaSet">取消</button><button class="save" id="saveTaSet">保存</button></div>
     </div>
   </div>
 
@@ -292,20 +244,10 @@
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
-      <div class="upload-item">
-        <label>我的头像（本地上传）</label>
-        <input type="file" id="meAvatarFile" accept="image/*" />
-      </div>
-      <div class="link-item">
-        <label>我的头像（图片链接）</label>
-        <input type="text" id="meAvatarLink" placeholder="粘贴头像链接" autocomplete="off" />
-      </div>
-      <label style="font-size:14px;color:#444;">我的昵称</label>
-      <input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
-      <div class="btns-wrap">
-        <button class="close" id="closeMeSet">取消</button>
-        <button class="save" id="saveMeSet">保存</button>
-      </div>
+      <div class="upload-item"><label>我的头像（本地上传）</label><input type="file" id="meAvatarFile" accept="image/*" /></div>
+      <div class="link-item"><label>我的头像（图片链接）</label><input type="text" id="meAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
+      <label style="font-size:14px;color:#444;">我的昵称</label><input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
+      <div class="btns-wrap"><button class="close" id="closeMeSet">取消</button><button class="save" id="saveMeSet">保存</button></div>
     </div>
   </div>
 
@@ -313,52 +255,46 @@
   <div class="mask" id="delayMask">
     <div class="panel">
       <h3>回复间隔设置</h3>
-      <label style="font-size:14px;color:#444;">最小等待秒数（最低20）</label>
-      <input type="number" id="minDelayInput" min="20" value="20" />
-      <label style="font-size:14px;color:#444;margin-top:8px;">最大等待秒数（最高120）</label>
-      <input type="number" id="maxDelayInput" max="120" value="120" />
-      <div class="btns-wrap">
-        <button class="close" id="closeDelaySet">取消</button>
-        <button class="save" id="saveDelaySet">保存</button>
-      </div>
+      <label style="font-size:14px;color:#444;">最小等待秒数（最低20）</label><input type="number" id="minDelayInput" min="20" value="20" />
+      <label style="font-size:14px;color:#444;margin-top:8px;">最大等待秒数（最高120）</label><input type="number" id="maxDelayInput" max="120" value="120" />
+      <div class="btns-wrap"><button class="close" id="closeDelaySet">取消</button><button class="save" id="saveDelaySet">保存</button></div>
     </div>
   </div>
 
-  <!-- 状态设置 -->
-  <div class="mask" id="statusMask">
+  <!-- 拍一拍后缀 -->
+  <div class="mask" id="patMask">
     <div class="panel">
-      <h3>设置当前状态</h3>
-      <input type="text" id="statusInput" placeholder="输入状态文字" />
-      <div class="btns-wrap">
-        <button class="close" id="closeStatusSet">取消</button>
-        <button class="save" id="saveStatusSet">保存</button>
-      </div>
+      <h3>我的拍一拍后缀</h3>
+      <input type="text" id="patSuffixInput" placeholder="输入后缀，如：摸了摸头" />
+      <div class="btns-wrap"><button class="close" id="closePatSet">取消</button><button class="save" id="savePatSet">保存</button></div>
     </div>
   </div>
 
-  <!-- 日历心情记录 -->
-  <div class="mask" id="moodModal">
+  <!-- 视频背景 -->
+  <div class="mask" id="videoBgMask">
     <div class="panel">
-      <h3>记录今日心情</h3>
-      <div class="mood-emoji-grid" id="moodEmojiGrid"></div>
-      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">想说的话</label>
-      <input type="text" id="moodTextInput" placeholder="写下你想说的话..." />
-      <div class="btns-wrap">
-        <button class="close" id="closeMoodModal">取消</button>
-        <button class="save" id="saveMoodModal">保存</button>
-      </div>
+      <h3>视频通话背景</h3>
+      <div class="upload-item"><label>上传背景图片</label><input type="file" id="videoBgFile" accept="image/*" /></div>
+      <div class="link-item"><label>图片链接</label><input type="text" id="videoBgLink" placeholder="粘贴图片链接" autocomplete="off" /></div>
+      <div class="btns-wrap"><button class="close" id="closeVideoBg">取消</button><button class="save" id="saveVideoBg">保存</button></div>
     </div>
   </div>
 
-  <!-- 导入确认 -->
+  <!-- 写信弹窗 -->
+  <div class="mask" id="writeLetterMask">
+    <div class="panel">
+      <h3>写信</h3>
+      <textarea id="letterContentInput" placeholder="写下你想寄出的信件..." style="width:100%;min-height:120px;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:16px;resize:vertical;"></textarea>
+      <div class="btns-wrap"><button class="close" id="closeLetterModal">取消</button><button class="save" id="sendLetterConfirm">寄出</button></div>
+    </div>
+  </div>
+
+  <!-- 确认导入 -->
   <div class="mask" id="importConfirmMask">
     <div class="panel">
       <h3>确认导入</h3>
       <p style="margin:16px 0;">导入后会覆盖当前所有数据，是否继续？</p>
-      <div class="btns-wrap">
-        <button class="close" id="importCancelBtn">退出</button>
-        <button class="save" id="importConfirmBtn">继续</button>
-      </div>
+      <div class="btns-wrap"><button class="close" id="importCancelBtn">退出</button><button class="save" id="importConfirmBtn">继续</button></div>
     </div>
   </div>
 
