@@ -1,4 +1,3 @@
-// 持久化数据结构
 let store = {
   base: {
     name: "梦角",
@@ -9,13 +8,14 @@ let store = {
   },
   appIcon: {
     chat: "",
-    card: ""
+    card: "",
+    theme: ""
   },
-  groups: {}, // {分组名: [{id,text,disabled}]}
+  groups: {},
   currentSelectGroup: ""
 };
 
-// DOM
+// 基础DOM
 const topHeader = document.querySelector('.top-header');
 const chatWrap = document.getElementById('chatWrap');
 const inputText = document.getElementById('inputText');
@@ -27,21 +27,29 @@ const closeSet = document.getElementById('closeSet');
 const saveSet = document.getElementById('saveSet');
 const nameInput = document.getElementById('nameInput');
 const headText = document.getElementById('headText');
-const avatarUrlInput = document.getElementById('avatarUrlInput');
 const minDelaySec = document.getElementById('minDelaySec');
 const maxDelaySec = document.getElementById('maxDelaySec');
 const targetName = document.getElementById('targetName');
 const avatarImg = document.getElementById('avatarImg');
 const avatarText = document.getElementById('avatarText');
+const avatarClickEdit = document.getElementById('avatarClickEdit');
 
-// 首页图标
+// 头像弹窗
+const avatarMask = document.getElementById('avatarMask');
+const avatarUrlInput = document.getElementById('avatarUrlInput');
+const closeAvatarSet = document.getElementById('closeAvatarSet');
+const saveAvatarBtn = document.getElementById('saveAvatarBtn');
+
+// 外观图标DOM
 const chatAppIcon = document.getElementById('chatAppIcon');
 const cardAppIcon = document.getElementById('cardAppIcon');
+const themeAppIcon = document.getElementById('themeAppIcon');
 const chatIconUrl = document.getElementById('chatIconUrl');
 const cardIconUrl = document.getElementById('cardIconUrl');
-const saveIconBtn = document.getElementById('saveIconBtn');
+const themeIconUrl = document.getElementById('themeIconUrl');
+const saveThemeBtn = document.getElementById('saveThemeBtn');
 
-// 分组、字卡
+// 分组字卡DOM
 const newGroupName = document.getElementById('newGroupName');
 const createGroupBtn = document.getElementById('createGroupBtn');
 const groupListWrap = document.getElementById('groupListWrap');
@@ -62,12 +70,34 @@ tabItems.forEach(tab=>{
     tab.classList.add('active');
     pages.forEach(p=>p.classList.remove('active'));
     document.querySelector(`.${targetPage}`).classList.add('active');
-    // 仅聊天页显示顶部栏
     topHeader.classList.toggle('show', targetPage === 'chat-page');
   }
 })
 
-// 键盘弹出监听，上移输入框
+// 首页卡片点击跳转
+document.querySelectorAll('.app-card').forEach(card=>{
+  card.onclick = ()=>{
+    const target = card.dataset.target;
+    tabItems.forEach(t=>{
+      if(t.dataset.page === target) t.click();
+    })
+  }
+})
+
+// 头像点击打开头像修改弹窗
+avatarClickEdit.onclick = ()=>{
+  avatarUrlInput.value = store.base.avatarUrl;
+  avatarMask.style.display = 'flex';
+}
+closeAvatarSet.onclick = ()=> avatarMask.style.display = 'none';
+saveAvatarBtn.onclick = ()=>{
+  store.base.avatarUrl = avatarUrlInput.value.trim();
+  saveLocal();
+  renderHeader();
+  avatarMask.style.display = 'none';
+}
+
+// 键盘适配
 window.visualViewport.addEventListener('resize', () => {
   if(window.visualViewport.height < window.innerHeight - 100){
     inputWrap.style.bottom = (50 + window.innerHeight - window.visualViewport.height) + 'px';
@@ -101,27 +131,21 @@ function renderHeader(){
 function renderAppIcon(){
   chatIconUrl.value = store.appIcon.chat;
   cardIconUrl.value = store.appIcon.card;
+  themeIconUrl.value = store.appIcon.theme;
   if(store.appIcon.chat) chatAppIcon.src = store.appIcon.chat;
   if(store.appIcon.card) cardAppIcon.src = store.appIcon.card;
+  if(store.appIcon.theme) themeAppIcon.src = store.appIcon.theme;
 }
 
-saveIconBtn.onclick = ()=>{
+// 保存外观全部图标
+saveThemeBtn.onclick = ()=>{
   store.appIcon.chat = chatIconUrl.value.trim();
   store.appIcon.card = cardIconUrl.value.trim();
+  store.appIcon.theme = themeIconUrl.value.trim();
   saveLocal();
   renderAppIcon();
-  alert('图标已保存，刷新页面生效');
+  alert('图标配置已保存，刷新页面生效');
 }
-
-// 首页应用卡片跳转
-document.querySelectorAll('.app-card').forEach(card=>{
-  card.onclick = ()=>{
-    const target = card.dataset.target;
-    tabItems.forEach(t=>{
-      if(t.dataset.page === target) t.click();
-    })
-  }
-})
 
 // 时间格式化
 function getNowTime(){
@@ -131,7 +155,7 @@ function getNowTime(){
   return `${h}:${m}`;
 }
 
-// 气泡
+// 消息气泡
 function addBubble(text, isUser, time, isTyping = false){
   const item = document.createElement('div');
   item.className = `msg-item ${isUser?'user-msg':'target-msg'}`;
@@ -155,7 +179,7 @@ function addBubble(text, isUser, time, isTyping = false){
   return item;
 }
 
-// 获取全部未屏蔽字卡（跨所有分组）
+// 获取全部未屏蔽字卡
 function getAllValidCards(){
   let res = [];
   Object.values(store.groups).forEach(list=>{
@@ -164,7 +188,7 @@ function getAllValidCards(){
   return res;
 }
 
-// 随机1~3条
+// 随机抽取1~3条
 function getRandomReplyArr(){
   const pool = getAllValidCards();
   if(pool.length === 0) return ["暂无可用字卡，请前往字卡库添加分组与词条"];
@@ -203,11 +227,10 @@ function sendMessage(){
 sendBtn.onclick = sendMessage;
 inputText.onkeydown = e=> e.key === 'Enter' && sendMessage();
 
-// 设置弹窗
+// 基础设置弹窗
 openSet.onclick = ()=>{
   nameInput.value = store.base.name;
   headText.value = store.base.head;
-  avatarUrlInput.value = store.base.avatarUrl;
   minDelaySec.value = store.base.minDelay;
   maxDelaySec.value = store.base.maxDelay;
   mask.style.display = 'flex';
@@ -218,7 +241,6 @@ saveSet.onclick = ()=>{
   let max = Number(maxDelaySec.value) || min;
   store.base.name = nameInput.value.trim() || '梦角';
   store.base.head = headText.value.trim() || '角';
-  store.base.avatarUrl = avatarUrlInput.value.trim();
   store.base.minDelay = Math.min(min,max);
   store.base.maxDelay = Math.max(min,max);
   renderHeader();
@@ -226,7 +248,7 @@ saveSet.onclick = ()=>{
   mask.style.display = 'none';
 }
 
-// 分组管理
+// 分组创建与管理
 createGroupBtn.onclick = ()=>{
   const name = newGroupName.value.trim();
   if(!name || store.groups[name]) return;
@@ -307,7 +329,7 @@ function renderCurrentCardList(){
   })
 }
 
-// 单条添加
+// 单条添加字卡
 addSingleCard.onclick = ()=>{
   const txt = newCardInput.value.trim();
   const g = store.currentSelectGroup;
@@ -319,7 +341,7 @@ addSingleCard.onclick = ()=>{
 }
 newCardInput.onkeydown = e=>e.key==='Enter'&&addSingleCard.click();
 
-// 批量导入
+// 批量导入字卡
 batchImportBtn.onclick = ()=>{
   const txt = batchTextarea.value.trim();
   const g = store.currentSelectGroup;
