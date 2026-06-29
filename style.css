@@ -6,11 +6,18 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .chat-page { background-image:var(--chat-bg,none); background-size:cover; background-position:center; background-repeat:no-repeat; }
 
 /* ===== 页面切换 ===== */
-.page { flex:1; display:none; overflow-y:auto; opacity:0; transition:opacity 0.2s ease; }
+.page { 
+  flex:1; 
+  display:none; 
+  overflow-y:auto; 
+  opacity:0; 
+  transition:opacity 0.2s ease;
+  min-height:0; /* 关键：防止flex溢出隐藏 */
+}
 .page.active { display:flex; flex-direction:column; opacity:1; }
 .no-transition .page { transition:none !important; }
 
-/* ===== 头部（固定） ===== */
+/* ===== 头部固定 ===== */
 .page-header { display:flex; align-items:center; padding:8px 12px; background:#fff; box-shadow:0 1px 4px #e0d8e6; flex-shrink:0; position:fixed; top:0; left:0; right:0; z-index:1000; }
 .page-header .back-btn { margin-right:auto; }
 .top-header { display:none; flex-direction:column; align-items:center; justify-content:center; padding:8px 12px; background:#fff; box-shadow:0 1px 4px #e0d8e6; position:fixed; top:0; left:0; right:0; z-index:1000; min-height:70px; }
@@ -27,7 +34,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 /* ===== 各页面偏移 ===== */
 .chat-page { padding-top:78px; padding-bottom:0; }
 .setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page { padding-top:56px; padding-bottom:20px; }
-.chat-box { flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; padding-bottom:80px; }
+.chat-box { flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; padding-bottom:80px; min-height:0; }
 .quote-bar { position:fixed; bottom:60px; left:0; right:0; background:#f0ebf5; padding:6px 16px; display:flex; align-items:center; gap:8px; border-top:1px solid #d5c8e0; z-index:97; font-size:13px; color:#555; }
 .quote-content { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .quote-close { background:none; border:none; font-size:18px; cursor:pointer; color:#888; padding:0 4px; }
@@ -49,7 +56,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .emoji-item img { width:100%; height:100%; object-fit:cover; }
 .emoji-item.add-btn { background:#e8e0f0; display:flex; align-items:center; justify-content:center; font-size:28px; color:#663399; border:2px dashed #a87bc9; }
 
-/* ===== 表情大图（纯表情） ===== */
+/* ===== 表情大图 ===== */
 .msg-item.emoji-only .msg-bubble-wrap { max-width:100%; }
 .msg-item.emoji-only .msg-bubble-wrap .msg-bubble { display:none; }
 .emoji-big { width:60px; height:60px; border-radius:12px; object-fit:cover; }
@@ -92,7 +99,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
 
 /* ===== 拍一拍与系统消息 ===== */
-.pat-message { text-align:center; font-size:8px; color:#888; padding:6px 0; margin:4px 0; width:100%; background:transparent; font-weight:200; }
+.pat-message { text-align:center; font-size:12px; color:#888; padding:6px 0; margin:4px 0; width:100%; background:transparent; font-weight:300; }
 .pat-message.red { color:#e74c3c; font-weight:400; }
 
 /* ===== 首页图标 ===== */
@@ -105,7 +112,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .app-label { font-size:14px; color:#444; pointer-events:none; }
 
 /* ===== 设置相关 ===== */
-.setting-container { padding:20px; display:flex; flex-direction:column; gap:24px; }
+.setting-container { padding:20px; display:flex; flex-direction:column; gap:24px; min-height:0; flex:1; }
 .setting-block { background:#ffffff; border-radius:12px; padding:16px; box-shadow:0 1px 6px #e9e2f2; }
 .setting-block .block-title { font-size:16px; font-weight:600; margin-bottom:14px; color:#333; }
 .set-block-item { width:100%; background:#fff; padding:14px 16px; border-radius:10px; font-size:15px; color:#333; box-shadow:0 1px 4px #eee; cursor:pointer; transition:background 0.15s ease; border:1px solid transparent; user-select:none; }
@@ -135,12 +142,12 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .toggle-switch.active .toggle-knob { transform:translateX(20px); }
 
 /* ===== 信箱 ===== */
-.mail-container { padding:16px; flex:1; display:flex; flex-direction:column; }
+.mail-container { padding:16px; flex:1; display:flex; flex-direction:column; min-height:0; }
 .mail-tab-bar { display:flex; background:#fff; border-radius:10px; overflow:hidden; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
 .mail-tab { flex:1; border:none; padding:12px; background:#f3eef8; color:#666; font-size:15px; cursor:pointer; transition:background 0.15s ease; min-height:44px; }
 .mail-tab.active { background:#a87bc9; color:#fff; }
-.mail-list-wrap { flex:1; display:flex; flex-direction:column; }
-.sent-box { flex:1; display:flex; flex-direction:column; }
+.mail-list-wrap { flex:1; display:flex; flex-direction:column; min-height:0; }
+.sent-box { flex:1; display:flex; flex-direction:column; min-height:0; }
 .mail-list-header { display:flex; justify-content:space-between; align-items:center; padding:8px 4px; font-size:14px; color:#555; border-bottom:1px solid #eee; }
 .mail-add-btn { background:#a87bc9; color:#fff; border:none; border-radius:50%; width:32px; height:32px; font-size:20px; cursor:pointer; }
 .sent-list { flex:1; overflow-y:auto; padding-top:8px; }
@@ -150,7 +157,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .sent-item .sent-preview { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .sent-item .sent-detail { display:none; margin-top:4px; padding-top:4px; border-top:1px dashed #ddd; font-size:13px; color:#555; word-break:break-all; }
 .sent-item.expanded .sent-detail { display:block; }
-.inbox-box { flex:1; overflow-y:auto; }
+.inbox-box { flex:1; overflow-y:auto; min-height:0; }
 .inbox-box.hidden { display:none; }
 .letter-item { background:#fff; border-radius:10px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
 .letter-origin { font-size:12px; color:#888; padding-bottom:6px; border-bottom:1px dashed #eee; margin-bottom:8px; }
@@ -175,7 +182,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .save:active { background:#8e64b0; }
 
 /* ===== 字卡 ===== */
-.card-container { padding:16px; }
+.card-container { padding:16px; flex:1; min-height:0; overflow-y:auto; }
 .group-op-bar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
 #newGroupName { flex:1; padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:16px; min-width:100px; min-height:40px; }
 #createGroupBtn { background:#a87bc9; color:#fff; border:none; border-radius:8px; padding:0 14px; cursor:pointer; font-size:14px; min-height:40px; transition:background 0.15s ease; }
@@ -204,13 +211,13 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .del-btn { background:#ffdddd; color:#c33; }
 .switch-btn { background:#eef6ff; color:#2879d8; }
 
-/* ===== 日历（紧凑） ===== */
-.calendar-container { flex:1; padding:16px; display:flex; flex-direction:column; gap:6px; background:#fff; }
+/* ===== 日历 ===== */
+.calendar-container { flex:1; padding:16px; display:flex; flex-direction:column; gap:6px; background:#fff; min-height:0; }
 .calendar-text-area { background:#f8f4fb; border-radius:12px; padding:8px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
 .cal-text-item { font-size:13px; padding:2px 0; color:#333; }
 .cal-text-item.ta-text { color:#663399; font-weight:500; }
 .cal-text-item.me-text { color:#555; }
-.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; background:#faf8fc; border-radius:12px; padding:4px; flex:1; overflow-y:auto; width:100%; }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; background:#faf8fc; border-radius:12px; padding:4px; flex:1; overflow-y:auto; width:100%; min-height:0; }
 .cal-day { aspect-ratio:1/1.1; background:#fff; border-radius:4px; padding:2px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; box-shadow:0 1px 2px rgba(0,0,0,0.04); font-size:11px; color:#333; position:relative; min-width:0; }
 .cal-day.empty { background:transparent; box-shadow:none; }
 .cal-day .day-number { font-weight:600; font-size:12px; margin-bottom:1px; }
