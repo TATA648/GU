@@ -13,6 +13,7 @@ html, body {
   background: #f8f4fb;
   display: flex;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 顶部头部固定，键盘弹出不会上移 */
@@ -80,47 +81,58 @@ html, body {
   flex: 1;
   display: none;
   overflow-y: auto;
-  padding-bottom: 60px;
 }
 .page.active {
   display: flex;
   flex-direction: column;
 }
+.home-page {
+  padding-bottom: 20px !important;
+}
+.chat-page, .card-page, .setting-page {
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
 
-/* 首页样式：仅图标，无文字 */
+/* 首页样式：圆角正方形图标+下方文字，无底部导航 */
 .home-container {
   padding: 40px 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 40px;
 }
 .home-title {
   text-align: center;
   color: #663399;
+  font-size: 22px;
 }
 .app-grid {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   justify-content: center;
   flex-wrap: wrap;
 }
 .app-card {
   background: #fff;
   width: 120px;
-  height: 120px;
-  border-radius: 14px;
+  padding: 16px 10px;
+  border-radius: 16px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
   box-shadow: 0 2px 8px #e2d9eb;
   cursor: pointer;
 }
 .app-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
+  width: 68px;
+  height: 68px;
+  border-radius: 14px;
   object-fit: cover;
   background: #e8dff0;
+}
+.app-label {
+  font-size: 14px;
+  color: #444;
 }
 
 /* 外观设置页面 */
@@ -227,7 +239,7 @@ html, body {
   padding: 0 6px;
 }
 
-/* 输入框跟随键盘适配 */
+/* 输入框跟随键盘适配 + 底部安全区域 */
 .input-area {
   display: flex;
   gap: 10px;
@@ -237,7 +249,7 @@ html, body {
   position: fixed;
   left: 0;
   width: 100%;
-  bottom: 50px;
+  bottom: calc(50px + env(safe-area-inset-bottom));
   transition: bottom 0.2s ease;
 }
 #inputText {
@@ -381,13 +393,17 @@ html, body {
 .del-btn {background:#ffdddd; color:#c33;}
 .switch-btn {background:#eef6ff; color:#2879d8;}
 
-/* 底部Tab栏 */
+/* 底部Tab栏：增加底部安全边距，首页隐藏 */
 .tab-bar {
-  display: flex;
+  display: none;
   flex-shrink: 0;
   height: 50px;
+  padding-bottom: env(safe-area-inset-bottom);
   background: #fff;
   border-top: 1px solid #eee;
+}
+.tab-bar.show {
+  display: flex;
 }
 .tab-item {
   flex: 1;
