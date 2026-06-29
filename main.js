@@ -121,7 +121,7 @@ function switchPage(pageName) {
   document.body.classList.toggle('home-bg', pageName === 'home-page');
 }
 
-// 返回按钮
+// 返回按钮统一绑定
 document.querySelectorAll('.back-btn').forEach(btn => {
   btn.onclick = function() {
     switchPage('home-page');
@@ -129,7 +129,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
 });
 chatSetBack.onclick = () => switchPage('chat-page');
 
-// 首页图标跳转
+// 首页应用图标跳转（修复点击失效核心）
 document.querySelectorAll('.app-card').forEach(card => {
   card.onclick = function() {
     const target = this.dataset.target;
@@ -137,7 +137,7 @@ document.querySelectorAll('.app-card').forEach(card => {
   }
 });
 
-// 打开主页壁纸
+// 主页壁纸弹窗
 openWallpaperModal.onclick = function() {
   currentEditTarget = 'wallpaper';
   modalTitle.innerText = '设置主页壁纸';
@@ -145,7 +145,7 @@ openWallpaperModal.onclick = function() {
   imageLinkInput.value = store.wallpaper;
   imageSelectMask.style.display = 'flex';
 };
-// 打开聊天背景
+// 聊天背景弹窗
 openChatBgModal.onclick = function() {
   currentEditTarget = 'chatBg';
   modalTitle.innerText = '设置聊天背景';
@@ -154,7 +154,7 @@ openChatBgModal.onclick = function() {
   imageSelectMask.style.display = 'flex';
 };
 
-// 图标修改
+// 所有更改图标按钮绑定
 changeIconBtns.forEach(btn => {
   btn.onclick = function() {
     const type = this.dataset.type;
@@ -196,14 +196,13 @@ confirmImageBtn.onclick = async function() {
   currentEditTarget = null;
 };
 
-// 表情面板开关
+// 表情面板
 emojiToggle.onclick = ()=>emojiPanel.classList.toggle('show');
 document.addEventListener('click',e=>{
   if(!emojiPanel.contains(e.target) && e.target !== emojiToggle){
     emojiPanel.classList.remove('show');
   }
 })
-// 添加表情
 addEmojiBtn.onclick = async ()=>{
   let url = '';
   if(emojiFileInput.files[0]) url = await fileToDataUrl(emojiFileInput.files[0]);
@@ -228,7 +227,7 @@ function renderEmojiList(){
   })
 }
 
-// 打开聊天设置页
+// 打开聊天设置
 openChatSettingPage.onclick = ()=>switchPage('chat-set-page');
 saveChatSetting.onclick = ()=>{
   applyBgStyle();
@@ -237,7 +236,7 @@ saveChatSetting.onclick = ()=>{
   switchPage('chat-page');
 }
 
-// 打开各个设置弹窗
+// 关于TA弹窗
 blockTa.onclick = ()=>{
   taNameInput.value = store.taInfo.name;
   taAvatarLink.value = store.taInfo.avatarUrl;
@@ -256,6 +255,7 @@ saveTaSet.onclick = async ()=>{
   taMask.style.display = 'none';
 }
 
+// 关于我弹窗
 blockMe.onclick = ()=>{
   meNameInput.value = store.myInfo.name;
   meAvatarLink.value = store.myInfo.avatarUrl;
@@ -274,6 +274,7 @@ saveMeSet.onclick = async ()=>{
   meMask.style.display = 'none';
 }
 
+// 回复时长弹窗
 blockDelay.onclick = ()=>{
   minDelayInput.value = store.delay.min;
   maxDelayInput.value = store.delay.max;
@@ -320,7 +321,7 @@ function renderHeaderAvatar(){
   headerMyAvatar.src = store.myInfo.avatarUrl || '';
 }
 
-// 信箱切换
+// 信箱标签切换
 mailTabs.forEach(tab => {
   tab.onclick = function() {
     mailTabs.forEach(t => t.classList.remove('active'));
@@ -384,7 +385,7 @@ function formatTime(ts) {
 }
 function pad(n) {return String(n).padStart(2,'0');}
 
-// 10分钟间隔判定
+// 10分钟时间分割线
 function needTimeStamp(){
   const now = Date.now();
   if(now - store.lastChatTime > 10 * 60 * 1000){
@@ -400,15 +401,15 @@ function addTimeDivider(){
   chatWrap.appendChild(div);
 }
 
-// 解析文本内表情标签
+// 解析文本表情
 function parseEmojiText(text){
   return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>{
     return `<img class="msg-emoji-inside" src="${src}">`;
   })
 }
 
+// 角色随机附带表情
 function randomAttachEmoji(){
-  // 35%概率附带表情，15%只发表情
   const r = Math.random();
   if(store.emojiList.length === 0) return null;
   if(r < 0.15){
@@ -432,4 +433,228 @@ function addBubble(text, isUser, time){
   }else if(emojiSrc){
     html += `<img class="msg-emoji-inside" src="${emojiSrc}">`;
   }
-  const avatarSrc = isUser ? store.myInfo.avatarUrl :
+  const avatarSrc = isUser ? store.myInfo.avatarUrl : store.taInfo.avatarUrl;
+  item.innerHTML = `
+    <div class="msg-avatar">
+      ${avatarSrc ? `<img src="${avatarSrc}">` : ''}
+    </div>
+    <div class="msg-bubble-wrap">
+      <div class="msg-bubble">${html}</div>
+      <div class="time-text">${time}</div>
+    </div>
+  `;
+  chatWrap.appendChild(item);
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+
+function getNowTime(){
+  const d = new Date();
+  let h = String(d.getHours()).padStart(2,'0');
+  let m = String(d.getMinutes()).padStart(2,'0');
+  return h + ':' + m;
+}
+
+function getAllValidCards(){
+  let list = [];
+  Object.values(store.groups).forEach(arr => {
+    list = list.concat(arr.filter(item => !item.disabled));
+  });
+  return list;
+}
+
+function getRandomReplyArr(){
+  const pool = getAllValidCards();
+  if(pool.length === 0) return [{text:"暂无可用字卡，请前往字卡库添加分组与词条"}];
+  let arr = [...pool];
+  for(let i = arr.length - 1; i > 0; i--){
+    const r = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[r]] = [arr[r], arr[i]];
+  }
+  const take = Math.floor(Math.random() * 3) + 1;
+  return arr.slice(0, take);
+}
+
+function sendMessage(){
+  const content = inputText.value.trim();
+  if(!content) return;
+  addBubble(content, true, getNowTime());
+  inputText.value = '';
+
+  const min = store.delay.min * 1000;
+  const max = store.delay.max * 1000;
+  const wait = Math.floor(Math.random() * (max - min) + min);
+  // 打字占位
+  const tempItem = document.createElement('div');
+  tempItem.className = `msg-item target-msg`;
+  tempItem.innerHTML = `
+    <div class="msg-avatar">${store.taInfo.avatarUrl ? `<img src="${store.taInfo.avatarUrl}">` : ''}</div>
+    <div class="msg-bubble-wrap">
+      <div class="msg-bubble">
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      </div>
+    </div>
+  `;
+  chatWrap.appendChild(tempItem);
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+
+  setTimeout(() => {
+    tempItem.remove();
+    const replyList = getRandomReplyArr();
+    replyList.forEach((item, idx) => {
+      setTimeout(() => addBubble(item.text, false, getNowTime()), idx * 500);
+    });
+  }, wait);
+}
+
+sendBtn.onclick = sendMessage;
+inputText.onkeydown = e => {
+  if(e.key === 'Enter') sendMessage();
+};
+
+// 字卡逻辑
+const newGroupName = document.getElementById('newGroupName');
+const createGroupBtn = document.getElementById('createGroupBtn');
+const groupListWrap = document.getElementById('groupListWrap');
+const currentGroupSelect = document.getElementById('currentGroupSelect');
+const newCardInput = document.getElementById('newCardInput');
+const addSingleCard = document.getElementById('addSingleCard');
+const batchTextarea = document.getElementById('batchTextarea');
+const batchImportBtn = document.getElementById('batchImportBtn');
+const cardListWrap = document.getElementById('cardListWrap');
+
+createGroupBtn.onclick = function() {
+  const name = newGroupName.value.trim();
+  if(!name || store.groups[name]) return;
+  store.groups[name] = [];
+  newGroupName.value = '';
+  saveLocal();
+  refreshGroupSelect();
+};
+
+function refreshGroupSelect(){
+  const keys = Object.keys(store.groups);
+  groupListWrap.innerHTML = '';
+  currentGroupSelect.innerHTML = '';
+  keys.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = `${g} (${store.groups[g].length}条)`;
+    currentGroupSelect.appendChild(opt);
+    const row = document.createElement('div');
+    row.className = 'group-item-row';
+    row.innerHTML = `<span>${g}</span><span class="del-group-btn">删除</span>`;
+    row.querySelector('.del-group-btn').onclick = function() {
+      delete store.groups[g];
+      saveLocal();
+      refreshGroupSelect();
+    };
+    groupListWrap.appendChild(row);
+  });
+  if(keys.length && !keys.includes(store.currentSelectGroup)) {
+    store.currentSelectGroup = keys[0];
+  }
+  currentGroupSelect.value = store.currentSelectGroup;
+  currentGroupSelect.onchange = function() {
+    store.currentSelectGroup = this.value;
+    saveLocal();
+    renderCurrentCardList();
+  };
+  renderCurrentCardList();
+}
+
+function renderCurrentCardList(){
+  cardListWrap.innerHTML = '';
+  const g = store.currentSelectGroup;
+  if(!g || !store.groups[g]) return;
+  const list = store.groups[g];
+  list.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card-item ${card.disabled ? 'disabled' : ''}`;
+    div.innerHTML = `
+      <div class="card-text">${card.text}</div>
+      <div class="card-opts">
+        <button class="edit-btn">编辑</button>
+        <button class="del-btn">删除</button>
+        <button class="switch-btn">${card.disabled ? '启用' : '屏蔽'}</button>
+      </div>
+    `;
+    div.querySelector('.edit-btn').onclick = function() {
+      const res = prompt('修改字卡', card.text);
+      if(res?.trim()) {
+        list[idx].text = res.trim();
+        saveLocal();
+        renderCurrentCardList();
+      }
+    };
+    div.querySelector('.del-btn').onclick = function() {
+      list.splice(idx, 1);
+      saveLocal();
+      renderCurrentCardList();
+    };
+    div.querySelector('.switch-btn').onclick = function() {
+      list[idx].disabled = !list[idx].disabled;
+      saveLocal();
+      renderCurrentCardList();
+    };
+    cardListWrap.appendChild(div);
+  });
+}
+
+addSingleCard.onclick = function() {
+  const text = newCardInput.value.trim();
+  const g = store.currentSelectGroup;
+  if(!text || !g) return;
+  store.groups[g].push({id: Date.now(), text: text, disabled: false});
+  newCardInput.value = '';
+  saveLocal();
+  renderCurrentCardList();
+};
+newCardInput.onkeydown = e => {
+  if(e.key === 'Enter') addSingleCard.click();
+};
+
+batchImportBtn.onclick = function() {
+  const text = batchTextarea.value.trim();
+  const g = store.currentSelectGroup;
+  if(!text || !g) return;
+  const arr = text.split('\n').map(s => s.trim()).filter(s => s);
+  arr.forEach(t => {
+    store.groups[g].push({id: Date.now() + Math.random(), text: t, disabled: false});
+  });
+  batchTextarea.value = '';
+  saveLocal();
+  renderCurrentCardList();
+};
+
+function loadLocal(){
+  const raw = localStorage.getItem('dreamCardStore');
+  if(raw) store = JSON.parse(raw);
+  renderHeaderAvatar();
+  refreshAllIconPreview();
+  wallpaperPreview.src = store.wallpaper;
+  chatBgPreview.src = store.chatBg;
+  applyBgStyle();
+  refreshGroupSelect();
+  renderEmojiList();
+  renderInbox();
+}
+function saveLocal(){
+  localStorage.setItem('dreamCardStore', JSON.stringify(store));
+}
+
+// 定时执行信件到期检测
+setInterval(()=>processLetterReply(), 10000);
+
+// 全局兜底禁止双击缩放
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+loadLocal();
