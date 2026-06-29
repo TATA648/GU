@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
 
   // ============================================================
-  //  DATA STORE
+  //  DATA STORE（扩展）
   // ============================================================
   let store = {
     taInfo: { name: "梦角", avatarUrl: "" },
     myInfo: { name: "我", avatarUrl: "" },
     delay: { min: 20, max: 120 },
     chatBg: "",
-    appIcon: { chat: "", card: "", theme: "", mail: "" },
+    appIcon: { chat: "", card: "", theme: "", mail: "", calendar: "" },
     wallpaper: "",
     groups: {},
     currentSelectGroup: "",
@@ -16,7 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
     inbox: [],
     emojiList: [],
     lastChatTime: 0,
-    animEnabled: true
+    animEnabled: true,
+    // 新增
+    messages: [],               // 聊天记录 [{id, text, isUser, time, quote}]
+    currentStatus: "平静",      // 梦角当前状态
+    calendar: {},               // { "2026-06-30": { taEmoji: "😊", meEmoji: "🥰", taText: "...", meText: "..." } }
+    selectedMoodEmoji: null,    // 当前选中的心情表情
+    quoteMessage: null          // 当前引用的消息对象
   };
 
   // ============================================================
@@ -52,10 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardIconPreview = $('#cardIconPreview');
   const themeIconPreview = $('#themeIconPreview');
   const mailIconPreview = $('#mailIconPreview');
-  const chatAppIcon = $('#chatAppIcon');
-  const cardAppIcon = $('#cardAppIcon');
-  const themeAppIcon = $('#themeAppIcon');
-  const mailAppIcon = $('#mailAppIcon');
+  const calendarIconPreview = document.getElementById('calendarAppIcon'); // 新增日历图标
   const changeIconBtns = $$('.icon-change-btn');
 
   const openChatSettingPage = $('#openChatSettingPage');
@@ -65,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const blockTa = $('#blockTa');
   const blockMe = $('#blockMe');
   const blockDelay = $('#blockDelay');
+  const blockStatus = $('#blockStatus');
 
   const taMask = $('#taMask');
   const taAvatarFile = $('#taAvatarFile');
@@ -86,6 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeDelaySet = $('#closeDelaySet');
   const saveDelaySet = $('#saveDelaySet');
 
+  const statusMask = $('#statusMask');
+  const statusInput = $('#statusInput');
+  const closeStatusSet = $('#closeStatusSet');
+  const saveStatusSet = $('#saveStatusSet');
+
   const mailTabs = $$('.mail-tab');
   const letterInput = $('#letterInput');
   const sendLetterBtn = $('#sendLetterBtn');
@@ -104,16 +113,43 @@ document.addEventListener('DOMContentLoaded', function() {
   const headerTaAvatar = $('#headerTaAvatar');
   const headerMyAvatar = $('#headerMyAvatar');
   const targetName = $('#targetName');
+  const currentStatusText = $('#currentStatusText');
 
   const animToggle = $('#animToggle');
 
+  // 新增引用相关
+  const quoteBar = $('#quoteBar');
+  const quoteContent = $('#quoteContent');
+  const quoteClose = $('#quoteClose');
+
+  // 日历相关
+  const calendarGrid = $('#calendarGrid');
+  const calTaText = $('#calTaText');
+  const calMeText = $('#calMeText');
+  const openMoodModal = $('#openMoodModal');
+  const moodModal = $('#moodModal');
+  const moodEmojiGrid = $('#moodEmojiGrid');
+  const moodTextInput = $('#moodTextInput');
+  const closeMoodModal = $('#closeMoodModal');
+  const saveMoodModal = $('#saveMoodModal');
+
+  // 数据导入导出
+  const exportDataBtn = $('#exportDataBtn');
+  const importDataBtn = $('#importDataBtn');
+  const importConfirmMask = $('#importConfirmMask');
+  const importCancelBtn = $('#importCancelBtn');
+  const importConfirmBtn = $('#importConfirmBtn');
+
+  // 其他变量
   let currentEditTarget = null;
   let currentMailTab = 'write';
   let typingTimer = null;
   let letterTimer = null;
+  let selectedMoodEmoji = null;
+  let currentDateStr = null;
 
   // ============================================================
-  //  PAGE SWITCHING with animation
+  //  PAGE SWITCHING
   // ============================================================
   function switchPage(pageName) {
     const pages = $$('.page');
@@ -128,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
       target.classList.add('active');
       requestAnimationFrame(() => {
         target.style.opacity = '1';
-        target.style.transform = 'translateY(0)';
+        target.style.transform = 'translateY(0)');
       });
     } else {
       target.classList.add('active');
@@ -137,15 +173,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (topHeader) topHeader.classList.toggle('show', pageName === 'chat-page');
     document.body.classList.toggle('home-bg', pageName === 'home-page');
 
-    if (pageName === 'chat-page' && chatWrap) {
-      setTimeout(() => {
-        chatWrap.scrollTop = chatWrap.scrollHeight;
-      }, 50);
+    if (pageName === 'chat-page') {
+      renderMessages();
+      setTimeout(() => { chatWrap.scrollTop = chatWrap.scrollHeight; }, 50);
+    }
+    if (pageName === 'calendar-page') {
+      renderCalendar();
     }
   }
 
   // ============================================================
-  //  NAVIGATION BINDING
+  //  NAVIGATION
   // ============================================================
   $$('.app-card').forEach(card => {
     card.addEventListener('click', function() {
@@ -225,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
   changeIconBtns.forEach(btn => {
     btn.addEventListener('click', function() {
       const type = this.dataset.type;
-      const labelMap = { chat: '聊天传讯图标', card: '字卡管理图标', theme: '外观设置图标', mail: '信箱图标' };
+      const labelMap = { chat: '聊天传讯图标', card: '字卡管理图标', theme: '外观设置图标', mail: '信箱图标', calendar: '日历图标' };
       openImageModal('更改 ' + (labelMap[type] || '图标'), type);
     });
   });
@@ -265,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  CHAT SETTINGS (关于TA / 关于我 / 回复时长)
+  //  CHAT SETTINGS (关于TA / 关于我 / 回复时长 / 状态)
   // ============================================================
   if (blockTa) {
     blockTa.addEventListener('click', function() {
@@ -340,6 +378,28 @@ document.addEventListener('DOMContentLoaded', function() {
       store.delay.max = max;
       saveLocal();
       delayMask.style.display = 'none';
+    });
+  }
+
+  // 状态设置
+  if (blockStatus) {
+    blockStatus.addEventListener('click', function() {
+      statusInput.value = store.currentStatus;
+      statusMask.style.display = 'flex';
+    });
+  }
+  if (closeStatusSet) {
+    closeStatusSet.addEventListener('click', function() { statusMask.style.display = 'none'; });
+  }
+  if (saveStatusSet) {
+    saveStatusSet.addEventListener('click', function() {
+      const val = statusInput.value.trim();
+      if (val) {
+        store.currentStatus = val;
+        updateStatusDisplay();
+        saveLocal();
+      }
+      statusMask.style.display = 'none';
     });
   }
 
@@ -502,12 +562,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  CHAT
+  //  CHAT (持久化消息 + 引用)
   // ============================================================
   function renderHeaderAvatar() {
     targetName.innerText = store.taInfo.name || '梦角';
     headerTaAvatar.src = store.taInfo.avatarUrl || '';
     headerMyAvatar.src = store.myInfo.avatarUrl || '';
+    updateStatusDisplay();
+  }
+
+  function updateStatusDisplay() {
+    if (currentStatusText) {
+      currentStatusText.innerText = store.currentStatus || '平静';
+    }
   }
 
   function applyBgStyle() {
@@ -516,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function refreshAllIconPreview() {
-    const icons = ['chat', 'card', 'theme', 'mail'];
+    const icons = ['chat', 'card', 'theme', 'mail', 'calendar'];
     icons.forEach(key => {
       const el = document.getElementById(key + 'AppIcon');
       const prev = document.getElementById(key + 'IconPreview');
@@ -539,39 +606,116 @@ document.addEventListener('DOMContentLoaded', function() {
     return null;
   }
 
-  function addBubble(text, isUser, time) {
-    if (needTimeStamp()) addTimeDivider();
-    store.lastChatTime = Date.now();
+  // 渲染所有消息（从store.messages）
+  function renderMessages() {
+    if (!chatWrap) return;
+    chatWrap.innerHTML = '';
+    let lastTime = 0;
+    store.messages.forEach(msg => {
+      const now = msg.time;
+      if (now - lastTime > 10 * 60 * 1000) {
+        const div = document.createElement('div');
+        div.className = 'time-divider';
+        div.innerText = formatTime(now);
+        chatWrap.appendChild(div);
+      }
+      lastTime = now;
+      appendMessageElement(msg);
+    });
+    // 滚动到底部
+    chatWrap.scrollTop = chatWrap.scrollHeight;
+  }
 
+  // 添加消息元素到DOM（不保存到store，仅用于新消息）
+  function appendMessageElement(msg) {
     const item = document.createElement('div');
-    item.className = `msg-item ${isUser ? 'user-msg' : 'target-msg'}`;
-    let html = parseEmojiText(text);
+    item.className = `msg-item ${msg.isUser ? 'user-msg' : 'target-msg'}`;
+    item.dataset.msgId = msg.id;
+
+    // 引用内容
+    let quoteHtml = '';
+    if (msg.quote) {
+      quoteHtml = `<div class="msg-quote">📎 ${escapeHtml(msg.quote.text)}</div>`;
+    }
+
+    let html = parseEmojiText(msg.text);
     let emojiSrc = null;
-    if (!isUser) emojiSrc = randomAttachEmoji();
-    if (emojiSrc && text.trim() === '') {
+    if (!msg.isUser) emojiSrc = randomAttachEmoji();
+    if (emojiSrc && msg.text.trim() === '') {
       html = `<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`;
     } else if (emojiSrc) {
       html += `<img class="msg-emoji-inside" src="${emojiSrc}">`;
     }
-    const avatarSrc = isUser ? store.myInfo.avatarUrl : store.taInfo.avatarUrl;
+    const avatarSrc = msg.isUser ? store.myInfo.avatarUrl : store.taInfo.avatarUrl;
     item.innerHTML = `
       <div class="msg-avatar">
         ${avatarSrc ? `<img src="${avatarSrc}" loading="lazy">` : ''}
       </div>
       <div class="msg-bubble-wrap">
+        ${quoteHtml}
         <div class="msg-bubble">${html}</div>
-        <div class="time-text">${time}</div>
+        <div class="time-text">${formatTime(msg.time)}</div>
       </div>
     `;
+
+    // 右滑引用手势
+    let startX = 0;
+    let isSwiping = false;
+    item.addEventListener('touchstart', function(e) {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      isSwiping = true;
+    });
+    item.addEventListener('touchmove', function(e) {
+      if (!isSwiping) return;
+      const touch = e.touches[0];
+      const diff = startX - touch.clientX;
+      if (diff > 30) {
+        // 触发引用
+        e.preventDefault();
+        isSwiping = false;
+        // 回弹效果：闪烁一下
+        this.classList.add('swiped');
+        setTimeout(() => this.classList.remove('swiped'), 300);
+        // 设置引用
+        store.quoteMessage = msg;
+        quoteContent.innerText = msg.text;
+        quoteBar.style.display = 'flex';
+        // 清除旧引用标记
+      }
+    });
+    item.addEventListener('touchend', function() {
+      isSwiping = false;
+    });
+
     chatWrap.appendChild(item);
+  }
+
+  // 添加消息（同时存入store和渲染）
+  function addMessage(text, isUser, time, quote) {
+    const msg = {
+      id: Date.now() + Math.random(),
+      text: text,
+      isUser: isUser,
+      time: time || Date.now(),
+      quote: quote || null
+    };
+    store.messages.push(msg);
+    saveLocal();
+    // 渲染
+    if (needTimeStamp()) addTimeDivider();
+    store.lastChatTime = Date.now();
+    appendMessageElement(msg);
     chatWrap.scrollTop = chatWrap.scrollHeight;
   }
 
   function needTimeStamp() {
     const now = Date.now();
-    if (now - store.lastChatTime > 10 * 60 * 1000) {
-      store.lastChatTime = now;
-      return true;
+    if (store.messages.length > 0) {
+      const last = store.messages[store.messages.length - 1];
+      if (now - last.time > 10 * 60 * 1000) {
+        return true;
+      }
     }
     return false;
   }
@@ -611,7 +755,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function sendMessage() {
     const content = inputText.value.trim();
     if (!content) return;
-    addBubble(content, true, getNowTime());
+
+    const quoteMsg = store.quoteMessage;
+    // 清空引用
+    store.quoteMessage = null;
+    quoteBar.style.display = 'none';
+
+    const now = Date.now();
+    addMessage(content, true, now, quoteMsg);
     inputText.value = '';
 
     const min = store.delay.min * 1000;
@@ -637,9 +788,16 @@ document.addEventListener('DOMContentLoaded', function() {
     typingTimer = setTimeout(() => {
       tempItem.remove();
       const replyList = getRandomReplyArr();
+      // 梦角回复时也可能引用用户消息（随机）
+      let quoteReply = null;
+      if (Math.random() < 0.2 && store.messages.length > 1) {
+        const lastUserMsg = [...store.messages].reverse().find(m => m.isUser);
+        if (lastUserMsg) quoteReply = lastUserMsg;
+      }
       replyList.forEach((item, idx) => {
         setTimeout(() => {
-          addBubble(item.text, false, getNowTime());
+          const replyTime = Date.now();
+          addMessage(item.text, false, replyTime, quoteReply);
         }, idx * 500);
       });
       typingTimer = null;
@@ -655,6 +813,14 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         sendMessage();
       }
+    });
+  }
+
+  // 引用关闭
+  if (quoteClose) {
+    quoteClose.addEventListener('click', function() {
+      store.quoteMessage = null;
+      quoteBar.style.display = 'none';
     });
   }
 
@@ -831,6 +997,227 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
+  //  CALENDAR
+  // ============================================================
+  function renderCalendar() {
+    if (!calendarGrid) return;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    calendarGrid.innerHTML = '';
+    // 填充空白
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      calendarGrid.appendChild(empty);
+    }
+    // 填充日期
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const dateStr = dateObj.toISOString().slice(0,10);
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'cal-day';
+      dayDiv.innerHTML = `<div class="day-number">${d}</div>`;
+
+      const data = store.calendar[dateStr] || {};
+      const taEmoji = data.taEmoji || '';
+      const meEmoji = data.meEmoji || '';
+
+      const emojiGroup = document.createElement('div');
+      emojiGroup.className = 'day-emoji-group';
+
+      if (taEmoji && meEmoji) {
+        // 两个都有
+        const span1 = document.createElement('span');
+        span1.className = 'emoji-single small';
+        span1.textContent = taEmoji;
+        const span2 = document.createElement('span');
+        span2.className = 'emoji-single small';
+        span2.textContent = meEmoji;
+        emojiGroup.appendChild(span1);
+        emojiGroup.appendChild(span2);
+      } else if (taEmoji) {
+        const span = document.createElement('span');
+        span.className = 'emoji-single large';
+        span.textContent = taEmoji;
+        emojiGroup.appendChild(span);
+      } else if (meEmoji) {
+        const span = document.createElement('span');
+        span.className = 'emoji-single large';
+        span.textContent = meEmoji;
+        emojiGroup.appendChild(span);
+      }
+      dayDiv.appendChild(emojiGroup);
+      calendarGrid.appendChild(dayDiv);
+    }
+
+    // 更新顶部文字
+    const todayStr = now.toISOString().slice(0,10);
+    const todayData = store.calendar[todayStr] || {};
+    calTaText.innerText = todayData.taText || 'TA今天还没有记录哦～';
+    calMeText.innerText = todayData.meText || '今天有什么想说的。';
+  }
+
+  // 打开心情记录弹窗
+  if (openMoodModal) {
+    openMoodModal.addEventListener('click', function() {
+      // 设置当前日期
+      const now = new Date();
+      currentDateStr = now.toISOString().slice(0,10);
+      const data = store.calendar[currentDateStr] || {};
+      // 设置已有表情
+      selectedMoodEmoji = data.meEmoji || null;
+      moodTextInput.value = data.meText || '';
+      renderMoodEmojis();
+      moodModal.style.display = 'flex';
+    });
+  }
+
+  function renderMoodEmojis() {
+    const emojis = ['😭','🥺','🥰','🥹','😆','😎','🥳','😖','😫','😴'];
+    moodEmojiGrid.innerHTML = '';
+    emojis.forEach(emo => {
+      const span = document.createElement('span');
+      span.textContent = emo;
+      if (selectedMoodEmoji === emo) span.classList.add('selected');
+      span.addEventListener('click', function() {
+        selectedMoodEmoji = emo;
+        renderMoodEmojis();
+      });
+      moodEmojiGrid.appendChild(span);
+    });
+  }
+
+  if (closeMoodModal) {
+    closeMoodModal.addEventListener('click', function() {
+      moodModal.style.display = 'none';
+      selectedMoodEmoji = null;
+    });
+  }
+
+  if (saveMoodModal) {
+    saveMoodModal.addEventListener('click', function() {
+      const dateStr = currentDateStr;
+      if (!dateStr) return;
+      const text = moodTextInput.value.trim();
+      // 用户保存的表情和文字
+      const data = store.calendar[dateStr] || {};
+      data.meEmoji = selectedMoodEmoji || data.meEmoji;
+      data.meText = text || data.meText;
+      // 梦角自动选一个随机表情（如果有的话）
+      if (!data.taEmoji) {
+        const taEmojis = ['😊','😌','😄','🤗','😏','😜','🤔','😴','🥱'];
+        data.taEmoji = taEmojis[randomInt(0, taEmojis.length-1)];
+      }
+      // 梦角随机选1-3句字卡作为文字
+      if (!data.taText) {
+        const cards = getAllValidCards();
+        if (cards.length > 0) {
+          const count = Math.min(randomInt(1,3), cards.length);
+          const shuffled = [...cards].sort(() => Math.random() - 0.5);
+          const selected = shuffled.slice(0, count).map(c => c.text).join(' ');
+          data.taText = selected;
+        } else {
+          data.taText = '今天没有什么想说的～';
+        }
+      }
+      store.calendar[dateStr] = data;
+      saveLocal();
+      renderCalendar();
+      moodModal.style.display = 'none';
+      selectedMoodEmoji = null;
+    });
+  }
+
+  // ============================================================
+  //  DATA MANAGEMENT (导出 / 导入)
+  // ============================================================
+  if (exportDataBtn) {
+    exportDataBtn.addEventListener('click', function() {
+      // 构建完整数据对象
+      const data = {
+        version: '1.0',
+        exportTime: new Date().toISOString(),
+        store: store
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dreamcard_data_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // 导入流程
+  let importFileResolve = null;
+  if (importDataBtn) {
+    importDataBtn.addEventListener('click', function() {
+      // 先显示确认弹窗
+      importConfirmMask.style.display = 'flex';
+    });
+  }
+
+  if (importCancelBtn) {
+    importCancelBtn.addEventListener('click', function() {
+      importConfirmMask.style.display = 'none';
+      if (importFileResolve) {
+        importFileResolve(null);
+        importFileResolve = null;
+      }
+    });
+  }
+
+  if (importConfirmBtn) {
+    importConfirmBtn.addEventListener('click', function() {
+      importConfirmMask.style.display = 'none';
+      // 弹出文件选择
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.store) {
+              // 覆盖store
+              store = data.store;
+              // 重新加载所有UI
+              saveLocal();
+              // 刷新界面
+              renderHeaderAvatar();
+              refreshAllIconPreview();
+              applyBgStyle();
+              refreshGroupSelect();
+              renderEmojiList();
+              renderInbox();
+              renderMessages();
+              updateAnimToggleUI();
+              renderCalendar();
+              alert('数据导入成功！');
+            } else {
+              alert('无效的数据文件');
+            }
+          } catch (err) {
+            alert('文件解析失败：' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
+  }
+
+  // ============================================================
   //  UTILITY
   // ============================================================
   function fileToDataUrl(file) {
@@ -869,6 +1256,11 @@ document.addEventListener('DOMContentLoaded', function() {
         store = { ...store, ...parsed };
       }
     } catch (e) { console.warn('Load local error', e); }
+    // 确保有messages字段
+    if (!store.messages) store.messages = [];
+    if (!store.calendar) store.calendar = {};
+    if (!store.appIcon.calendar) store.appIcon.calendar = '';
+
     renderHeaderAvatar();
     refreshAllIconPreview();
     if (wallpaperPreview) wallpaperPreview.src = store.wallpaper || '';
@@ -877,8 +1269,11 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshGroupSelect();
     renderEmojiList();
     renderInbox();
+    renderMessages();
     updateAnimToggleUI();
     scheduleLetterReplies();
+    renderCalendar();
+    updateStatusDisplay();
   }
 
   function saveLocal() {
@@ -890,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ============================================================
   //  INIT
   // ============================================================
-  // 防止双击缩放 (全局)
+  // 防止双击缩放
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     const now = Date.now();
