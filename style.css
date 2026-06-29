@@ -98,7 +98,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
 
 /* ===== 拍一拍与系统消息 ===== */
-.pat-message { text-align:center; font-size:12px; color:#888; padding:6px 0; margin:4px 0; width:100%; background:transparent; font-weight:300; }
+.pat-message { text-align:center; font-size:10px; color:#888; padding:6px 0; margin:4px 0; width:100%; background:transparent; font-weight:300; }
 .pat-message.red { color:#e74c3c; font-weight:400; }
 
 /* ===== 首页布局 ===== */
@@ -211,7 +211,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .app-grid {
   display:grid;
   grid-template-columns:repeat(2, 1fr);
-  gap:8px 16px;
+  gap:8px 8px;
   flex:1;
   max-width:280px;
 }
@@ -228,8 +228,8 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 }
 .app-card:active { transform:scale(0.92); }
 .app-icon {
-  width:56px !important;
-  height:56px !important;
+  width:60px !important;
+  height:60px !important;
   border-radius:14px;
   object-fit:cover;
   background:#e0e0e0;
@@ -247,7 +247,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .deco-image {
   flex:1;
   min-width:60px;
-  max-width:100px;
+  max-width:120px;
   aspect-ratio:1/1;
   border-radius:12px;
   overflow:hidden;
@@ -277,7 +277,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 /* ===== 底栏 ===== */
 .bottom-bar {
   position:fixed;
-  bottom:12px;
+  bottom:16px;
   left:50%;
   transform:translateX(-50%);
   background:#fff;
@@ -304,14 +304,14 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .bar-item.placeholder { cursor:default; }
 .bar-item.placeholder:active { background:transparent; }
 .bar-icon {
-  width:28px;
-  height:28px;
+  width:60px;
+  height:60px;
   border-radius:8px;
   object-fit:cover;
   background:#e0e0e0;
 }
 .bar-label {
-  font-size:10px;
+  font-size:12px;
   color:#888;
 }
 
