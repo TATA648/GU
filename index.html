@@ -7,33 +7,49 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- 首页主页面 默认进入 -->
+<!-- 默认首页：仅图标，点击跳转 -->
 <div class="page home-page active">
   <div class="home-container">
     <h2 class="home-title">梦角工具箱</h2>
     <div class="app-grid">
       <div class="app-card" data-target="chat-page">
-        <img class="app-icon" id="chatAppIcon" src="" alt="聊天图标">
-        <div class="app-name">聊天传讯</div>
+        <img class="app-icon" id="chatAppIcon" alt="聊天图标">
       </div>
       <div class="app-card" data-target="card-page">
-        <img class="app-icon" id="cardAppIcon" src="" alt="字卡图标">
-        <div class="app-name">字卡管理</div>
+        <img class="app-icon" id="cardAppIcon" alt="字卡图标">
       </div>
-    </div>
-    <div class="icon-set-wrap">
-      <p>自定义图标链接（填写后刷新生效）</p>
-      <input type="text" id="chatIconUrl" placeholder="聊天图标图片链接">
-      <input type="text" id="cardIconUrl" placeholder="字卡图标图片链接">
-      <button id="saveIconBtn">保存图标</button>
+      <div class="app-card" data-target="setting-page">
+        <img class="app-icon" id="themeAppIcon" alt="外观设置">
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 顶部固定头部 仅聊天页面显示 -->
+<!-- 外观设置页面：统一配置所有应用图标 -->
+<div class="page setting-page">
+  <div class="setting-container">
+    <h3>外观图标配置</h3>
+    <div class="icon-input-item">
+      <label>聊天图标链接</label>
+      <input type="text" id="chatIconUrl" placeholder="粘贴图片URL">
+    </div>
+    <div class="icon-input-item">
+      <label>字卡库图标链接</label>
+      <input type="text" id="cardIconUrl" placeholder="粘贴图片URL">
+    </div>
+    <div class="icon-input-item">
+      <label>外观设置图标链接</label>
+      <input type="text" id="themeIconUrl" placeholder="粘贴图片URL">
+    </div>
+    <button id="saveThemeBtn" class="save-theme">保存外观配置</button>
+    <div class="tip-text">保存后刷新页面即可生效</div>
+  </div>
+</div>
+
+<!-- 聊天页顶部栏：头像点击直接修改头像 -->
 <div class="top-header">
-  <div class="avatar-box">
-    <img class="avatar-img" id="avatarImg" src="" alt="角色头像">
+  <div class="avatar-box" id="avatarClickEdit">
+    <img class="avatar-img" id="avatarImg" alt="角色头像">
     <span class="avatar-txt" id="avatarText">角</span>
   </div>
   <div class="dream-name" id="targetName">梦角</div>
@@ -77,17 +93,16 @@
   <div class="tab-item" data-page="home-page">首页</div>
   <div class="tab-item" data-page="chat-page">聊天</div>
   <div class="tab-item" data-page="card-page">字卡库</div>
+  <div class="tab-item" data-page="setting-page">外观</div>
 </div>
 
-<!-- 设置弹窗 -->
+<!-- 全局设置弹窗：昵称、文字头像、延迟配置 -->
 <div class="mask" id="mask">
   <div class="panel">
     <h3>基础设置 & 回复时长配置</h3>
     <label>梦角昵称</label>
     <input type="text" id="nameInput">
-    <label>角色头像图片链接</label>
-    <input type="text" id="avatarUrlInput" placeholder="粘贴图片URL，留空显示文字头像">
-    <label>文字头像（图片失效时备用）</label>
+    <label>备用文字头像</label>
     <input type="text" id="headText" maxlength="1">
     <label>最小等待秒数</label>
     <input type="number" id="minDelaySec" min="1" value="20">
@@ -96,6 +111,19 @@
     <div class="btns-wrap">
       <button class="close" id="closeSet">取消</button>
       <button class="save" id="saveSet">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 头像单独修改弹窗 -->
+<div class="mask" id="avatarMask">
+  <div class="panel">
+    <h3>修改角色头像</h3>
+    <label>头像图片链接</label>
+    <input type="text" id="avatarUrlInput" placeholder="粘贴网络图片地址">
+    <div class="btns-wrap">
+      <button class="close" id="closeAvatarSet">取消</button>
+      <button class="save" id="saveAvatarBtn">确定使用该头像</button>
     </div>
   </div>
 </div>
