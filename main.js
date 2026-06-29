@@ -11,11 +11,11 @@ let store = {
     card: "",
     theme: ""
   },
+  wallpaper: "",
   groups: {},
   currentSelectGroup: ""
 };
 
-// DOM
 const topHeader = document.querySelector('.top-header');
 const chatWrap = document.getElementById('chatWrap');
 const inputText = document.getElementById('inputText');
@@ -34,48 +34,49 @@ const avatarImg = document.getElementById('avatarImg');
 const avatarText = document.getElementById('avatarText');
 const avatarClickEdit = document.getElementById('avatarClickEdit');
 
-// 返回按钮统一绑定：全部返回首页
-const backBtns = document.querySelectorAll('.back-btn');
-backBtns.forEach(btn => {
-  btn.onclick = () => {
-    switchPage('home-page');
-  }
-});
+// 通用图片选择弹窗
+const imageSelectMask = document.getElementById('imageSelectMask');
+const modalTitle = document.getElementById('modalTitle');
+const localImageFile = document.getElementById('localImageFile');
+const imageLinkInput = document.getElementById('imageLinkInput');
+const closeImageModal = document.getElementById('closeImageModal');
+const confirmImageBtn = document.getElementById('confirmImageBtn');
 
-// 头像弹窗
+// 头像专属弹窗
 const avatarMask = document.getElementById('avatarMask');
-const avatarUrlInput = document.getElementById('avatarUrlInput');
+const avatarLocalFile = document.getElementById('avatarLocalFile');
+const avatarLinkInput = document.getElementById('avatarLinkInput');
 const closeAvatarSet = document.getElementById('closeAvatarSet');
 const saveAvatarBtn = document.getElementById('saveAvatarBtn');
 
-// 外观图标DOM
+// 壁纸预览
+const wallpaperPreview = document.getElementById('wallpaperPreview');
+const openWallpaperModal = document.getElementById('openWallpaperModal');
+
+// 图标预览与修改按钮
+const chatIconPreview = document.getElementById('chatIconPreview');
+const cardIconPreview = document.getElementById('cardIconPreview');
+const themeIconPreview = document.getElementById('themeIconPreview');
 const chatAppIcon = document.getElementById('chatAppIcon');
 const cardAppIcon = document.getElementById('cardAppIcon');
 const themeAppIcon = document.getElementById('themeAppIcon');
-const chatIconUrl = document.getElementById('chatIconUrl');
-const cardIconUrl = document.getElementById('cardIconUrl');
-const themeIconUrl = document.getElementById('themeIconUrl');
-const saveThemeBtn = document.getElementById('saveThemeBtn');
+const changeIconBtns = document.querySelectorAll('.change-btn[data-type]');
 
-// 分组字卡DOM
-const newGroupName = document.getElementById('newGroupName');
-const createGroupBtn = document.getElementById('createGroupBtn');
-const groupListWrap = document.getElementById('groupListWrap');
-const currentGroupSelect = document.getElementById('currentGroupSelect');
-const newCardInput = document.getElementById('newCardInput');
-const addSingleCard = document.getElementById('addSingleCard');
-const batchTextarea = document.getElementById('batchTextarea');
-const batchImportBtn = document.getElementById('batchImportBtn');
-const cardListWrap = document.getElementById('cardListWrap');
+let currentEditTarget = null; // wallpaper / chat / card / theme
 
-// 页面切换公共函数
+// 返回按钮
+const backBtns = document.querySelectorAll('.back-btn');
+backBtns.forEach(btn => {
+  btn.onclick = () => switchPage('home-page');
+});
+
+// 页面切换
 function switchPage(pageName) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelector(`.${pageName}`).classList.add('active');
   topHeader.classList.toggle('show', pageName === 'chat-page');
 }
 
-// ========== 修复：重新绑定首页卡片点击事件，确保可以正常跳转 ==========
 document.querySelectorAll('.app-card').forEach(card => {
   card.onclick = function() {
     const target = this.getAttribute('data-target');
@@ -83,17 +84,93 @@ document.querySelectorAll('.app-card').forEach(card => {
   }
 })
 
-// 头像点击打开头像修改弹窗
-avatarClickEdit.onclick = ()=>{
-  avatarUrlInput.value = store.base.avatarUrl;
+// 打开壁纸弹窗
+openWallpaperModal.onclick = () => {
+  currentEditTarget = 'wallpaper';
+  modalTitle.textContent = '设置主页壁纸';
+  localImageFile.value = '';
+  imageLinkInput.value = store.wallpaper;
+  imageSelectMask.style.display = 'flex';
+}
+
+// 打开图标修改弹窗
+changeIconBtns.forEach(btn => {
+  btn.onclick = () => {
+    const type = btn.dataset.type;
+    currentEditTarget = type;
+    modalTitle.textContent = '更改图标';
+    localImageFile.value = '';
+    imageLinkInput.value = store.appIcon[type];
+    imageSelectMask.style.display = 'flex';
+  }
+})
+
+closeImageModal.onclick = () => {
+  imageSelectMask.style.display = 'none';
+  currentEditTarget = null;
+}
+
+// 确认图片选择
+confirmImageBtn.onclick = async () => {
+  let finalUrl = "";
+  if(localImageFile.files[0]) {
+    finalUrl = await fileToBlobUrl(localImageFile.files[0]);
+  } else if(imageLinkInput.value.trim()) {
+    finalUrl = imageLinkInput.value.trim();
+  }
+  if(!finalUrl) return;
+
+  if(currentEditTarget === 'wallpaper') {
+    store.wallpaper = finalUrl;
+    document.body.style.setProperty('--wallpaper', `url(${finalUrl})`);
+    wallpaperPreview.src = finalUrl;
+  } else {
+    store.appIcon[currentEditTarget] = finalUrl;
+    refreshAllIconPreview();
+  }
+  saveLocal();
+  imageSelectMask.style.display = 'none';
+  currentEditTarget = null;
+}
+
+// 头像修改逻辑
+avatarClickEdit.onclick = () => {
+  avatarLocalFile.value = '';
+  avatarLinkInput.value = store.base.avatarUrl;
   avatarMask.style.display = 'flex';
 }
-closeAvatarSet.onclick = ()=> avatarMask.style.display = 'none';
-saveAvatarBtn.onclick = ()=>{
-  store.base.avatarUrl = avatarUrlInput.value.trim();
-  saveLocal();
-  renderHeader();
+closeAvatarSet.onclick = () => avatarMask.style.display = 'none';
+saveAvatarBtn.onclick = async () => {
+  let url = "";
+  if(avatarLocalFile.files[0]) {
+    url = await fileToBlobUrl(avatarLocalFile.files[0]);
+  } else if(avatarLinkInput.value.trim()) {
+    url = avatarLinkInput.value.trim();
+  }
+  if(url) {
+    store.base.avatarUrl = url;
+    renderHeader();
+    saveLocal();
+  }
   avatarMask.style.display = 'none';
+}
+
+// 文件转blob本地链接
+function fileToBlobUrl(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  })
+}
+
+function refreshAllIconPreview() {
+  chatAppIcon.src = store.appIcon.chat;
+  cardAppIcon.src = store.appIcon.card;
+  themeAppIcon.src = store.appIcon.theme;
+  chatIconPreview.src = store.appIcon.chat;
+  cardIconPreview.src = store.appIcon.card;
+  themeIconPreview.src = store.appIcon.theme;
 }
 
 // 键盘适配
@@ -106,12 +183,13 @@ window.visualViewport.addEventListener('resize', () => {
   }
 })
 
-// 本地存储
 function loadLocal(){
   const raw = localStorage.getItem('dreamCardStore');
   if(raw) store = JSON.parse(raw);
   renderHeader();
-  renderAppIcon();
+  refreshAllIconPreview();
+  wallpaperPreview.src = store.wallpaper;
+  if(store.wallpaper) document.body.style.setProperty('--wallpaper', `url(${store.wallpaper})`);
   refreshGroupSelect();
 }
 function saveLocal(){
@@ -128,26 +206,7 @@ function renderHeader(){
     avatarImg.classList.remove('show');
   }
 }
-function renderAppIcon(){
-  chatIconUrl.value = store.appIcon.chat;
-  cardIconUrl.value = store.appIcon.card;
-  themeIconUrl.value = store.appIcon.theme;
-  if(store.appIcon.chat) chatAppIcon.src = store.appIcon.chat;
-  if(store.appIcon.card) cardAppIcon.src = store.appIcon.card;
-  if(store.appIcon.theme) themeAppIcon.src = store.appIcon.theme;
-}
 
-// 保存外观全部图标
-saveThemeBtn.onclick = ()=>{
-  store.appIcon.chat = chatIconUrl.value.trim();
-  store.appIcon.card = cardIconUrl.value.trim();
-  store.appIcon.theme = themeIconUrl.value.trim();
-  saveLocal();
-  renderAppIcon();
-  alert('图标配置已保存，刷新页面生效');
-}
-
-// 时间格式化
 function getNowTime(){
   const d = new Date();
   const h = String(d.getHours()).padStart(2,'0');
@@ -155,7 +214,6 @@ function getNowTime(){
   return `${h}:${m}`;
 }
 
-// 消息气泡
 function addBubble(text, isUser, time, isTyping = false){
   const item = document.createElement('div');
   item.className = `msg-item ${isUser?'user-msg':'target-msg'}`;
@@ -179,7 +237,6 @@ function addBubble(text, isUser, time, isTyping = false){
   return item;
 }
 
-// 获取全部未屏蔽字卡
 function getAllValidCards(){
   let res = [];
   Object.values(store.groups).forEach(list=>{
@@ -188,7 +245,6 @@ function getAllValidCards(){
   return res;
 }
 
-// 随机抽取1~3条
 function getRandomReplyArr(){
   const pool = getAllValidCards();
   if(pool.length === 0) return ["暂无可用字卡，请前往字卡库添加分组与词条"];
@@ -201,7 +257,6 @@ function getRandomReplyArr(){
   return arr.slice(0,take);
 }
 
-// 发送消息
 function sendMessage(){
   const content = inputText.value.trim();
   if(!content) return;
@@ -227,7 +282,6 @@ function sendMessage(){
 sendBtn.onclick = sendMessage;
 inputText.onkeydown = e=> e.key === 'Enter' && sendMessage();
 
-// 基础设置弹窗
 openSet.onclick = ()=>{
   nameInput.value = store.base.name;
   headText.value = store.base.head;
@@ -248,7 +302,6 @@ saveSet.onclick = ()=>{
   mask.style.display = 'none';
 }
 
-// 分组创建与管理
 createGroupBtn.onclick = ()=>{
   const name = newGroupName.value.trim();
   if(!name || store.groups[name]) return;
@@ -267,7 +320,6 @@ function refreshGroupSelect(){
     opt.value = g;
     opt.textContent = `${g} (${store.groups[g].length}条)`;
     currentGroupSelect.appendChild(opt);
-
     const row = document.createElement('div');
     row.className = 'group-item-row';
     row.innerHTML = `<span>${g}</span><span class="del-group-btn">删除</span>`;
@@ -290,7 +342,6 @@ function refreshGroupSelect(){
   renderCurrentCardList();
 }
 
-// 渲染当前分组字卡
 function renderCurrentCardList(){
   cardListWrap.innerHTML = '';
   const targetGroup = store.currentSelectGroup;
@@ -329,7 +380,6 @@ function renderCurrentCardList(){
   })
 }
 
-// 单条添加字卡
 addSingleCard.onclick = ()=>{
   const txt = newCardInput.value.trim();
   const g = store.currentSelectGroup;
@@ -341,7 +391,6 @@ addSingleCard.onclick = ()=>{
 }
 newCardInput.onkeydown = e=>e.key==='Enter'&&addSingleCard.click();
 
-// 批量导入字卡
 batchImportBtn.onclick = ()=>{
   const txt = batchTextarea.value.trim();
   const g = store.currentSelectGroup;
