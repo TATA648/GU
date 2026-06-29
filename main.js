@@ -75,11 +75,11 @@ function switchPage(pageName) {
   topHeader.classList.toggle('show', pageName === 'chat-page');
 }
 
-// 首页卡片点击跳转
-document.querySelectorAll('.app-card').forEach(card=>{
-  card.onclick = ()=>{
-    const target = card.dataset.target;
-    switchPage(target);
+// ========== 修复：重新绑定首页卡片点击事件，确保可以正常跳转 ==========
+document.querySelectorAll('.app-card').forEach(card => {
+  card.onclick = function() {
+    const target = this.getAttribute('data-target');
+    if(target) switchPage(target);
   }
 })
 
