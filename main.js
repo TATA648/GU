@@ -36,8 +36,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const heBtn=$('#heBtn'), meBtn=$('#meBtn');
   const blockDelay=$('#blockDelay'), delayRange=$('#delayRange'), delayRangeValue=$('#delayRangeValue');
   const blockPatSuffix=$('#blockPatSuffix'), blockVideoBg=$('#blockVideoBg');
-  const taMask=$('#taMask'), taAvatarFile=$('#taAvatarFile'), taAvatarLink=$('#taAvatarLink'), taNameInput=$('#taNameInput'), closeTaSet=$('#closeTaSet'), saveTaSet=$('#saveTaSet');
-  const meMask=$('#meMask'), meAvatarFile=$('#meAvatarFile'), meAvatarLink=$('#meAvatarLink'), meNameInput=$('#meNameInput'), closeMeSet=$('#closeMeSet'), saveMeSet=$('#saveMeSet');
+  // 关于TA弹窗元素
+  const taMask=$('#taMask'), taPreviewBox=$('#taPreviewBox'), taPreviewImg=$('#taPreviewImg');
+  const taLocalBtn=$('#taLocalBtn'), taAvatarFile=$('#taAvatarFile'), taAvatarLink=$('#taAvatarLink');
+  const taNameInput=$('#taNameInput'), closeTaSet=$('#closeTaSet'), saveTaSet=$('#saveTaSet');
+  // 关于我弹窗元素
+  const meMask=$('#meMask'), mePreviewBox=$('#mePreviewBox'), mePreviewImg=$('#mePreviewImg');
+  const meLocalBtn=$('#meLocalBtn'), meAvatarFile=$('#meAvatarFile'), meAvatarLink=$('#meAvatarLink');
+  const meNameInput=$('#meNameInput'), closeMeSet=$('#closeMeSet'), saveMeSet=$('#saveMeSet');
   const patMask=$('#patMask'), patSuffixInput=$('#patSuffixInput'), closePatSet=$('#closePatSet'), savePatSet=$('#savePatSet');
   const videoBgMask=$('#videoBgMask'), videoBgFile=$('#videoBgFile'), videoBgLink=$('#videoBgLink'), closeVideoBg=$('#closeVideoBg'), saveVideoBg=$('#saveVideoBg');
   const mailTabs=$$('.mail-tab'), sentList=$('#sentList'), inboxWrap=$('#inboxWrap'), mailAddBtn=$('#mailAddBtn');
@@ -112,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateAnimToggleUI(){ if(!animToggle) return; store.animEnabled?animToggle.classList.add('active'):animToggle.classList.remove('active'); document.body.classList.toggle('no-transition',!store.animEnabled); }
   if(animToggle) animToggle.addEventListener('click',function(){ store.animEnabled=!store.animEnabled; updateAnimToggleUI(); saveLocal(); });
 
-  // ===== 粒子特效（Canvas 碎片 + 拖尾） =====
+  // ===== 粒子特效（灰色、减少数量） =====
   let particleEnabled = true;
   let particleCtx=null, particleCanvas=null, particles=[], trails=[], particleAnimId=null;
   
@@ -141,34 +147,34 @@ document.addEventListener('DOMContentLoaded', function() {
   function particleLoop(){
     if(!particleCtx) return;
     particleCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
-    // 更新拖尾
+    // 更新拖尾 (灰色)
     for(let i=trails.length-1;i>=0;i--){
       const t=trails[i];
       t.x+=t.vx;
       t.y+=t.vy;
-      t.life-=0.02;
+      t.life-=0.025;
       t.vy+=0.02;
       if(t.life<=0){ trails.splice(i,1); continue; }
-      const alpha=t.life*0.4;
+      const alpha=t.life*0.3;
       particleCtx.beginPath();
-      particleCtx.arc(t.x,t.y,t.size*t.life,0,Math.PI*2);
-      particleCtx.fillStyle='rgba(150,150,170,'+alpha+')';
+      particleCtx.arc(t.x,t.y,t.size*t.life*0.8,0,Math.PI*2);
+      particleCtx.fillStyle='rgba(180,180,180,'+alpha+')';
       particleCtx.fill();
     }
-    // 更新碎片
+    // 更新碎片 (灰色)
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
       p.x+=p.vx;
       p.y+=p.vy;
-      p.vy+=0.05;
-      p.life-=0.015;
+      p.vy+=0.04;
+      p.life-=0.018;
       p.vx*=0.99;
       p.vy*=0.99;
       if(p.life<=0){ particles.splice(i,1); continue; }
-      const alpha=p.life*0.7;
-      const size=p.size*p.life;
+      const alpha=p.life*0.5;
+      const size=p.size*p.life*0.8;
       particleCtx.globalAlpha=alpha;
-      particleCtx.fillStyle=p.color || 'rgba(180,180,200,0.6)';
+      particleCtx.fillStyle='rgba(190,190,190,0.5)';
       particleCtx.beginPath();
       particleCtx.arc(p.x,p.y,size,0,Math.PI*2);
       particleCtx.fill();
@@ -178,37 +184,38 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function emitParticles(x,y,count,color){
     if(!particleEnabled || !particleCtx) return;
+    count = Math.min(count, 6); // 减少数量
     for(let i=0;i<count;i++){
       const angle=Math.random()*Math.PI*2;
-      const speed=1+Math.random()*4;
+      const speed=1+Math.random()*3;
       particles.push({
-        x:x+(Math.random()-0.5)*4,
-        y:y+(Math.random()-0.5)*4,
+        x:x+(Math.random()-0.5)*3,
+        y:y+(Math.random()-0.5)*3,
         vx:Math.cos(angle)*speed,
         vy:Math.sin(angle)*speed-0.5,
-        size:3+Math.random()*5,
-        life:0.6+Math.random()*0.6,
-        color:color || 'rgba(180,180,200,0.6)'
+        size:2+Math.random()*4,
+        life:0.5+Math.random()*0.5,
+        color:color || 'rgba(190,190,190,0.5)'
       });
     }
   }
   function emitTrail(x,y){
     if(!particleEnabled || !particleCtx) return;
-    for(let i=0;i<2;i++){
+    for(let i=0;i<1;i++){ // 减少拖尾数量
       trails.push({
-        x:x+(Math.random()-0.5)*3,
-        y:y+(Math.random()-0.5)*3,
-        vx:(Math.random()-0.5)*0.8,
-        vy:-0.5-Math.random()*0.5,
-        size:2+Math.random()*3,
-        life:0.5+Math.random()*0.3
+        x:x+(Math.random()-0.5)*2,
+        y:y+(Math.random()-0.5)*2,
+        vx:(Math.random()-0.5)*0.6,
+        vy:-0.3-Math.random()*0.3,
+        size:1.5+Math.random()*2,
+        life:0.4+Math.random()*0.2
       });
     }
   }
   // 点击事件 -> 碎片（使用 passive:true 避免阻塞）
   document.addEventListener('click',function(e){
     if(!particleEnabled) return;
-    emitParticles(e.clientX,e.clientY,12+Math.floor(Math.random()*8));
+    emitParticles(e.clientX,e.clientY,5+Math.floor(Math.random()*3));
   });
   // 触摸事件 -> 碎片 + 拖尾（使用 passive:true）
   let lastTouchX=0,lastTouchY=0;
@@ -216,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(!particleEnabled) return;
     const touch=e.touches[0];
     if(touch){
-      emitParticles(touch.clientX,touch.clientY,10+Math.floor(Math.random()*6));
+      emitParticles(touch.clientX,touch.clientY,4+Math.floor(Math.random()*2));
       lastTouchX=touch.clientX;
       lastTouchY=touch.clientY;
     }
@@ -226,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const touch=e.touches[0];
     if(touch){
       emitTrail(touch.clientX,touch.clientY);
-      if(Math.random()<0.3) emitParticles(touch.clientX,touch.clientY,2);
+      if(Math.random()<0.2) emitParticles(touch.clientX,touch.clientY,1);
       lastTouchX=touch.clientX;
       lastTouchY=touch.clientY;
     }
@@ -252,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ===== 图片选择弹窗 =====
+  // ===== 图片选择弹窗（通用） =====
   function openImageModal(title,targetKey){
     currentEditTarget=targetKey; modalTitle.innerText=title;
     localImageFile.value='';
@@ -269,15 +276,18 @@ document.addEventListener('DOMContentLoaded', function() {
     updateImagePreview(existing);
     imageSelectMask.style.display='flex';
   }
-  function updateImagePreview(url){
+  function updateImagePreview(url, previewBox, previewImg){
+    if(!previewBox) previewBox=imagePreviewBox;
+    if(!previewImg) previewImg=imagePreviewImg;
     if(url && url.trim()){
-      imagePreviewImg.src=url;
-      imagePreviewBox.classList.add('has-image');
+      previewImg.src=url;
+      previewBox.classList.add('has-image');
     }else{
-      imagePreviewImg.src='';
-      imagePreviewBox.classList.remove('has-image');
+      previewImg.src='';
+      previewBox.classList.remove('has-image');
     }
   }
+  // 通用上传按钮触发文件选择
   if(localImageBtn){
     localImageBtn.addEventListener('click',function(){
       localImageFile.click();
@@ -324,100 +334,90 @@ document.addEventListener('DOMContentLoaded', function() {
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
 
-  // ===== 文本编辑弹窗 =====
-  function openEditText(title,currentValue,callback){
-    editTextTitle.innerText=title;
-    editTextInput.value=currentValue;
-    editTextMask.style.display='flex';
-    const newSave=function(){
-      const val=editTextInput.value.trim();
-      if(val) callback(val);
-      editTextMask.style.display='none';
-    };
-    saveEditText.onclick=newSave;
-    closeEditText.onclick=function(){ editTextMask.style.display='none'; };
-  }
-
-  // ===== 个人资料 =====
-  if(profileCover) profileCover.addEventListener('click',()=>openImageModal('选择封面','profileCover'));
-  if(profileAvatar) profileAvatar.addEventListener('click',()=>openImageModal('选择头像','profileAvatar'));
-  if(profileName) profileName.addEventListener('click',()=>openEditText('修改昵称', store.profile.name, (val)=>{ store.profile.name=val; profileName.innerText=val; saveLocal(); }));
-  if(profileLocation) profileLocation.addEventListener('click',()=>{
-    const html=`
-      <div style="margin-bottom:12px;">
-        <label style="font-size:14px;color:#555;">位置名称</label>
-        <input type="text" id="editLocationText" value="${store.profile.location}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
-      </div>
-      <div>
-        <label style="font-size:14px;color:#555;">位置图标链接</label>
-        <input type="text" id="editLocationIcon" value="${store.profile.locationIcon}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
-      </div>
-    `;
-    const panel=document.querySelector('#editTextMask .panel');
-    const originalContent=panel.innerHTML;
-    panel.innerHTML=`<h3>修改位置</h3>${html}<div class="btns-wrap"><button class="close" id="editLocationCancel">取消</button><button class="save" id="editLocationSave">保存</button></div>`;
-    document.getElementById('editLocationCancel').onclick=function(){ panel.innerHTML=originalContent; editTextMask.style.display='none'; };
-    document.getElementById('editLocationSave').onclick=function(){
-      const newText=document.getElementById('editLocationText').value.trim();
-      const newIcon=document.getElementById('editLocationIcon').value.trim();
-      if(newText){ store.profile.location=newText; locationText.innerText=newText; }
-      if(newIcon){ store.profile.locationIcon=newIcon; locationIcon.src=newIcon; }
-      saveLocal();
-      panel.innerHTML=originalContent;
-      editTextMask.style.display='none';
-    };
-    editTextMask.style.display='flex';
-  });
-  if(profileSignature) profileSignature.addEventListener('click',()=>openEditText('修改签名', store.profile.signature, (val)=>{ store.profile.signature=val; profileSignature.innerText=val; saveLocal(); }));
-  if(decoImage) decoImage.addEventListener('click',()=>openImageModal('更换装饰图','decoImage'));
-
-  // ===== 聊天设置：HE/ME =====
+  // ===== 关于TA弹窗（新预览样式） =====
   if(heBtn) heBtn.addEventListener('click',function(){ 
     taNameInput.value=store.taInfo.name; 
     taAvatarLink.value=store.taInfo.avatarUrl||''; 
     taAvatarFile.value=''; 
+    // 更新预览
+    updateImagePreview(store.taInfo.avatarUrl, taPreviewBox, taPreviewImg);
     taMask.style.display='flex'; 
   });
+  if(taLocalBtn) taLocalBtn.addEventListener('click',function(){ taAvatarFile.click(); });
+  if(taAvatarFile){
+    taAvatarFile.addEventListener('change',function(e){
+      const file=e.target.files[0];
+      if(!file) return;
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        const url=ev.target.result;
+        updateImagePreview(url, taPreviewBox, taPreviewImg);
+        taAvatarLink.value='';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  if(taAvatarLink){
+    taAvatarLink.addEventListener('input',function(){
+      updateImagePreview(this.value, taPreviewBox, taPreviewImg);
+    });
+  }
+  if(closeTaSet) closeTaSet.addEventListener('click',()=>taMask.style.display='none');
+  if(saveTaSet) saveTaSet.addEventListener('click',async function(){ 
+    store.taInfo.name=taNameInput.value.trim()||'梦角'; 
+    let url=store.taInfo.avatarUrl; 
+    if(taAvatarFile.files&&taAvatarFile.files[0]) url=await fileToDataUrl(taAvatarFile.files[0]); 
+    else if(taAvatarLink.value.trim()) url=taAvatarLink.value.trim(); 
+    store.taInfo.avatarUrl=url; 
+    renderHeaderAvatar(); 
+    saveLocal(); 
+    taMask.style.display='none'; 
+  });
+
+  // ===== 关于我弹窗（新预览样式） =====
   if(meBtn) meBtn.addEventListener('click',function(){ 
     meNameInput.value=store.myInfo.name; 
     meAvatarLink.value=store.myInfo.avatarUrl||''; 
     meAvatarFile.value=''; 
+    updateImagePreview(store.myInfo.avatarUrl, mePreviewBox, mePreviewImg);
     meMask.style.display='flex'; 
   });
-  if(closeTaSet) closeTaSet.addEventListener('click',()=>taMask.style.display='none');
-  if(saveTaSet) saveTaSet.addEventListener('click',async function(){ store.taInfo.name=taNameInput.value.trim()||'梦角'; let url=store.taInfo.avatarUrl; if(taAvatarFile.files&&taAvatarFile.files[0]) url=await fileToDataUrl(taAvatarFile.files[0]); else if(taAvatarLink.value.trim()) url=taAvatarLink.value.trim(); store.taInfo.avatarUrl=url; renderHeaderAvatar(); saveLocal(); taMask.style.display='none'; });
-  if(closeMeSet) closeMeSet.addEventListener('click',()=>meMask.style.display='none');
-  if(saveMeSet) saveMeSet.addEventListener('click',async function(){ store.myInfo.name=meNameInput.value.trim()||'我'; let url=store.myInfo.avatarUrl; if(meAvatarFile.files&&meAvatarFile.files[0]) url=await fileToDataUrl(meAvatarFile.files[0]); else if(meAvatarLink.value.trim()) url=meAvatarLink.value.trim(); store.myInfo.avatarUrl=url; renderHeaderAvatar(); saveLocal(); meMask.style.display='none'; });
-
-  // ===== 回复时长进度条 =====
-  if(delayRange){
-    delayRange.addEventListener('input',function(){
-      const val=parseInt(this.value);
-      delayRangeValue.textContent=val+'秒';
-      store.delay.min=val;
-      store.delay.max=val+20;
-      saveLocal();
-    });
-    const loadDelay=function(){
-      const min=store.delay.min||20;
-      delayRange.value=min;
-      delayRangeValue.textContent=min+'秒';
-    };
-    setTimeout(loadDelay,100);
-    if(saveChatSetting) saveChatSetting.addEventListener('click',function(){ 
-      const val=parseInt(delayRange.value);
-      store.delay.min=val;
-      store.delay.max=val+20;
-      saveLocal();
+  if(meLocalBtn) meLocalBtn.addEventListener('click',function(){ meAvatarFile.click(); });
+  if(meAvatarFile){
+    meAvatarFile.addEventListener('change',function(e){
+      const file=e.target.files[0];
+      if(!file) return;
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        const url=ev.target.result;
+        updateImagePreview(url, mePreviewBox, mePreviewImg);
+        meAvatarLink.value='';
+      };
+      reader.readAsDataURL(file);
     });
   }
+  if(meAvatarLink){
+    meAvatarLink.addEventListener('input',function(){
+      updateImagePreview(this.value, mePreviewBox, mePreviewImg);
+    });
+  }
+  if(closeMeSet) closeMeSet.addEventListener('click',()=>meMask.style.display='none');
+  if(saveMeSet) saveMeSet.addEventListener('click',async function(){ 
+    store.myInfo.name=meNameInput.value.trim()||'我'; 
+    let url=store.myInfo.avatarUrl; 
+    if(meAvatarFile.files&&meAvatarFile.files[0]) url=await fileToDataUrl(meAvatarFile.files[0]); 
+    else if(meAvatarLink.value.trim()) url=meAvatarLink.value.trim(); 
+    store.myInfo.avatarUrl=url; 
+    renderHeaderAvatar(); 
+    saveLocal(); 
+    meMask.style.display='none'; 
+  });
 
-  // ===== 拍一拍后缀 =====
+  // ===== 其他聊天设置 =====
+  if(blockDelay) blockDelay.addEventListener('click',function(){ /* 进度条无需弹窗 */ });
   if(blockPatSuffix) blockPatSuffix.addEventListener('click',()=>{ patSuffixInput.value=store.chatSettings.patSuffix||'拍了拍'; patMask.style.display='flex'; });
   if(closePatSet) closePatSet.addEventListener('click',()=>patMask.style.display='none');
   if(savePatSet) savePatSet.addEventListener('click',function(){ const val=patSuffixInput.value.trim(); if(val){ store.chatSettings.patSuffix=val; saveLocal(); } patMask.style.display='none'; });
-
-  // ===== 视频背景 =====
   if(blockVideoBg) blockVideoBg.addEventListener('click',()=>{ videoBgLink.value=store.chatSettings.videoBg||''; videoBgFile.value=''; videoBgMask.style.display='flex'; });
   if(closeVideoBg) closeVideoBg.addEventListener('click',()=>videoBgMask.style.display='none');
   if(saveVideoBg) saveVideoBg.addEventListener('click',async function(){ let url=''; if(videoBgFile.files&&videoBgFile.files[0]) url=await fileToDataUrl(videoBgFile.files[0]); else if(videoBgLink.value.trim()) url=videoBgLink.value.trim(); if(url){ store.chatSettings.videoBg=url; applyVideoBg(); saveLocal(); } videoBgMask.style.display='none'; });
@@ -1320,7 +1320,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if(placeholderIcon) placeholderIcon.src=store.appIcon.placeholder||'';
     const style=store.chatSettings.avatarStyle||'circle';
     styleOptions.forEach(o=>{ o.classList.toggle('active', o.dataset.style===style); });
-    // 恢复粒子状态
     if(rippleToggle){
       if(store.rippleEnabled!==undefined) particleEnabled=store.rippleEnabled;
       if(particleEnabled) {
@@ -1332,13 +1331,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if(particleCanvas) particleCanvas.style.display='none';
       }
     }
-    // 恢复心情按钮文字
     if(openMoodModal){
       const todayStr=new Date().toISOString().slice(0,10);
       const hasRecord = store.calendar[todayStr] && (store.calendar[todayStr].meEmoji || store.calendar[todayStr].meText);
       openMoodModal.textContent = hasRecord ? '修改' : '记录心情';
     }
-    // 恢复延时进度条
     if(delayRange){
       const min=store.delay.min||20;
       delayRange.value=min;
