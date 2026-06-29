@@ -136,46 +136,48 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentDateStr = null;
 
   // ============================================================
-  //  PAGE SWITCHING
+  //  PAGE SWITCHING (修复版：保证 class 切换可靠)
   // ============================================================
   function switchPage(pageName) {
     const pages = $$('.page');
     const target = document.querySelector(`.${pageName}`);
     if (!target) return;
+
+    // 移除所有 active
     pages.forEach(p => p.classList.remove('active'));
 
-    if (store.animEnabled) {
-      target.style.opacity = '0';
-      target.style.transform = 'translateY(6px)';
-      target.classList.add('active');
-      requestAnimationFrame(() => {
-        target.style.opacity = '1';
-        target.style.transform = 'translateY(0)';
-      });
-    } else {
-      target.classList.add('active');
-    }
+    // 添加 active（触发 display:flex）
+    target.classList.add('active');
 
+    // 控制顶部栏显示
     if (topHeader) topHeader.classList.toggle('show', pageName === 'chat-page');
     document.body.classList.toggle('home-bg', pageName === 'home-page');
 
+    // 如果切换到聊天页，滚动到底部并刷新消息
     if (pageName === 'chat-page') {
       renderMessages();
       setTimeout(() => { chatWrap.scrollTop = chatWrap.scrollHeight; }, 50);
     }
-    if (pageName === 'calendar-page') renderCalendar();
+    if (pageName === 'calendar-page') {
+      renderCalendar();
+    }
   }
 
   // ============================================================
-  //  NAVIGATION
+  //  NAVIGATION 绑定（修复：增加 touch 兼容）
   // ============================================================
+  // 首页卡片
   $$('.app-card').forEach(card => {
-    card.addEventListener('click', function() {
+    const handler = function(e) {
+      e.preventDefault();
       const target = this.dataset.target;
       if (target) switchPage(target);
-    });
+    };
+    card.addEventListener('click', handler);
+    card.addEventListener('touchstart', handler, { passive: false });
   });
 
+  // 返回按钮
   $$('.back-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -286,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  CHAT SETTINGS
+  //  CHAT SETTINGS (关于TA / 关于我 / 回复时长 / 状态)
   // ============================================================
   if (blockTa) {
     blockTa.addEventListener('click', function() {
@@ -920,7 +922,6 @@ document.addEventListener('DOMContentLoaded', function() {
       calendarGrid.appendChild(dayDiv);
     }
 
-    // 顶部文字
     const todayStr = now.toISOString().slice(0,10);
     const todayData = store.calendar[todayStr] || {};
     calTaText.innerText = todayData.taText || 'TA今天还没有记录哦～';
@@ -1121,15 +1122,30 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ============================================================
-  //  INIT
+  //  防止双击缩放（加强）
   // ============================================================
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     const now = Date.now();
-    if (now - lastTouchEnd <= 300) e.preventDefault();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
     lastTouchEnd = now;
   }, { passive: false });
 
+  // 强制所有 input 字体 ≥ 16px 防止 iOS 自动缩放
+  document.querySelectorAll('input, textarea').forEach(el => {
+    el.style.fontSize = '16px';
+  });
+
+  // 额外：禁止双指缩放
+  document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
   loadLocal();
   applyBgStyle();
 
