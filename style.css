@@ -19,6 +19,7 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
   max-height:100vh;
   justify-content:center;
   overflow:hidden;
+  flex:1;
 }
 
 /* ===== 头部 ===== */
@@ -172,7 +173,6 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
 .chat-setting-container { padding:20px; display:flex; flex-direction:column; gap:12px; flex:1; }
 .chat-set-item { background:#ffffff; border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
 .chat-set-item .chat-set-label { font-size:14px; font-weight:500; color:#333; margin-bottom:8px; }
-/* HE/ME 合并行 */
 .he-me-row { display:flex; gap:12px; padding:8px 16px; }
 .he-me-btn { flex:1; padding:12px 0; background:#e8e8e8; border:none; border-radius:10px; font-size:18px; font-weight:600; color:#555; cursor:pointer; transition:background 0.15s; }
 .he-me-btn:active { background:#d0d0d0; }
