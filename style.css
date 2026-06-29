@@ -15,9 +15,9 @@ html, body {
   flex-direction: column;
 }
 
-/* 顶部头部 */
+/* 顶部头部固定，键盘弹出不会上移 */
 .top-header {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
@@ -25,15 +25,32 @@ html, body {
   box-shadow: 0 1px 4px #e0d8e6;
   flex-shrink: 0;
   position: relative;
+  z-index: 9;
 }
-.avatar {
+.top-header.show {
+  display: flex;
+}
+.avatar-box {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: #e8dff0;
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.avatar-img.show {
+  display: block;
+}
+.avatar-txt {
   font-weight: bold;
   color: #885fb3;
 }
@@ -57,20 +74,81 @@ html, body {
   z-index: 2;
 }
 
-/* 页面容器切换 */
+/* 页面切换通用 */
 .page {
   flex: 1;
   display: none;
   overflow-y: auto;
+  padding-bottom: 60px;
 }
 .page.active {
   display: flex;
   flex-direction: column;
 }
 
+/* 首页样式 */
+.home-container {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.home-title {
+  text-align: center;
+  color: #663399;
+}
+.app-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+.app-card {
+  background: #fff;
+  width: 120px;
+  padding: 16px 10px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px #e2d9eb;
+  cursor: pointer;
+}
+.app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #e8dff0;
+}
+.app-name {
+  font-size: 14px;
+  color: #444;
+}
+.icon-set-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+.icon-set-wrap input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+#saveIconBtn {
+  width: fit-content;
+  align-self: flex-end;
+  background: #a87bc9;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
 /* 聊天页 */
 .chat-page {
-  padding-bottom: 70px;
+  position: relative;
 }
 .chat-box {
   flex: 1;
@@ -109,7 +187,6 @@ html, body {
   border-bottom-left-radius: 4px;
   box-shadow: 0 1px 3px #ddd;
 }
-/* 输入动画三点 */
 .typing-dot {
   display: inline-block;
   width: 6px;
@@ -131,6 +208,7 @@ html, body {
   padding: 0 6px;
 }
 
+/* 输入框跟随键盘适配 */
 .input-area {
   display: flex;
   gap: 10px;
@@ -138,9 +216,10 @@ html, body {
   background: #fff;
   border-top: 1px solid #eee;
   position: fixed;
-  bottom: 50px;
   left: 0;
   width: 100%;
+  bottom: 50px;
+  transition: bottom 0.2s ease;
 }
 #inputText {
   flex: 1;
@@ -162,10 +241,53 @@ html, body {
   background: #8e64b0;
 }
 
-/* 字卡管理页面 */
+/* 字卡分组页面 */
 .card-page {
   padding: 16px;
-  padding-bottom: 70px;
+}
+.group-op-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+#newGroupName {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+#createGroupBtn {
+  background: #a87bc9;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 12px;
+}
+.group-list {
+  background: #f3eef9;
+  padding: 8px;
+  border-radius: 8px;
+  max-height: 100px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+.group-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 13px;
+}
+.del-group-btn {
+  color: #d64545;
+  font-size: 12px;
+  cursor: pointer;
+}
+#currentGroupSelect {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 12px;
 }
 .card-add-bar {
   display: flex;
