@@ -110,12 +110,12 @@
       <div class="setting-block">
         <h4 class="block-title">滑动特效</h4>
         <div class="toggle-row">
-          <span class="toggle-label">启用涟漪拖尾效果</span>
+          <span class="toggle-label">启用粒子拖尾效果</span>
           <div class="toggle-switch active" id="rippleToggle">
             <div class="toggle-knob"></div>
           </div>
         </div>
-        <div style="font-size:12px; color:#999; margin-top:4px;">点击或滑动屏幕产生水滴涟漪效果</div>
+        <div style="font-size:12px; color:#999; margin-top:4px;">点击产生碎片粒子，滑动产生拖尾</div>
       </div>
       <div class="tip-text">所有设置保存后刷新页面生效</div>
     </div>
@@ -154,15 +154,24 @@
     </div>
   </div>
 
-  <!-- ===== 聊天设置页（独立条目） ===== -->
+  <!-- ===== 聊天设置页 ===== -->
   <div class="page chat-set-page">
     <div class="page-header">
       <button class="back-btn chat-set-back"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
     </div>
     <div class="chat-setting-container">
-      <div class="chat-set-item" id="blockTa">关于TA</div>
-      <div class="chat-set-item" id="blockMe">关于我</div>
-      <div class="chat-set-item" id="blockDelay">回复时长</div>
+      <!-- HE / ME 合并栏 -->
+      <div class="chat-set-item he-me-row">
+        <button class="he-me-btn" id="heBtn">HE</button>
+        <button class="he-me-btn" id="meBtn">ME</button>
+      </div>
+      <div class="chat-set-item" id="blockDelay">
+        <div class="chat-set-label">回复时长</div>
+        <div class="range-row">
+          <input type="range" id="delayRange" min="20" max="120" value="20" />
+          <span class="range-value" id="delayRangeValue">20秒</span>
+        </div>
+      </div>
       <div class="chat-set-item" id="blockPatSuffix">我的拍一拍后缀</div>
       <div class="chat-set-item" id="blockVideoBg">视频通话背景</div>
       <div class="chat-set-item">
@@ -200,7 +209,10 @@
         </div>
         <div class="status-bar"><span class="status-text" id="currentStatusText">平静</span></div>
       </div>
-      <button class="setting-btn" id="openChatSettingPage"><img src="https://i.ibb.co/bgWYH15g/gengduo-2.png" alt="更多" /></button>
+      <div class="header-right-btns">
+        <button class="video-top-btn" id="videoTopBtn"><img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" alt="视频" /></button>
+        <button class="setting-btn" id="openChatSettingPage"><img src="https://i.ibb.co/bgWYH15g/gengduo-2.png" alt="更多" /></button>
+      </div>
     </div>
     <div class="chat-box" id="chatWrap"></div>
     <div class="quote-bar" id="quoteBar" style="display:none;">
@@ -209,8 +221,9 @@
     </div>
     <div class="input-area" id="inputWrap">
       <button class="album-btn" id="albumBtn"><img src="https://i.ibb.co/bRWBPsxH/xiangce.png" alt="相册" /></button>
-      <input type="text" id="inputText" placeholder="输入想要发送的话..." autocomplete="off" />
+      <input type="text" id="inputText" placeholder="…" autocomplete="off" />
       <div class="emoji-btn-wrapper">
+        <button class="emoji-send-btn" id="emojiSendBtn"><img src="https://i.ibb.co/JWCM6nHz/pengyouquanbiaoqingbao.png" alt="表情" /></button>
         <button id="sendBtn">发送</button>
       </div>
     </div>
@@ -297,13 +310,14 @@
     </div>
     <div class="calendar-container">
       <div class="calendar-text-area">
-        <div class="cal-row">
-          <span class="cal-label">他的记录</span>
-          <span class="cal-text ta-text" id="calTaText">TA今天还没有记录哦～</span>
+        <div class="cal-block">
+          <div class="cal-block-label">他的记录</div>
+          <div class="cal-text ta-text" id="calTaText">TA今天还没有记录哦～</div>
         </div>
-        <div class="cal-row">
-          <span class="cal-label">我的记录</span>
-          <span class="cal-text me-text" id="calMeText">今天有什么想说的。</span>
+        <div class="cal-divider"></div>
+        <div class="cal-block">
+          <div class="cal-block-label">我的记录</div>
+          <div class="cal-text me-text" id="calMeText">今天有什么想说的。</div>
         </div>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
@@ -312,15 +326,24 @@
   </div>
 
   <!-- ===== 弹窗区 ===== -->
+  <!-- 通用图片选择弹窗（新样式） -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
-      <div class="upload-item"><label>上传本地图片</label><input type="file" id="localImageFile" accept="image/*" /></div>
-      <div class="link-item"><label>填入图片链接</label><input type="text" id="imageLinkInput" placeholder="粘贴网络图片地址" autocomplete="off" /></div>
+      <div class="image-preview-wrap">
+        <div class="image-preview-box" id="imagePreviewBox">
+          <img id="imagePreviewImg" src="" alt="图片预览" />
+          <div class="image-preview-placeholder" id="imagePreviewPlaceholder">暂无图片</div>
+        </div>
+      </div>
+      <button class="upload-btn" id="localImageBtn">上传本地图片</button>
+      <input type="file" id="localImageFile" accept="image/*" style="display:none;" />
+      <input type="text" id="imageLinkInput" placeholder="填入图片链接" autocomplete="off" />
       <div class="btns-wrap"><button class="close" id="closeImageModal">取消</button><button class="save" id="confirmImageBtn">确定使用</button></div>
     </div>
   </div>
 
+  <!-- 编辑文本弹窗 -->
   <div class="mask" id="editTextMask">
     <div class="panel">
       <h3 id="editTextTitle">编辑内容</h3>
@@ -329,6 +352,7 @@
     </div>
   </div>
 
+  <!-- 导入确认弹窗 -->
   <div class="mask" id="importConfirmMask">
     <div class="panel">
       <h3 id="importConfirmTitle">确认导入</h3>
@@ -337,6 +361,7 @@
     </div>
   </div>
 
+  <!-- 关于TA（保留但通过 HE 触发） -->
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
@@ -347,6 +372,7 @@
     </div>
   </div>
 
+  <!-- 关于我（保留但通过 ME 触发） -->
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
@@ -357,15 +383,10 @@
     </div>
   </div>
 
-  <div class="mask" id="delayMask">
-    <div class="panel">
-      <h3>回复间隔设置</h3>
-      <label style="font-size:14px;color:#444;">最小等待秒数（最低20）</label><input type="number" id="minDelayInput" min="20" value="20" />
-      <label style="font-size:14px;color:#444;margin-top:8px;">最大等待秒数（最高120）</label><input type="number" id="maxDelayInput" max="120" value="120" />
-      <div class="btns-wrap"><button class="close" id="closeDelaySet">取消</button><button class="save" id="saveDelaySet">保存</button></div>
-    </div>
-  </div>
+  <!-- 回复时长已改用进度条，弹窗保留但不使用 -->
+  <div class="mask" id="delayMask" style="display:none;"></div>
 
+  <!-- 拍一拍后缀 -->
   <div class="mask" id="patMask">
     <div class="panel">
       <h3>我的拍一拍后缀</h3>
@@ -374,6 +395,7 @@
     </div>
   </div>
 
+  <!-- 视频背景 -->
   <div class="mask" id="videoBgMask">
     <div class="panel">
       <h3>视频通话背景</h3>
@@ -383,6 +405,7 @@
     </div>
   </div>
 
+  <!-- 写信弹窗 -->
   <div class="mask" id="writeLetterMask">
     <div class="panel">
       <h3>写信</h3>
@@ -391,6 +414,7 @@
     </div>
   </div>
 
+  <!-- 心情记录弹窗 -->
   <div class="mask" id="moodModal">
     <div class="panel">
       <h3>记录今日心情</h3>
