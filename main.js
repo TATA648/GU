@@ -1,10 +1,17 @@
 let store = {
-  base: {
+  taInfo: {
     name: "梦角",
-    avatarUrl: "",
-    minDelay: 20,
-    maxDelay: 60
+    avatarUrl: ""
   },
+  myInfo: {
+    name: "我",
+    avatarUrl: ""
+  },
+  delay: {
+    min: 20,
+    max: 120
+  },
+  chatBg: "",
   appIcon: {
     chat: "",
     card: "",
@@ -12,11 +19,12 @@ let store = {
     mail: ""
   },
   wallpaper: "",
-  chatBg: "",
   groups: {},
   currentSelectGroup: "",
   letters: [],
-  inbox: []
+  inbox: [],
+  emojiList: [],
+  lastChatTime: 0
 };
 
 const topHeader = document.querySelector('.top-header');
@@ -25,7 +33,20 @@ const inputText = document.getElementById('inputText');
 const sendBtn = document.getElementById('sendBtn');
 const inputWrap = document.getElementById('inputWrap');
 
-// 图片弹窗
+// 顶部双头像
+const headerTaAvatar = document.getElementById('headerTaAvatar');
+const headerMyAvatar = document.getElementById('headerMyAvatar');
+const targetName = document.getElementById('targetName');
+
+// 表情面板
+const emojiToggle = document.getElementById('emojiToggle');
+const emojiPanel = document.getElementById('emojiPanel');
+const emojiFileInput = document.getElementById('emojiFileInput');
+const emojiLinkInput = document.getElementById('emojiLinkInput');
+const addEmojiBtn = document.getElementById('addEmojiBtn');
+const emojiList = document.getElementById('emojiList');
+
+// 通用图片弹窗
 const imageSelectMask = document.getElementById('imageSelectMask');
 const modalTitle = document.getElementById('modalTitle');
 const localImageFile = document.getElementById('localImageFile');
@@ -33,14 +54,7 @@ const imageLinkInput = document.getElementById('imageLinkInput');
 const closeImageModal = document.getElementById('closeImageModal');
 const confirmImageBtn = document.getElementById('confirmImageBtn');
 
-// 头像弹窗
-const avatarMask = document.getElementById('avatarMask');
-const avatarLocalFile = document.getElementById('avatarLocalFile');
-const avatarLinkInput = document.getElementById('avatarLinkInput');
-const closeAvatarSet = document.getElementById('closeAvatarSet');
-const saveAvatarBtn = document.getElementById('saveAvatarBtn');
-
-// 壁纸、聊天背景
+// 主页壁纸、聊天背景
 const wallpaperPreview = document.getElementById('wallpaperPreview');
 const openWallpaperModal = document.getElementById('openWallpaperModal');
 const chatBgPreview = document.getElementById('chatBgPreview');
@@ -57,13 +71,38 @@ const themeAppIcon = document.getElementById('themeAppIcon');
 const mailAppIcon = document.getElementById('mailAppIcon');
 const changeIconBtns = document.querySelectorAll('.icon-change-btn');
 
-// 聊天设置页
+// 聊天设置页面
 const openChatSettingPage = document.getElementById('openChatSettingPage');
-const setNickname = document.getElementById('setNickname');
-const setMinDelay = document.getElementById('setMinDelay');
-const setMaxDelay = document.getElementById('setMaxDelay');
 const saveChatSetting = document.getElementById('saveChatSetting');
 const chatSetBack = document.querySelector('.chat-set-back');
+
+// 四大设置区块
+const blockTa = document.getElementById('blockTa');
+const blockMe = document.getElementById('blockMe');
+const blockDelay = document.getElementById('blockDelay');
+
+// 关于TA弹窗
+const taMask = document.getElementById('taMask');
+const taAvatarFile = document.getElementById('taAvatarFile');
+const taAvatarLink = document.getElementById('taAvatarLink');
+const taNameInput = document.getElementById('taNameInput');
+const closeTaSet = document.getElementById('closeTaSet');
+const saveTaSet = document.getElementById('saveTaSet');
+
+// 关于我弹窗
+const meMask = document.getElementById('meMask');
+const meAvatarFile = document.getElementById('meAvatarFile');
+const meAvatarLink = document.getElementById('meAvatarLink');
+const meNameInput = document.getElementById('meNameInput');
+const closeMeSet = document.getElementById('closeMeSet');
+const saveMeSet = document.getElementById('saveMeSet');
+
+// 时长弹窗
+const delayMask = document.getElementById('delayMask');
+const minDelayInput = document.getElementById('minDelayInput');
+const maxDelayInput = document.getElementById('maxDelayInput');
+const closeDelaySet = document.getElementById('closeDelaySet');
+const saveDelaySet = document.getElementById('saveDelaySet');
 
 // 信箱
 const mailTabs = document.querySelectorAll('.mail-tab');
@@ -82,7 +121,7 @@ function switchPage(pageName) {
   document.body.classList.toggle('home-bg', pageName === 'home-page');
 }
 
-// 返回首页
+// 返回按钮
 document.querySelectorAll('.back-btn').forEach(btn => {
   btn.onclick = function() {
     switchPage('home-page');
@@ -98,7 +137,7 @@ document.querySelectorAll('.app-card').forEach(card => {
   }
 });
 
-// 打开主页壁纸弹窗
+// 打开主页壁纸
 openWallpaperModal.onclick = function() {
   currentEditTarget = 'wallpaper';
   modalTitle.innerText = '设置主页壁纸';
@@ -106,7 +145,7 @@ openWallpaperModal.onclick = function() {
   imageLinkInput.value = store.wallpaper;
   imageSelectMask.style.display = 'flex';
 };
-// 打开聊天背景弹窗
+// 打开聊天背景
 openChatBgModal.onclick = function() {
   currentEditTarget = 'chatBg';
   modalTitle.innerText = '设置聊天背景';
@@ -157,32 +196,99 @@ confirmImageBtn.onclick = async function() {
   currentEditTarget = null;
 };
 
-// 头像修改
-const avatarImg = document.getElementById('avatarImg');
-const avatarClickEdit = document.getElementById('avatarClickEdit');
-const targetName = document.getElementById('targetName');
-avatarClickEdit.onclick = function() {
-  avatarLocalFile.value = '';
-  avatarLinkInput.value = store.base.avatarUrl;
-  avatarMask.style.display = 'flex';
-};
-closeAvatarSet.onclick = function() {
-  avatarMask.style.display = 'none';
-};
-saveAvatarBtn.onclick = async function() {
+// 表情面板开关
+emojiToggle.onclick = ()=>emojiPanel.classList.toggle('show');
+document.addEventListener('click',e=>{
+  if(!emojiPanel.contains(e.target) && e.target !== emojiToggle){
+    emojiPanel.classList.remove('show');
+  }
+})
+// 添加表情
+addEmojiBtn.onclick = async ()=>{
   let url = '';
-  if(avatarLocalFile.files[0]) {
-    url = await fileToDataUrl(avatarLocalFile.files[0]);
-  } else if(avatarLinkInput.value.trim()) {
-    url = avatarLinkInput.value.trim();
-  }
-  if(url) {
-    store.base.avatarUrl = url;
-    renderHeader();
-    saveLocal();
-  }
-  avatarMask.style.display = 'none';
-};
+  if(emojiFileInput.files[0]) url = await fileToDataUrl(emojiFileInput.files[0]);
+  else if(emojiLinkInput.value.trim()) url = emojiLinkInput.value.trim();
+  if(!url) return;
+  store.emojiList.push(url);
+  emojiFileInput.value = '';
+  emojiLinkInput.value = '';
+  saveLocal();
+  renderEmojiList();
+}
+function renderEmojiList(){
+  emojiList.innerHTML = '';
+  store.emojiList.forEach(src=>{
+    const div = document.createElement('div');
+    div.className = 'emoji-item';
+    div.innerHTML = `<img src="${src}">`;
+    div.onclick = ()=>{
+      inputText.value += `[emoji:${src}]`;
+    }
+    emojiList.appendChild(div);
+  })
+}
+
+// 打开聊天设置页
+openChatSettingPage.onclick = ()=>switchPage('chat-set-page');
+saveChatSetting.onclick = ()=>{
+  applyBgStyle();
+  saveLocal();
+  renderHeaderAvatar();
+  switchPage('chat-page');
+}
+
+// 打开各个设置弹窗
+blockTa.onclick = ()=>{
+  taNameInput.value = store.taInfo.name;
+  taAvatarLink.value = store.taInfo.avatarUrl;
+  taAvatarFile.value = '';
+  taMask.style.display = 'flex';
+}
+closeTaSet.onclick = ()=>taMask.style.display = 'none';
+saveTaSet.onclick = async ()=>{
+  store.taInfo.name = taNameInput.value.trim() || '梦角';
+  let url = store.taInfo.avatarUrl;
+  if(taAvatarFile.files[0]) url = await fileToDataUrl(taAvatarFile.files[0]);
+  else if(taAvatarLink.value.trim()) url = taAvatarLink.value.trim();
+  store.taInfo.avatarUrl = url;
+  renderHeaderAvatar();
+  saveLocal();
+  taMask.style.display = 'none';
+}
+
+blockMe.onclick = ()=>{
+  meNameInput.value = store.myInfo.name;
+  meAvatarLink.value = store.myInfo.avatarUrl;
+  meAvatarFile.value = '';
+  meMask.style.display = 'flex';
+}
+closeMeSet.onclick = ()=>meMask.style.display = 'none';
+saveMeSet.onclick = async ()=>{
+  store.myInfo.name = meNameInput.value.trim() || '我';
+  let url = store.myInfo.avatarUrl;
+  if(meAvatarFile.files[0]) url = await fileToDataUrl(meAvatarFile.files[0]);
+  else if(meAvatarLink.value.trim()) url = meAvatarLink.value.trim();
+  store.myInfo.avatarUrl = url;
+  renderHeaderAvatar();
+  saveLocal();
+  meMask.style.display = 'none';
+}
+
+blockDelay.onclick = ()=>{
+  minDelayInput.value = store.delay.min;
+  maxDelayInput.value = store.delay.max;
+  delayMask.style.display = 'flex';
+}
+closeDelaySet.onclick = ()=>delayMask.style.display = 'none';
+saveDelaySet.onclick = ()=>{
+  let min = Math.max(Number(minDelayInput.value)||20,20);
+  let max = Math.min(Number(maxDelayInput.value)||120,120);
+  if(min>max) [min,max] = [max,min];
+  store.delay.min = min;
+  store.delay.max = max;
+  saveLocal();
+  delayMask.style.display = 'none';
+}
 
 function fileToDataUrl(file) {
   return new Promise(resolve => {
@@ -208,25 +314,13 @@ function applyBgStyle() {
   document.documentElement.style.setProperty('--chat-bg', store.chatBg ? `url(${store.chatBg})` : 'none');
 }
 
-// 聊天设置页面打开
-openChatSettingPage.onclick = function() {
-  setNickname.value = store.base.name;
-  setMinDelay.value = store.base.minDelay;
-  setMaxDelay.value = store.base.maxDelay;
-  switchPage('chat-set-page');
-};
-saveChatSetting.onclick = function() {
-  let min = Number(setMinDelay.value) || 1;
-  let max = Number(setMaxDelay.value) || min;
-  store.base.name = setNickname.value.trim() || '梦角';
-  store.base.minDelay = Math.min(min, max);
-  store.base.maxDelay = Math.max(min, max);
-  renderHeader();
-  saveLocal();
-  switchPage('chat-page');
-};
+function renderHeaderAvatar(){
+  targetName.innerText = store.taInfo.name;
+  headerTaAvatar.src = store.taInfo.avatarUrl || '';
+  headerMyAvatar.src = store.myInfo.avatarUrl || '';
+}
 
-// 信箱标签切换
+// 信箱切换
 mailTabs.forEach(tab => {
   tab.onclick = function() {
     mailTabs.forEach(t => t.classList.remove('active'));
@@ -243,23 +337,16 @@ sendLetterBtn.onclick = function() {
   const text = letterInput.value.trim();
   if(!text) return;
   const len = text.length;
-  // 12h ~ 24h
   const delayHour = 12 + (len / 500) * 12;
   const realDelay = Math.min(Math.max(delayHour, 12), 24) * 3600 * 1000;
   const create = Date.now();
   const replyTime = create + realDelay;
-  store.letters.push({
-    text,
-    create,
-    replyTime,
-    done: false
-  });
+  store.letters.push({text,create,replyTime,done:false});
   letterInput.value = '';
   saveLocal();
   setTimeout(()=>processLetterReply(), realDelay);
 };
 
-// 信件到期生成回信
 function processLetterReply() {
   const allCards = getAllValidCards();
   store.letters.forEach(letter => {
@@ -267,15 +354,8 @@ function processLetterReply() {
     letter.done = true;
     const count = randomInt(5, 20);
     let reply = [];
-    for(let i=0;i<count;i++) {
-      const idx = randomInt(0, allCards.length - 1);
-      reply.push(allCards[idx].text);
-    }
-    store.inbox.push({
-      replyText: reply.join(''),
-      originText: letter.text,
-      time: letter.replyTime
-    });
+    for(let i=0;i<count;i++) reply.push(allCards[randomInt(0, allCards.length-1)].text);
+    store.inbox.push({replyText: reply.join(''),originText:letter.text,time:letter.replyTime});
   });
   saveLocal();
   renderInbox();
@@ -287,6 +367,7 @@ function renderInbox() {
     const div = document.createElement('div');
     div.className = 'letter-item';
     div.innerHTML = `
+      <div class="letter-origin">我方原信：${item.originText}</div>
       <div class="letter-time">${formatTime(item.time)}</div>
       <div class="letter-content">${item.replyText}</div>
     `;
@@ -303,230 +384,52 @@ function formatTime(ts) {
 }
 function pad(n) {return String(n).padStart(2,'0');}
 
-// 键盘适配
-window.visualViewport.addEventListener('resize', () => {
-  const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
-  if(window.visualViewport.height < window.innerHeight - 100) {
-    inputWrap.style.bottom = (safe + window.innerHeight - window.visualViewport.height) + 'px';
-  } else {
-    inputWrap.style.bottom = safe + 'px';
+// 10分钟间隔判定
+function needTimeStamp(){
+  const now = Date.now();
+  if(now - store.lastChatTime > 10 * 60 * 1000){
+    store.lastChatTime = now;
+    return true;
   }
-});
-
-function loadLocal(){
-  const raw = localStorage.getItem('dreamCardStore');
-  if(raw) store = JSON.parse(raw);
-  renderHeader();
-  refreshAllIconPreview();
-  wallpaperPreview.src = store.wallpaper;
-  chatBgPreview.src = store.chatBg;
-  applyBgStyle();
-  refreshGroupSelect();
-  renderInbox();
+  return false;
 }
-function saveLocal(){
-  localStorage.setItem('dreamCardStore', JSON.stringify(store));
+function addTimeDivider(){
+  const div = document.createElement('div');
+  div.className = 'time-divider';
+  div.innerText = getNowTime();
+  chatWrap.appendChild(div);
 }
 
-function renderHeader(){
-  targetName.innerText = store.base.name;
-  if(store.base.avatarUrl){
-    avatarImg.src = store.base.avatarUrl;
-    avatarImg.classList.add('show');
-  }else{
-    avatarImg.classList.remove('show');
+// 解析文本内表情标签
+function parseEmojiText(text){
+  return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>{
+    return `<img class="msg-emoji-inside" src="${src}">`;
+  })
+}
+
+function randomAttachEmoji(){
+  // 35%概率附带表情，15%只发表情
+  const r = Math.random();
+  if(store.emojiList.length === 0) return null;
+  if(r < 0.15){
+    return store.emojiList[randomInt(0, store.emojiList.length-1)];
+  }else if(r < 0.5){
+    return store.emojiList[randomInt(0, store.emojiList.length-1)];
   }
+  return null;
 }
 
-function getNowTime(){
-  const d = new Date();
-  let h = String(d.getHours()).padStart(2,'0');
-  let m = String(d.getMinutes()).padStart(2,'0');
-  return h + ':' + m;
-}
-
-function addBubble(text, isUser, time, isTyping = false){
+function addBubble(text, isUser, time){
+  if(needTimeStamp()) addTimeDivider();
+  store.lastChatTime = Date.now();
   const item = document.createElement('div');
   item.className = `msg-item ${isUser ? 'user-msg' : 'target-msg'}`;
-  if(isTyping){
-    item.innerHTML = `
-      <div class="msg-bubble">
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-      </div>
-      <div class="time-text">${time}</div>
-    `;
-  }else{
-    item.innerHTML = `
-      <div class="msg-bubble">${text}</div>
-      <div class="time-text">${time}</div>
-    `;
+  let html = parseEmojiText(text);
+  let emojiSrc = null;
+  if(!isUser) emojiSrc = randomAttachEmoji();
+  if(emojiSrc && text.trim() === ''){
+    html = `<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`;
+  }else if(emojiSrc){
+    html += `<img class="msg-emoji-inside" src="${emojiSrc}">`;
   }
-  chatWrap.appendChild(item);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-  return item;
-}
-
-function getAllValidCards(){
-  let list = [];
-  Object.values(store.groups).forEach(arr => {
-    list = list.concat(arr.filter(item => !item.disabled));
-  });
-  return list;
-}
-
-function getRandomReplyArr(){
-  const pool = getAllValidCards();
-  if(pool.length === 0) return ["暂无可用字卡，请前往字卡库添加分组与词条"];
-  let arr = [...pool];
-  for(let i = arr.length - 1; i > 0; i--){
-    const r = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[r]] = [arr[r], arr[i]];
-  }
-  const take = Math.floor(Math.random() * 3) + 1;
-  return arr.slice(0, take);
-}
-
-function sendMessage(){
-  const content = inputText.value.trim();
-  if(!content) return;
-  addBubble(content, true, getNowTime());
-  inputText.value = '';
-
-  const min = store.base.minDelay * 1000;
-  const max = store.base.maxDelay * 1000;
-  const wait = Math.floor(Math.random() * (max - min) + min);
-  const tip = addBubble('', false, getNowTime(), true);
-
-  setTimeout(() => {
-    tip.remove();
-    const reply = getRandomReplyArr();
-    reply.forEach((item, idx) => {
-      setTimeout(() => addBubble(item.text, false, getNowTime()), idx * 500);
-    });
-  }, wait);
-}
-
-sendBtn.onclick = sendMessage;
-inputText.onkeydown = e => {
-  if(e.key === 'Enter') sendMessage();
-};
-
-// 字卡分组逻辑
-const newGroupName = document.getElementById('newGroupName');
-const createGroupBtn = document.getElementById('createGroupBtn');
-const groupListWrap = document.getElementById('groupListWrap');
-const currentGroupSelect = document.getElementById('currentGroupSelect');
-const newCardInput = document.getElementById('newCardInput');
-const addSingleCard = document.getElementById('addSingleCard');
-const batchTextarea = document.getElementById('batchTextarea');
-const batchImportBtn = document.getElementById('batchImportBtn');
-const cardListWrap = document.getElementById('cardListWrap');
-
-createGroupBtn.onclick = function() {
-  const name = newGroupName.value.trim();
-  if(!name || store.groups[name]) return;
-  store.groups[name] = [];
-  newGroupName.value = '';
-  saveLocal();
-  refreshGroupSelect();
-};
-
-function refreshGroupSelect(){
-  const keys = Object.keys(store.groups);
-  groupListWrap.innerHTML = '';
-  currentGroupSelect.innerHTML = '';
-  keys.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g;
-    opt.textContent = `${g} (${store.groups[g].length}条)`;
-    currentGroupSelect.appendChild(opt);
-    const row = document.createElement('div');
-    row.className = 'group-item-row';
-    row.innerHTML = `<span>${g}</span><span class="del-group-btn">删除</span>`;
-    row.querySelector('.del-group-btn').onclick = function() {
-      delete store.groups[g];
-      saveLocal();
-      refreshGroupSelect();
-    };
-    groupListWrap.appendChild(row);
-  });
-  if(keys.length && !keys.includes(store.currentSelectGroup)) {
-    store.currentSelectGroup = keys[0];
-  }
-  currentGroupSelect.value = store.currentSelectGroup;
-  currentGroupSelect.onchange = function() {
-    store.currentSelectGroup = this.value;
-    saveLocal();
-    renderCurrentCardList();
-  };
-  renderCurrentCardList();
-}
-
-function renderCurrentCardList(){
-  cardListWrap.innerHTML = '';
-  const g = store.currentSelectGroup;
-  if(!g || !store.groups[g]) return;
-  const list = store.groups[g];
-  list.forEach((card, idx) => {
-    const div = document.createElement('div');
-    div.className = `card-item ${card.disabled ? 'disabled' : ''}`;
-    div.innerHTML = `
-      <div class="card-text">${card.text}</div>
-      <div class="card-opts">
-        <button class="edit-btn">编辑</button>
-        <button class="del-btn">删除</button>
-        <button class="switch-btn">${card.disabled ? '启用' : '屏蔽'}</button>
-      </div>
-    `;
-    div.querySelector('.edit-btn').onclick = function() {
-      const res = prompt('修改字卡', card.text);
-      if(res?.trim()) {
-        list[idx].text = res.trim();
-        saveLocal();
-        renderCurrentCardList();
-      }
-    };
-    div.querySelector('.del-btn').onclick = function() {
-      list.splice(idx, 1);
-      saveLocal();
-      renderCurrentCardList();
-    };
-    div.querySelector('.switch-btn').onclick = function() {
-      list[idx].disabled = !list[idx].disabled;
-      saveLocal();
-      renderCurrentCardList();
-    };
-    cardListWrap.appendChild(div);
-  });
-}
-
-addSingleCard.onclick = function() {
-  const text = newCardInput.value.trim();
-  const g = store.currentSelectGroup;
-  if(!text || !g) return;
-  store.groups[g].push({id: Date.now(), text: text, disabled: false});
-  newCardInput.value = '';
-  saveLocal();
-  renderCurrentCardList();
-};
-newCardInput.onkeydown = e => {
-  if(e.key === 'Enter') addSingleCard.click();
-};
-
-batchImportBtn.onclick = function() {
-  const text = batchTextarea.value.trim();
-  const g = store.currentSelectGroup;
-  if(!text || !g) return;
-  const arr = text.split('\n').map(s => s.trim()).filter(s => s);
-  arr.forEach(t => {
-    store.groups[g].push({id: Date.now() + Math.random(), text: t, disabled: false});
-  });
-  batchTextarea.value = '';
-  saveLocal();
-  renderCurrentCardList();
-};
-
-loadLocal();
-setInterval(()=>processLetterReply(), 10000);
+  const avatarSrc = isUser ? store.myInfo.avatarUrl :
