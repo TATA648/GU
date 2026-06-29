@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
       videoBg:""
     },
     videoCall:{active:false, caller:"", startTime:null, answered:false, folded:false, timer:null},
-    isTyping: false  // 新增：是否正在等待回复
+    isTyping: false
   };
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -208,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function parseEmojiText(text){ return text.replace(/\[emoji:(.+?)\]/g,(m,src)=>`<img class="msg-emoji-inside" src="${src}" loading="lazy">`); }
   function randomAttachEmoji(){ if(store.emojiList.length===0) return null; if(Math.random()<0.25) return store.emojiList[randomInt(0,store.emojiList.length-1)]; return null; }
 
-  // 渲染消息，如果正在输入则显示占位
   function renderMessages(){
     if(!chatWrap) return;
     chatWrap.innerHTML='';
@@ -223,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
       lastTime=msg.time;
       appendMessageElement(msg);
     });
-    // 如果正在等待回复，添加占位
     if(store.isTyping){
       const tempItem=document.createElement('div');
       tempItem.className='msg-item target-msg typing-placeholder';
@@ -233,7 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
     chatWrap.scrollTop=chatWrap.scrollHeight;
   }
 
-  // 添加消息元素（支持头像合并）
   function appendMessageElement(msg){
     if(msg.system){
       const div=document.createElement('div');
@@ -248,13 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if(isEmojiOnly) item.classList.add('emoji-only');
     item.dataset.msgId=msg.id;
 
-    // 判断是否需要隐藏头像（与上一条消息合并）
     let hideAvatar=false;
     const msgs=store.messages;
     const idx=msgs.indexOf(msg);
     if(idx>0){
       const prev=msgs[idx-1];
-      // 上一条不是系统消息，且发送者相同，且时间差小于3秒
       if(!prev.system && prev.isUser===msg.isUser && (msg.time-prev.time)<3000){
         hideAvatar=true;
       }
@@ -274,22 +269,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
     const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
-    // 如果隐藏头像，用空白占位保持对齐
     const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
     item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
 
-    // 引用滑动：从左向右滑（diff < -30）
-    let startX=0, isSwiping=false;
-    item.addEventListener('touchstart',function(e){ startX=e.touches[0].clientX; isSwiping=true; }, {passive:true});
-    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const diff=startX-e.touches[0].clientX; if(diff < -30){
-      e.preventDefault();
-      isSwiping=false;
-      this.style.transition='transform 0.2s ease';
-      this.style.transform='translateX(20px)';
-      setTimeout(()=>{ this.style.transform=''; }, 300);
-      quoteMsg=msg; quoteContent.innerText=msg.text; quoteBar.style.display='flex';
-    } }, {passive:false});
-    item.addEventListener('touchend',function(){ isSwiping=false; });
+    // ===== 引用长按滑动（修改） =====
+    let longPressTimer=null;
+    let isLongPress=false;
+    let touchStartX=0, touchStartY=0;
+
+    item.addEventListener('touchstart', function(e){
+      const touch=e.touches[0];
+      touchStartX=touch.clientX;
+      touchStartY=touch.clientY;
+      isLongPress=false;
+      longPressTimer=setTimeout(()=>{
+        isLongPress=true;
+        // 长按触发震动（可选）
+        if(navigator.vibrate) navigator.vibrate(10);
+      }, 300); // 300ms长按判定
+    }, {passive:true});
+
+    item.addEventListener('touchmove', function(e){
+      if(!isLongPress) return;
+      const touch=e.touches[0];
+      const diffX=touchStartX - touch.clientX; // 手指向左滑动（diff>0）或向右滑动（diff<0）
+      // 我们只对从左向右滑（diff < -30）触发引用
+      if(diffX < -30){
+        e.preventDefault();
+        clearTimeout(longPressTimer);
+        longPressTimer=null;
+        isLongPress=false;
+        // 回弹效果
+        this.style.transition='transform 0.2s ease';
+        this.style.transform='translateX(20px)';
+        setTimeout(()=>{ this.style.transform=''; }, 300);
+        quoteMsg=msg;
+        quoteContent.innerText=msg.text;
+        quoteBar.style.display='flex';
+        // 清除其他可能的状态
+        item.removeEventListener('touchend', touchEndHandler);
+        item.removeEventListener('touchcancel', touchEndHandler);
+      }
+    }, {passive:false});
+
+    const touchEndHandler = function(){
+      clearTimeout(longPressTimer);
+      longPressTimer=null;
+      isLongPress=false;
+    };
+    item.addEventListener('touchend', touchEndHandler, {passive:true});
+    item.addEventListener('touchcancel', touchEndHandler, {passive:true});
+
     chatWrap.appendChild(item);
   }
 
@@ -300,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     store.lastChatTime=Date.now();
     appendMessageElement(msg);
     chatWrap.scrollTop=chatWrap.scrollHeight;
-    // 角色主动拍一拍（在回复后触发）
+    // 角色主动拍一拍
     if(!system && !isUser && Math.random()<0.1) {
       setTimeout(()=>{
         const target=Math.random()<0.5?'user':'ta';
@@ -329,18 +359,16 @@ document.addEventListener('DOMContentLoaded', function() {
     addMessage(text, true, now, quote);
     inputText.value='';
     updateRandomStatus();
-    // 设置 typing 状态
     store.isTyping=true;
-    renderMessages(); // 立即刷新显示占位
+    renderMessages();
 
     const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
     if(typingTimer) clearTimeout(typingTimer);
     typingTimer=setTimeout(()=>{
-      store.isTyping=false; // 清除占位
+      store.isTyping=false;
       const replyList=getRandomReplyArr();
       let quoteReply=null;
       if(Math.random()<0.2 && store.messages.length>1){ const lastUser=[...store.messages].reverse().find(m=>m.isUser); if(lastUser) quoteReply=lastUser; }
-      // 清除之前的占位（如果存在）
       const placeholder=chatWrap.querySelector('.typing-placeholder');
       if(placeholder) placeholder.remove();
       replyList.forEach((item,idx)=>{
@@ -356,15 +384,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
   if(quoteClose) quoteClose.addEventListener('click',function(){ quoteMsg=null; quoteBar.style.display='none'; });
 
-  // ========== 拍一拍（使用 click 检测双击，不影响滚动） ==========
+  // ========== 拍一拍（双击检测） ==========
   function handlePat(avatarEl, isUser){
     const initiator=store.myInfo.name;
     let targetName='';
-    if(isUser){
-      targetName=store.myInfo.name;
-    } else {
-      targetName=store.taInfo.name;
-    }
+    if(isUser) targetName=store.myInfo.name; else targetName=store.taInfo.name;
     const suffix=store.chatSettings.patSuffix||'拍了拍';
     const patText=`${initiator} 拍了拍 ${targetName} ${suffix}`;
     addMessage(patText, false, Date.now(), null, true, false);
