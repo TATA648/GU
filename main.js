@@ -15,9 +15,8 @@ let store = {
   currentSelectGroup: ""
 };
 
-// 基础DOM
+// DOM
 const topHeader = document.querySelector('.top-header');
-const tabBarWrap = document.getElementById('tabBarWrap');
 const chatWrap = document.getElementById('chatWrap');
 const inputText = document.getElementById('inputText');
 const sendBtn = document.getElementById('sendBtn');
@@ -34,6 +33,14 @@ const targetName = document.getElementById('targetName');
 const avatarImg = document.getElementById('avatarImg');
 const avatarText = document.getElementById('avatarText');
 const avatarClickEdit = document.getElementById('avatarClickEdit');
+
+// 返回按钮统一绑定：全部返回首页
+const backBtns = document.querySelectorAll('.back-btn');
+backBtns.forEach(btn => {
+  btn.onclick = () => {
+    switchPage('home-page');
+  }
+});
 
 // 头像弹窗
 const avatarMask = document.getElementById('avatarMask');
@@ -61,29 +68,18 @@ const batchTextarea = document.getElementById('batchTextarea');
 const batchImportBtn = document.getElementById('batchImportBtn');
 const cardListWrap = document.getElementById('cardListWrap');
 
-// Tab切换
-const tabItems = document.querySelectorAll('.tab-item');
-const pages = document.querySelectorAll('.page');
-tabItems.forEach(tab=>{
-  tab.onclick = ()=>{
-    const targetPage = tab.dataset.page;
-    tabItems.forEach(i=>i.classList.remove('active'));
-    tab.classList.add('active');
-    pages.forEach(p=>p.classList.remove('active'));
-    document.querySelector(`.${targetPage}`).classList.add('active');
-    // 首页隐藏底部栏，其他页面显示底部栏
-    tabBarWrap.classList.toggle('show', targetPage !== 'home-page');
-    topHeader.classList.toggle('show', targetPage === 'chat-page');
-  }
-})
+// 页面切换公共函数
+function switchPage(pageName) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.${pageName}`).classList.add('active');
+  topHeader.classList.toggle('show', pageName === 'chat-page');
+}
 
-// 首页卡片点击跳转（仅图标点击，不依赖底部栏）
+// 首页卡片点击跳转
 document.querySelectorAll('.app-card').forEach(card=>{
   card.onclick = ()=>{
     const target = card.dataset.target;
-    tabItems.forEach(t=>{
-      if(t.dataset.page === target) t.click();
-    })
+    switchPage(target);
   }
 })
 
@@ -104,9 +100,9 @@ saveAvatarBtn.onclick = ()=>{
 window.visualViewport.addEventListener('resize', () => {
   const safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
   if(window.visualViewport.height < window.innerHeight - 100){
-    inputWrap.style.bottom = (50 + safeBottom + window.innerHeight - window.visualViewport.height) + 'px';
+    inputWrap.style.bottom = (safeBottom + window.innerHeight - window.visualViewport.height) + 'px';
   }else{
-    inputWrap.style.bottom = `calc(50px + ${safeBottom}px)`;
+    inputWrap.style.bottom = `${safeBottom}px`;
   }
 })
 
@@ -117,8 +113,6 @@ function loadLocal(){
   renderHeader();
   renderAppIcon();
   refreshGroupSelect();
-  // 初始为首页，隐藏底部导航
-  tabBarWrap.classList.remove('show');
 }
 function saveLocal(){
   localStorage.setItem('dreamCardStore', JSON.stringify(store));
