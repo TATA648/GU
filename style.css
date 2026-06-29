@@ -521,3 +521,17 @@ body.home-bg { background-image:var(--wallpaper,none); background-size:cover; ba
   .app-icon { width:44px !important; height:44px !important; }
   .deco-image { max-width:60px; }
 }
+/* 字体上传区域 - 按钮右对齐 */
+.font-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.font-upload-area input[type="file"] {
+  flex: 1;
+  padding: 6px 0;
+  min-width: 0;
+}
+.font-upload-area .change-btn {
+  flex-shrink: 0;
+}
