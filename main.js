@@ -45,10 +45,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const videoWindow=$('#videoWindow'), videoBg=$('#videoBg'), videoTimer=$('#videoTimer'), videoFoldBtn=$('#videoFoldBtn'), videoAvatar=$('#videoAvatar'), videoHangupBtn=$('#videoHangupBtn');
   const videoAnswerArea=$('#videoAnswerArea'), videoAnswerBtn=$('#videoAnswerBtn'), videoRejectBtn=$('#videoRejectBtn');
   const videoCapsule=$('#videoCapsule'), capsuleTimer=$('#capsuleTimer'), capsuleExpand=$('#capsuleExpand');
-  const taAvatar=$('#taAvatar'), myAvatar=$('#myAvatar');
 
   let currentEditTarget=null, currentMailTab='sent', typingTimer=null, letterTimer=null, selectedMoodEmoji=null, currentDateStr=null;
-  let quoteMsg=null, videoTimerInterval=null, videoCallState=null; // 'idle','calling','ringing','connected'
+  let quoteMsg=null, videoTimerInterval=null, videoCallState=null;
 
   // ========== 页面切换 ==========
   function switchPage(pageName) {
@@ -73,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateAnimToggleUI(){ if(!animToggle) return; store.animEnabled?animToggle.classList.add('active'):animToggle.classList.remove('active'); document.body.classList.toggle('no-transition',!store.animEnabled); }
   if(animToggle) animToggle.addEventListener('click',function(){ store.animEnabled=!store.animEnabled; updateAnimToggleUI(); saveLocal(); });
 
-  // ========== 图片弹窗 ==========
+  // ========== 图片弹窗（含表情添加修复） ==========
   function openImageModal(title,targetKey){
     currentEditTarget=targetKey; modalTitle.innerText=title; localImageFile.value='';
     let existing='';
@@ -95,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(currentEditTarget==='wallpaper'){ store.wallpaper=url; wallpaperPreview.src=url; }
     else if(currentEditTarget==='chatBg'){ store.chatBg=url; chatBgPreview.src=url; }
     else if(currentEditTarget==='videoBg'){ store.chatSettings.videoBg=url; applyVideoBg(); }
+    else if(currentEditTarget==='emoji'){ store.emojiList.push(url); renderEmojiGrid(); }
     else{ store.appIcon[currentEditTarget]=url; refreshAllIconPreview(); }
     saveLocal(); applyBgStyle(); imageSelectMask.style.display='none'; currentEditTarget=null;
   });
@@ -132,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
       div.className='emoji-item';
       div.innerHTML=`<img src="${src}" loading="lazy">`;
       div.addEventListener('click',function(){
-        // 直接发送表情消息
         sendMessageByText(`[emoji:${src}]`);
         emojiPanel.classList.remove('show');
       });
@@ -141,9 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   if(emojiSendBtn) emojiSendBtn.addEventListener('click',function(e){ e.stopPropagation(); emojiPanel.classList.toggle('show'); });
   document.addEventListener('click',function(e){ if(emojiPanel&&!emojiPanel.contains(e.target)&&e.target!==emojiSendBtn) emojiPanel.classList.remove('show'); });
-  // 复用图片选择弹窗添加表情
-  const origConfirm=confirmImageBtn._listeners?null:null; // 我们在confirmImageBtn中处理了'emoji'类型
-  // 修改confirmImageBtn逻辑已包含对'emoji'的处理
 
   // ========== 信箱 ==========
   function renderMail(){
@@ -217,6 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function randomAttachEmoji(){ if(store.emojiList.length===0) return null; if(Math.random()<0.25) return store.emojiList[randomInt(0,store.emojiList.length-1)]; return null; }
   function renderMessages(){ if(!chatWrap) return; chatWrap.innerHTML=''; let lastTime=0; store.messages.forEach(msg=>{ if(msg.time-lastTime>10*60*1000){ const div=document.createElement('div'); div.className='time-divider'; div.innerText=formatTime(msg.time); chatWrap.appendChild(div); } lastTime=msg.time; appendMessageElement(msg); }); chatWrap.scrollTop=chatWrap.scrollHeight; }
   function appendMessageElement(msg){
+    if(msg.system){ // 拍一拍等系统消息
+      const div=document.createElement('div');
+      div.className='pat-message';
+      div.innerText=msg.text;
+      chatWrap.appendChild(div);
+      return;
+    }
     const item=document.createElement('div');
     item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
     item.dataset.msgId=msg.id;
@@ -227,31 +230,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if(!msg.isUser) emojiSrc=randomAttachEmoji();
     if(emojiSrc&&msg.text.trim()===''){ html=`<img class="msg-emoji-inside" style="width:40px;height:40px;" src="${emojiSrc}">`; } else if(emojiSrc){ html+=`<img class="msg-emoji-inside" src="${emojiSrc}">`; }
     const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
-    item.innerHTML=`<div class="msg-avatar">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div><div class="msg-bubble-wrap">${quoteHtml}<div class="msg-bubble">${html}</div><div class="time-text">${formatTime(msg.time)}</div></div>`;
-    // 引用滑动方向：用户消息左滑（向左滑=从左向右？我们定义：用户消息在右侧，左滑为手指从左向右划，触发引用；目标消息在左侧，右滑为手指从右向左划，触发引用）
+    item.innerHTML=`<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div><div class="msg-bubble-wrap">${quoteHtml}<div class="msg-bubble">${html}</div></div>`;
+    // 引用滑动（保留）
     let startX=0, isSwiping=false;
     item.addEventListener('touchstart',function(e){ const touch=e.touches[0]; startX=touch.clientX; isSwiping=true; });
-    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const touch=e.touches[0]; const diff=startX-touch.clientX; // diff>0 表示手指向左滑动
-      let trigger=false;
-      if(msg.isUser){ // 用户消息，期望向左滑（手指从左向右？我们判断 diff<0 即从左向右滑动）
-        if(diff < -30) trigger=true;
-      } else { // 目标消息，期望向右滑（手指从右向左滑动，diff>30）
-        if(diff > 30) trigger=true;
-      }
-      if(trigger){ e.preventDefault(); isSwiping=false; this.classList.add('swiped'); setTimeout(()=>this.classList.remove('swiped'),300); quoteMsg=msg; quoteContent.innerText=msg.text; quoteBar.style.display='flex'; }
-    });
+    item.addEventListener('touchmove',function(e){ if(!isSwiping) return; const touch=e.touches[0]; const diff=startX-touch.clientX; let trigger=false; if(msg.isUser){ if(diff<-30) trigger=true; } else { if(diff>30) trigger=true; } if(trigger){ e.preventDefault(); isSwiping=false; this.classList.add('swiped'); setTimeout(()=>this.classList.remove('swiped'),300); quoteMsg=msg; quoteContent.innerText=msg.text; quoteBar.style.display='flex'; } });
     item.addEventListener('touchend',function(){ isSwiping=false; });
     chatWrap.appendChild(item);
   }
-  function addMessage(text,isUser,time,quote){
-    const msg={id:Date.now()+Math.random(), text, isUser, time:time||Date.now(), quote:quote||null};
+  function addMessage(text,isUser,time,quote,system){
+    const msg={id:Date.now()+Math.random(), text, isUser, time:time||Date.now(), quote:quote||null, system:system||false};
     store.messages.push(msg); saveLocal();
-    if(needTimeStamp()) addTimeDivider();
+    if(!system && needTimeStamp()) addTimeDivider();
     store.lastChatTime=Date.now();
     appendMessageElement(msg);
     chatWrap.scrollTop=chatWrap.scrollHeight;
-    // 消息发送后，随机触发视频通话（角色主动发起）
-    if(!isUser && Math.random()<0.05) {
+    // 非系统消息且非用户消息（角色回复）时触发视频通话
+    if(!system && !isUser && Math.random()<0.05) {
       setTimeout(()=>{ initiateVideoCall('ta'); }, 1000);
     }
   }
@@ -266,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addMessage(text, true, now, quote);
     inputText.value='';
     updateRandomStatus();
-    // 自动回复
     const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
     const tempItem=document.createElement('div');
     tempItem.className='msg-item target-msg';
@@ -288,46 +282,45 @@ document.addEventListener('DOMContentLoaded', function() {
   if(inputText) inputText.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
   if(quoteClose) quoteClose.addEventListener('click',function(){ quoteMsg=null; quoteBar.style.display='none'; });
 
-  // ========== 拍一拍 ==========
-  function patHandler(avatar, isUser){
+  // ========== 拍一拍（双击消息头像） ==========
+  function handlePat(avatarEl, isUser){
     const name=isUser?store.myInfo.name:store.taInfo.name;
     const targetName=isUser?store.taInfo.name:store.myInfo.name;
     let suffix='';
-    if(isUser){ // 用户拍角色
+    if(isUser){ // 用户拍角色，用设置的后缀
       suffix=store.chatSettings.patSuffix||'拍了拍';
-    } else { // 角色拍用户，从字卡抽取
+    } else { // 角色拍用户，从字卡抽
       const cards=getAllValidCards();
       if(cards.length>0){ const idx=randomInt(0,cards.length-1); suffix=cards[idx].text; } else { suffix='拍了拍'; }
     }
-    const patText=`${name} ${suffix} ${targetName}`;
-    addMessage(patText, false, Date.now(), null); // 显示为系统消息，不是用户也不是目标，我们显示为角色（false）但颜色特殊？我们统一为灰色系统消息
-    // 我们重新处理：显示为系统消息，添加特殊样式
-    // 由于消息已存为false，但会显示头像，为了简洁，我们直接添加一条特殊的系统消息（不显示头像）
-    const sysMsg={id:Date.now()+Math.random(), text:patText, isUser:false, time:Date.now(), system:true};
-    store.messages.push(sysMsg); saveLocal();
-    // 重新渲染
-    renderMessages();
+    const patText=`${name} 拍了拍 ${targetName} ${suffix}`;
+    // 作为系统消息添加
+    addMessage(patText, false, Date.now(), null, true);
   }
+  // 使用事件委托监听双击 .msg-avatar
   let lastTapTime=0;
-  function doubleTapHandler(e, isUser){
+  chatWrap.addEventListener('touchstart', function(e){
+    const avatar=e.target.closest('.msg-avatar');
+    if(!avatar) return;
     const now=Date.now();
     if(now-lastTapTime<400){ // 双击
       e.preventDefault();
-      patHandler(e.currentTarget, isUser);
+      const msgItem=avatar.closest('.msg-item');
+      if(!msgItem) return;
+      const isUser=msgItem.classList.contains('user-msg');
+      handlePat(avatar, isUser);
       lastTapTime=0;
     } else { lastTapTime=now; }
-  }
-  if(taAvatar) taAvatar.addEventListener('touchstart',function(e){ doubleTapHandler(e, false); });
-  if(myAvatar) myAvatar.addEventListener('touchstart',function(e){ doubleTapHandler(e, true); });
-  // 也支持click双击（桌面）
+  }, {passive:false});
+  // 桌面双击
   let clickCount=0, clickTimer=null;
-  function doubleClickHandler(e, isUser){
+  chatWrap.addEventListener('click', function(e){
+    const avatar=e.target.closest('.msg-avatar');
+    if(!avatar) return;
     clickCount++;
-    if(clickCount===2){ clearTimeout(clickTimer); clickCount=0; patHandler(e.currentTarget, isUser); }
+    if(clickCount===2){ clearTimeout(clickTimer); clickCount=0; const msgItem=avatar.closest('.msg-item'); if(!msgItem) return; const isUser=msgItem.classList.contains('user-msg'); handlePat(avatar, isUser); }
     else { clickTimer=setTimeout(()=>{ clickCount=0; }, 400); }
-  }
-  if(taAvatar) taAvatar.addEventListener('click',function(e){ doubleClickHandler(e, false); });
-  if(myAvatar) myAvatar.addEventListener('click',function(e){ doubleClickHandler(e, true); });
+  });
 
   // ========== 视频通话 ==========
   function startVideoTimer(){
@@ -347,19 +340,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function showVideoWindow(caller){
     videoWindow.classList.add('active');
     videoCapsule.classList.remove('active');
-    // 设置对方头像
     const avatarUrl=caller==='ta'?store.taInfo.avatarUrl:store.myInfo.avatarUrl;
     videoAvatar.src=avatarUrl||'';
     videoAnswerArea.style.display='none';
     videoHangupBtn.style.display='block';
-    // 背景
     applyVideoBg();
-    // 开始计时
     startVideoTimer();
     store.videoCall.active=true;
     store.videoCall.caller=caller;
     store.videoCall.startTime=Date.now();
     store.videoCall.folded=false;
+    // 可拖动
+    enableVideoDrag();
   }
   function hideVideoWindow(){
     videoWindow.classList.remove('active');
@@ -374,6 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
       videoWindow.classList.remove('active');
       videoCapsule.classList.add('active');
       store.videoCall.folded=true;
+      capsuleTimer.textContent=videoTimer.textContent;
     }
   }
   function unfoldVideoWindow(){
@@ -384,24 +377,60 @@ document.addEventListener('DOMContentLoaded', function() {
   if(videoFoldBtn) videoFoldBtn.addEventListener('click',foldVideoWindow);
   if(capsuleExpand) capsuleExpand.addEventListener('click',unfoldVideoWindow);
   if(videoHangupBtn) videoHangupBtn.addEventListener('click',function(){
-    // 挂断
     const caller=store.videoCall.caller;
     const name=caller==='ta'?store.taInfo.name:store.myInfo.name;
-    const targetName=caller==='ta'?store.myInfo.name:store.taInfo.name;
     let msg='';
-    if(caller==='ta'){ // 角色打来，用户挂断
-      msg=`你挂断了${name}的电话`;
-    } else { // 用户打给角色，角色挂断（模拟）
-      msg=`${name}挂断了你的电话`;
-    }
-    addMessage(msg, false, Date.now(), null);
+    if(caller==='ta'){ msg=`你挂断了${name}的电话`; }
+    else { msg=`${name}挂断了你的电话`; }
+    addMessage(msg, false, Date.now(), null, true);
     hideVideoWindow();
   });
+
+  // 视频拖动
+  let dragData=null;
+  function enableVideoDrag(){
+    const el=videoWindow;
+    el.addEventListener('touchstart', onDragStart, {passive:false});
+    el.addEventListener('mousedown', onDragStart);
+  }
+  function onDragStart(e){
+    if(e.target.closest('button')) return;
+    const el=videoWindow;
+    const rect=el.getBoundingClientRect();
+    const clientX=e.touches?e.touches[0].clientX:e.clientX;
+    const clientY=e.touches?e.touches[0].clientY:e.clientY;
+    dragData={offsetX:clientX-rect.left, offsetY:clientY-rect.top, el:el};
+    el.classList.add('dragging');
+    document.addEventListener('touchmove', onDragMove, {passive:false});
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('touchend', onDragEnd);
+    document.addEventListener('mouseup', onDragEnd);
+    e.preventDefault();
+  }
+  function onDragMove(e){
+    if(!dragData) return;
+    const clientX=e.touches?e.touches[0].clientX:e.clientX;
+    const clientY=e.touches?e.touches[0].clientY:e.clientY;
+    const el=dragData.el;
+    el.style.left=(clientX-dragData.offsetX)+'px';
+    el.style.top=(clientY-dragData.offsetY)+'px';
+    el.style.right='auto';
+    el.style.bottom='auto';
+    e.preventDefault();
+  }
+  function onDragEnd(){
+    if(dragData) dragData.el.classList.remove('dragging');
+    dragData=null;
+    document.removeEventListener('touchmove', onDragMove);
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('touchend', onDragEnd);
+    document.removeEventListener('mouseup', onDragEnd);
+  }
+
   function initiateVideoCall(caller){
     if(store.videoCall.active) return;
     const name=caller==='ta'?store.taInfo.name:store.myInfo.name;
     if(caller==='ta'){ // 角色主动打给用户
-      // 显示来电界面
       videoWindow.classList.add('active');
       videoCapsule.classList.remove('active');
       videoAvatar.src=store.taInfo.avatarUrl||'';
@@ -412,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
       store.videoCall.active=true;
       store.videoCall.caller='ta';
       store.videoCall.startTime=null;
-      // 接听按钮
+      enableVideoDrag();
       videoAnswerBtn.onclick=function(){
         videoAnswerArea.style.display='none';
         videoHangupBtn.style.display='block';
@@ -420,36 +449,32 @@ document.addEventListener('DOMContentLoaded', function() {
         startVideoTimer();
         store.videoCall.answered=true;
         store.videoCall.startTime=Date.now();
-        // 显示接通消息
-        addMessage(`${store.taInfo.name} 接听了你的视频`, false, Date.now(), null);
+        addMessage(`${store.taInfo.name} 接听了你的视频`, false, Date.now(), null, true);
       };
       videoRejectBtn.onclick=function(){
         hideVideoWindow();
-        addMessage(`${store.taInfo.name} 正忙，未接听`, false, Date.now(), null);
+        addMessage(`${store.taInfo.name} 正忙，未接听`, false, Date.now(), null, true);
         store.videoCall.active=false;
       };
     } else { // 用户打给角色
       showVideoWindow('me');
-      // 模拟角色接听（80%概率接听）
       const answer=Math.random()<0.8;
       if(answer){
         setTimeout(()=>{
-          // 角色接听
           videoTimer.textContent='00:00:00';
           startVideoTimer();
           store.videoCall.answered=true;
-          addMessage(`${store.taInfo.name} 接听了你的视频`, false, Date.now(), null);
+          addMessage(`${store.taInfo.name} 接听了你的视频`, false, Date.now(), null, true);
         }, 2000);
       } else {
         setTimeout(()=>{
           hideVideoWindow();
-          addMessage(`${store.taInfo.name} 正忙，未接听`, false, Date.now(), null);
+          addMessage(`${store.taInfo.name} 正忙，未接听`, false, Date.now(), null, true);
         }, 3000);
       }
     }
   }
-  // 用户主动发起视频（可通过某个按钮，暂时放在聊天设置里或双击头像？为方便，可在聊天页加个按钮，但用户没要求，我们加在输入栏旁）
-  // 在输入栏增加一个视频按钮（隐藏？），我们加到发送按钮旁边
+  // 视频按钮
   const videoCallBtn=document.createElement('button');
   videoCallBtn.textContent='📹';
   videoCallBtn.style.background='transparent'; videoCallBtn.style.border='none'; videoCallBtn.style.fontSize='22px'; videoCallBtn.style.cursor='pointer'; videoCallBtn.style.minHeight='40px'; videoCallBtn.style.padding='0 8px';
