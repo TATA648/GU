@@ -13,6 +13,8 @@ html, body {
   display: flex;
   flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
+  /* 禁止浏览器双击缩放、触摸缩放 */
+  touch-action: manipulation;
 }
 body {
   background: #f8f4fb;
