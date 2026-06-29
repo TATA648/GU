@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- 默认首页：无底部导航，仅图标点击跳转 -->
+<!-- 默认首页 -->
 <div class="page home-page active">
   <div class="home-container">
     <h2 class="home-title">梦角工具箱</h2>
@@ -30,8 +30,11 @@
 
 <!-- 外观设置页面 -->
 <div class="page setting-page">
+  <div class="page-header">
+    <button class="back-btn">← 返回</button>
+    <h3 class="page-title">外观设置</h3>
+  </div>
   <div class="setting-container">
-    <h3>外观图标配置</h3>
     <div class="icon-input-item">
       <label>聊天图标链接</label>
       <input type="text" id="chatIconUrl" placeholder="粘贴图片URL">
@@ -49,8 +52,9 @@
   </div>
 </div>
 
-<!-- 聊天页顶部栏：头像点击直接修改头像 -->
+<!-- 聊天页顶部栏：fixed固定定位，永远悬浮顶部不会消失 -->
 <div class="top-header">
+  <button class="back-btn">←</button>
   <div class="avatar-box" id="avatarClickEdit">
     <img class="avatar-img" id="avatarImg" alt="角色头像">
     <span class="avatar-txt" id="avatarText">角</span>
@@ -70,6 +74,10 @@
 
 <!-- 字卡+分组管理页面 -->
 <div class="page card-page">
+  <div class="page-header">
+    <button class="back-btn">← 返回</button>
+    <h3 class="page-title">字卡管理</h3>
+  </div>
   <div class="card-container">
     <div class="group-op-bar">
       <input type="text" id="newGroupName" placeholder="新建分组名称">
@@ -91,13 +99,8 @@
   </div>
 </div>
 
-<!-- 底部Tab导航：首页隐藏，仅子页面显示 -->
-<div class="tab-bar" id="tabBarWrap">
-  <div class="tab-item" data-page="home-page">首页</div>
-  <div class="tab-item" data-page="chat-page">聊天</div>
-  <div class="tab-item" data-page="card-page">字卡库</div>
-  <div class="tab-item" data-page="setting-page">外观</div>
-</div>
+<!-- 底部Tab栏 彻底删除，注释保留结构不渲染 -->
+<!-- <div class="tab-bar" id="tabBarWrap"></div> -->
 
 <!-- 全局设置弹窗 -->
 <div class="mask" id="mask">
