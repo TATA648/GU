@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
   const topHeader=$('.top-header'), chatWrap=$('#chatWrap'), inputText=$('#inputText'), sendBtn=$('#sendBtn');
   const emojiSendBtn=$('#emojiSendBtn'), emojiPanel=$('#emojiPanel'), emojiGrid=$('#emojiGrid');
+  const albumBtn=$('#albumBtn');
   const imageSelectMask=$('#imageSelectMask'), modalTitle=$('#modalTitle'), localImageFile=$('#localImageFile'), imageLinkInput=$('#imageLinkInput'), closeImageModal=$('#closeImageModal'), confirmImageBtn=$('#confirmImageBtn');
   const wallpaperPreview=$('#wallpaperPreview'), openWallpaperModal=$('#openWallpaperModal'), chatBgPreview=$('#chatBgPreview'), openChatBgModal=$('#openChatBgModal');
   const changeIconBtns=$$('.icon-change-btn');
@@ -140,6 +141,53 @@ document.addEventListener('DOMContentLoaded', function() {
   if(emojiSendBtn) emojiSendBtn.addEventListener('click',function(e){ e.stopPropagation(); emojiPanel.classList.toggle('show'); });
   document.addEventListener('click',function(e){ if(emojiPanel&&!emojiPanel.contains(e.target)&&e.target!==emojiSendBtn) emojiPanel.classList.remove('show'); });
 
+  // ========== 相册按钮（新增） ==========
+  if(albumBtn){
+    albumBtn.addEventListener('click',function(){
+      const input=document.createElement('input');
+      input.type='file';
+      input.accept='image/*';
+      input.onchange=function(e){
+        const file=e.target.files[0];
+        if(!file) return;
+        const reader=new FileReader();
+        reader.onload=function(ev){
+          const dataUrl=ev.target.result;
+          sendImageMessage(dataUrl);
+        };
+        reader.readAsDataURL(file);
+        input.value=''; // 清空以便重复选择
+      };
+      input.click();
+    });
+  }
+
+  // ========== 发送图片消息 ==========
+  function sendImageMessage(imageUrl){
+    const quote=quoteMsg; quoteMsg=null; quoteBar.style.display='none';
+    const now=Date.now();
+    addMessage('', true, now, quote, false, false, imageUrl);
+    updateRandomStatus();
+    // 自动回复（与文本消息相同逻辑）
+    store.isTyping=true;
+    renderMessages();
+    const min=store.delay.min*1000, max=store.delay.max*1000, wait=Math.floor(Math.random()*(max-min)+min);
+    if(typingTimer) clearTimeout(typingTimer);
+    typingTimer=setTimeout(()=>{
+      store.isTyping=false;
+      const replyList=getRandomReplyArr();
+      let quoteReply=null;
+      if(Math.random()<0.2 && store.messages.length>1){ const lastUser=[...store.messages].reverse().find(m=>m.isUser); if(lastUser) quoteReply=lastUser; }
+      const placeholder=chatWrap.querySelector('.typing-placeholder');
+      if(placeholder) placeholder.remove();
+      replyList.forEach((item,idx)=>{
+        setTimeout(()=>{ addMessage(item.text, false, Date.now(), quoteReply); }, idx*500);
+      });
+      setTimeout(()=>{ updateRandomStatus(); }, replyList.length*500+100);
+      typingTimer=null;
+    }, wait);
+  }
+
   // ========== 信箱 ==========
   function renderMail(){ renderSentList(); renderInbox(); }
   function renderSentList(){
@@ -239,6 +287,28 @@ document.addEventListener('DOMContentLoaded', function() {
       chatWrap.appendChild(div);
       return;
     }
+    // 判断是否为图片消息
+    if(msg.imageUrl){
+      const item=document.createElement('div');
+      item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
+      const avatarSrc=msg.isUser?store.myInfo.avatarUrl:store.taInfo.avatarUrl;
+      // 检查是否合并头像
+      let hideAvatar=false;
+      const msgs=store.messages;
+      const idx=msgs.indexOf(msg);
+      if(idx>0){
+        const prev=msgs[idx-1];
+        if(!prev.system && prev.isUser===msg.isUser && (msg.time-prev.time)<3000){
+          hideAvatar=true;
+        }
+      }
+      const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar" data-msgid="${msg.id}">${avatarSrc?`<img src="${avatarSrc}" loading="lazy">`:''}</div>`;
+      const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
+      item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap"><img class="msg-image" src="${msg.imageUrl}" loading="lazy"></div>`;
+      chatWrap.appendChild(item);
+      return;
+    }
+
     const isEmojiOnly = /^\[emoji:.+\]$/.test(msg.text.trim());
     const item=document.createElement('div');
     item.className=`msg-item ${msg.isUser?'user-msg':'target-msg'}`;
@@ -272,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar" style="visibility:hidden;"></div>` : avatarHtml;
     item.innerHTML=`${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly?'':`<div class="msg-bubble">${html}</div>`}${isEmojiOnly?html:''}</div>`;
 
-    // ===== 引用长按滑动（修改） =====
+    // 引用长按滑动
     let longPressTimer=null;
     let isLongPress=false;
     let touchStartX=0, touchStartY=0;
@@ -284,29 +354,25 @@ document.addEventListener('DOMContentLoaded', function() {
       isLongPress=false;
       longPressTimer=setTimeout(()=>{
         isLongPress=true;
-        // 长按触发震动（可选）
         if(navigator.vibrate) navigator.vibrate(10);
-      }, 300); // 300ms长按判定
+      }, 300);
     }, {passive:true});
 
     item.addEventListener('touchmove', function(e){
       if(!isLongPress) return;
       const touch=e.touches[0];
-      const diffX=touchStartX - touch.clientX; // 手指向左滑动（diff>0）或向右滑动（diff<0）
-      // 我们只对从左向右滑（diff < -30）触发引用
+      const diffX=touchStartX - touch.clientX;
       if(diffX < -30){
         e.preventDefault();
         clearTimeout(longPressTimer);
         longPressTimer=null;
         isLongPress=false;
-        // 回弹效果
         this.style.transition='transform 0.2s ease';
         this.style.transform='translateX(20px)';
         setTimeout(()=>{ this.style.transform=''; }, 300);
         quoteMsg=msg;
         quoteContent.innerText=msg.text;
         quoteBar.style.display='flex';
-        // 清除其他可能的状态
         item.removeEventListener('touchend', touchEndHandler);
         item.removeEventListener('touchcancel', touchEndHandler);
       }
@@ -323,8 +389,8 @@ document.addEventListener('DOMContentLoaded', function() {
     chatWrap.appendChild(item);
   }
 
-  function addMessage(text,isUser,time,quote,system,isRed){
-    const msg={id:Date.now()+Math.random(), text, isUser, time:time||Date.now(), quote:quote||null, system:system||false, isRed:isRed||false};
+  function addMessage(text,isUser,time,quote,system,isRed,imageUrl){
+    const msg={id:Date.now()+Math.random(), text, isUser, time:time||Date.now(), quote:quote||null, system:system||false, isRed:isRed||false, imageUrl:imageUrl||null};
     store.messages.push(msg); saveLocal();
     if(!system && needTimeStamp()) addTimeDivider();
     store.lastChatTime=Date.now();
