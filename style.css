@@ -40,6 +40,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 .avatar-img {
   width: 100%;
@@ -86,7 +87,7 @@ html, body {
   flex-direction: column;
 }
 
-/* 首页样式 */
+/* 首页样式：仅图标，无文字 */
 .home-container {
   padding: 40px 20px;
   display: flex;
@@ -101,49 +102,67 @@ html, body {
   display: flex;
   gap: 20px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 .app-card {
   background: #fff;
   width: 120px;
-  padding: 16px 10px;
+  height: 120px;
   border-radius: 14px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   box-shadow: 0 2px 8px #e2d9eb;
   cursor: pointer;
 }
 .app-icon {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 12px;
   object-fit: cover;
   background: #e8dff0;
 }
-.app-name {
-  font-size: 14px;
-  color: #444;
-}
-.icon-set-wrap {
+
+/* 外观设置页面 */
+.setting-container {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 20px;
+  gap: 16px;
 }
-.icon-set-wrap input {
-  padding: 8px 10px;
+.setting-container h3 {
+  color: #444;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.icon-input-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.icon-input-item label {
+  font-size: 14px;
+  color: #555;
+}
+.icon-input-item input {
+  padding: 9px 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
 }
-#saveIconBtn {
+.save-theme {
   width: fit-content;
   align-self: flex-end;
   background: #a87bc9;
   color: #fff;
   border: none;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 8px;
+  margin-top: 8px;
+}
+.tip-text {
+  font-size: 12px;
+  color: #999;
+  align-self: flex-end;
 }
 
 /* 聊天页 */
@@ -384,7 +403,7 @@ html, body {
   font-weight: 600;
 }
 
-/* 设置弹窗 */
+/* 弹窗通用样式 */
 .mask {
   position: fixed;
   inset: 0;
