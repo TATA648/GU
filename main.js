@@ -17,6 +17,7 @@ let store = {
 
 // 基础DOM
 const topHeader = document.querySelector('.top-header');
+const tabBarWrap = document.getElementById('tabBarWrap');
 const chatWrap = document.getElementById('chatWrap');
 const inputText = document.getElementById('inputText');
 const sendBtn = document.getElementById('sendBtn');
@@ -70,11 +71,13 @@ tabItems.forEach(tab=>{
     tab.classList.add('active');
     pages.forEach(p=>p.classList.remove('active'));
     document.querySelector(`.${targetPage}`).classList.add('active');
+    // 首页隐藏底部栏，其他页面显示底部栏
+    tabBarWrap.classList.toggle('show', targetPage !== 'home-page');
     topHeader.classList.toggle('show', targetPage === 'chat-page');
   }
 })
 
-// 首页卡片点击跳转
+// 首页卡片点击跳转（仅图标点击，不依赖底部栏）
 document.querySelectorAll('.app-card').forEach(card=>{
   card.onclick = ()=>{
     const target = card.dataset.target;
@@ -99,10 +102,11 @@ saveAvatarBtn.onclick = ()=>{
 
 // 键盘适配
 window.visualViewport.addEventListener('resize', () => {
+  const safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
   if(window.visualViewport.height < window.innerHeight - 100){
-    inputWrap.style.bottom = (50 + window.innerHeight - window.visualViewport.height) + 'px';
+    inputWrap.style.bottom = (50 + safeBottom + window.innerHeight - window.visualViewport.height) + 'px';
   }else{
-    inputWrap.style.bottom = '50px';
+    inputWrap.style.bottom = `calc(50px + ${safeBottom}px)`;
   }
 })
 
@@ -113,6 +117,8 @@ function loadLocal(){
   renderHeader();
   renderAppIcon();
   refreshGroupSelect();
+  // 初始为首页，隐藏底部导航
+  tabBarWrap.classList.remove('show');
 }
 function saveLocal(){
   localStorage.setItem('dreamCardStore', JSON.stringify(store));
