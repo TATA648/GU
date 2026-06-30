@@ -336,7 +336,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: -40px;
+  row-gap: 0px;
   column-gap: 2px;
   background: #fafafa;
   border-radius: 12px;
@@ -346,7 +346,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   width: 100%;
   min-height: 0;
 }
-.cal-day{aspect-ratio:1/1.1;background:#fff;border-radius:4px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.02);font-size:11px;color:#333;position:relative;min-width:0}
+.cal-day{aspect-ratio:1/0.5;background:#fff;border-radius:4px;padding:0px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.02);font-size:11px;color:#333;position:relative;min-width:0}
 .cal-day.empty{background:transparent;box-shadow:none}
 .cal-day .day-number{font-weight:600;font-size:12px;margin-bottom:1px}
 .cal-day .day-emoji-group{display:flex;justify-content:center;gap:1px;flex-wrap:wrap;margin-top:1px}
