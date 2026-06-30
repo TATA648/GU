@@ -68,7 +68,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   left: 0;
   right: 0;
   z-index: 1000;
-  min-height: 44px;                   /* 与其他页面顶栏高度一致 */
+  min-height: 42px;                   /* 与其他页面顶栏高度一致 */
 }
 .top-header.show { display:flex; }
 
@@ -87,8 +87,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   flex-shrink: 0;
 }
 .top-header .back-btn img {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   display: block;
 }
 
