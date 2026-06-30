@@ -121,7 +121,7 @@
     <div class="video-capsule" id="videoCapsule" style="display:none;"><span class="capsule-timer" id="capsuleTimer">00:00:00</span><button class="capsule-expand" id="capsuleExpand">⤴</button></div>
   </div>
 
-  <!-- ===== 字卡管理页 ===== -->
+<!-- ===== 字卡管理页 ===== -->
   <div class="page card-page">
     <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
     <div class="card-container">
@@ -131,25 +131,15 @@
         <button id="createGroupBtn">创建分组</button>
       </div>
 
-      <!-- 分组列表（默认折叠） -->
-      <div class="group-collapse-wrap">
-        <div class="group-collapse-header" id="groupCollapseHeader">
-          <span>📂 分组列表</span>
-          <span class="collapse-arrow" id="collapseArrow">▶</span>
-        </div>
-        <div class="group-collapse-body" id="groupCollapseBody" style="display:none;">
-          <div class="group-list" id="groupListWrap"></div>
-        </div>
-      </div>
+      <!-- 管理分组按钮（弹窗） -->
+      <button class="manage-group-btn" id="manageGroupBtn">管理分组</button>
 
-      <!-- 总字卡数量 -->
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:14px; color:#555; margin-top:6px;">
-        <span>总字卡数量：<strong id="totalCardCount">0</strong></span>
-      </div>
-
-      <!-- 当前分组选择 -->
-      <label style="font-size:13px;color:#555;margin-bottom:2px;display:block;">当前操作分组</label>
+      <!-- 当前操作分组 -->
+      <label style="font-size:13px;color:#555;margin-bottom:2px;display:block;margin-top:8px;">当前操作分组</label>
       <select id="currentGroupSelect"></select>
+
+      <!-- 管理当前分组字卡按钮（上移） -->
+      <button class="manage-card-btn" id="manageCardBtn">管理当前分组字卡</button>
 
       <!-- 添加字卡 -->
       <div class="card-add-bar">
@@ -163,11 +153,8 @@
         <button id="batchImportBtn">批量导入</button>
       </div>
 
-      <!-- 管理字卡按钮 -->
-      <button class="manage-card-btn" id="manageCardBtn">📝 管理当前分组字卡</button>
-
-      <!-- 字卡列表（隐藏，由弹窗替代） -->
-      <div class="card-list" id="cardListWrap" style="display:none;"></div>
+      <!-- 总字卡数量（最下方居中） -->
+      <div class="total-card-count">总字卡数量：<strong id="totalCardCount">0</strong></div>
     </div>
   </div>
 
