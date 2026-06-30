@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
 
-  // DOM 引用
+  // DOM 引用（略，与之前相同，但需确保所有变量声明完整）
   const topHeader = $('.top-header');
   const chatWrap = $('#chatWrap');
   const inputText = $('#inputText');
@@ -180,6 +180,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const bottomBarItems = $$('.bar-item');
   const rippleToggle = $('#rippleToggle');
   const inboxBadge = $('#inboxBadge');
+
+  // 注意：styleOptions 在 DOM 加载后才获取
+  let styleOptions = [];
 
   let currentEditTarget = null;
   let currentMailTab = 'sent';
@@ -680,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ===== HE / ME 弹窗（无预览） =====
+  // ===== HE / ME 弹窗 =====
   if (heBtn) {
     heBtn.addEventListener('click', function() {
       taNameInput.value = store.taInfo.name;
@@ -711,16 +714,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const reader = new FileReader();
       reader.onload = function(ev) {
         const url = ev.target.result;
-        // 只更新链接输入框，不显示预览
         taAvatarLink.value = url;
       };
       reader.readAsDataURL(file);
     });
   }
   if (taAvatarLink) {
-    taAvatarLink.addEventListener('input', function() {
-      // 只更新链接输入框，不显示预览
-    });
+    taAvatarLink.addEventListener('input', function() {});
   }
   if (closeTaSet) {
     closeTaSet.addEventListener('click', function() {
@@ -762,9 +762,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   if (meAvatarLink) {
-    meAvatarLink.addEventListener('input', function() {
-      // 只更新链接输入框，不显示预览
-    });
+    meAvatarLink.addEventListener('input', function() {});
   }
   if (closeMeSet) {
     closeMeSet.addEventListener('click', function() {
@@ -876,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== 头像样式 =====
-  const styleOptions = $$('.style-option');
+  styleOptions = $$('.style-option');  // 先获取
   styleOptions.forEach(opt => {
     opt.addEventListener('click', function() {
       styleOptions.forEach(o => o.classList.remove('active'));
