@@ -4,12 +4,12 @@ html,body{width:100%;height:100vh;max-height:100vh;overflow:hidden;display:flex;
 body.home-bg{background-image:var(--wallpaper,none);background-size:cover;background-position:center;background-repeat:no-repeat}
 .chat-page{background-image:var(--chat-bg,none);background-size:cover;background-position:center;background-repeat:no-repeat}
 
-/* ===== 页面容器（修复滚动） ===== */
+/* ===== 页面容器 ===== */
 .page{flex:1;display:none;overflow-y:auto;opacity:0;transition:opacity .2s ease;min-height:0}
 .page.active{display:flex;flex-direction:column;opacity:1;overflow-y:visible}
 .no-transition .page{transition:none!important}
 
-/* ===== 首页固定（不滚动） ===== */
+/* ===== 首页固定 ===== */
 .home-page{overflow:hidden!important}
 .home-container{display:flex;flex-direction:column;padding:16px 16px 80px;height:100vh;max-height:100vh;justify-content:center;overflow:hidden;flex:1}
 
@@ -162,6 +162,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 #inputText{flex:1;border:1px solid #ddd;border-radius:22px;padding:10px 16px;outline:none;font-size:16px;min-height:35px;background:#fafafa;color:#333}
 #inputText:focus{border-color:#999}
 #inputText::placeholder{color:#bbb;font-size:15px}
+/* ===== 发送按钮（图片版） ===== */
 #sendBtn {
   border: none;
   background: transparent;
