@@ -207,10 +207,83 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .image-panel .image-preview-box .image-preview-placeholder{color:#bbb;font-size:12px}
 .image-panel .image-preview-box.has-image img{display:block}
 .image-panel .image-preview-box.has-image .image-preview-placeholder{display:none}
-.image-panel .upload-btn{width:100%;padding:8px;background:#f0f0f0;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#555;cursor:pointer;transition:background .15s;margin-bottom:8px;text-align:center}
-.image-panel .upload-btn:active{background:#e0e0e0}
-.image-panel input[type="text"]{width:100%;border:1px solid #ddd;padding:8px 12px;border-radius:8px;font-size:14px;outline:none;transition:border-color .15s ease;background:#fafafa}
-.image-panel input[type="text"]:focus{border-color:#999}
+/* ===== 强化关键按钮样式（加 !important 防止覆盖） ===== */
+.change-btn,
+.upload-btn,
+.save-btn,
+#applyFontBtn,
+#openWallpaperModal,
+#openChatBgModal,
+#createGroupBtn,
+#addSingleCard,
+#batchImportBtn,
+#sendLetterConfirm,
+#exportChatBtn,
+#importChatBtn,
+#exportCardsBtn,
+#importCardsBtn,
+#exportDataBtn,
+#importDataBtn {
+  background: #333 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: background .15s ease !important;
+  min-height: 34px !important;
+  text-align: center !important;
+  line-height: 1.4 !important;
+}
+.change-btn:active,
+.upload-btn:active,
+.save-btn:active,
+#applyFontBtn:active,
+#openWallpaperModal:active,
+#openChatBgModal:active,
+#createGroupBtn:active,
+#addSingleCard:active,
+#batchImportBtn:active,
+#sendLetterConfirm:active,
+#exportChatBtn:active,
+#importChatBtn:active,
+#exportCardsBtn:active,
+#importCardsBtn:active,
+#exportDataBtn:active,
+#importDataBtn:active {
+  background: #555 !important;
+}
+/* 预览框强制样式 */
+.preview-box,
+.image-preview-box {
+  background: #f0f0f0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  border: 1px solid #e0e0e0 !important;
+}
+.preview-box.rect-h { width:140px; height:70px; }
+.preview-box.rect-v { width:80px; height:140px; }
+.preview-box.small { width:50px; height:50px; }
+.image-panel .image-preview-box { width:80px; height:80px; border-radius:12px; }
+/* 文件输入框样式 */
+#fontFileInput,
+#localImageFile,
+#taAvatarFile,
+#meAvatarFile,
+#videoBgFile {
+  padding: 6px 0 !important;
+  font-size: 13px !important;
+}
+/* 弹窗中的标签和输入 */
+.panel label { font-size:14px; color:#555; }
+.panel input:not([type="file"]), .panel textarea {
+  width:100%; border:1px solid #ddd; padding:8px 10px; border-radius:8px; font-size:15px; margin-bottom:8px; outline:none; background:#fafafa;
+}
+.panel input:not([type="file"]):focus, .panel textarea:focus { border-color:#999; }
+/* 其他原有样式保留 */
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
 .mask.show{display:flex}
 .panel{width:100%;max-width:460px;background:#fff;padding:20px 24px;border-radius:14px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.2)}
@@ -218,8 +291,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .upload-item,.link-item{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .upload-item label,.link-item label{font-size:14px;color:#555}
 .upload-item input[type="file"]{padding:6px 0;font-size:13px}
-.panel input:not([type="file"]),.panel textarea{width:100%;border:1px solid #ddd;padding:8px 10px;border-radius:8px;font-size:15px;margin-bottom:8px;outline:none;transition:border-color .15s ease;background:#fafafa}
-.panel input:not([type="file"]):focus,.panel textarea:focus{border-color:#999}
 .btns-wrap{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
 .close,.save{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:14px;min-height:36px;transition:background .15s ease}
 .close{background:#e0e0e0;color:#555}
