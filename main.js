@@ -65,8 +65,20 @@ function updateImagePreview(url,previewBox,previewImg){if(!previewBox)previewBox
 if(localImageBtn)localImageBtn.addEventListener('click',function(){localImageFile.click();});
 if(localImageFile)localImageFile.addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){const url=ev.target.result;updateImagePreview(url);imageLinkInput.value='';};reader.readAsDataURL(file);});
 if(imageLinkInput)imageLinkInput.addEventListener('input',function(){updateImagePreview(this.value);});
-if(openWallpaperModal)openWallpaperModal.addEventListener('click',()=>openImageModal('设置主页壁纸','wallpaper'));
-if(openChatBgModal)openChatBgModal.addEventListener('click',()=>openImageModal('设置聊天背景','chatBg'));
+if// 点击壁纸预览图触发弹窗（按钮已隐藏）
+if(wallpaperPreview){
+  wallpaperPreview.parentElement.addEventListener('click', function(e){
+    e.stopPropagation();
+    openImageModal('设置主页壁纸','wallpaper');
+  });
+}
+// 点击聊天背景预览图触发弹窗
+if(chatBgPreview){
+  chatBgPreview.parentElement.addEventListener('click', function(e){
+    e.stopPropagation();
+    openImageModal('设置聊天背景','chatBg');
+  });
+}
 changeIconBtns.forEach(b=>b.addEventListener('click',function(){const type=this.dataset.type;const map={chat:'聊天',card:'字卡',theme:'外观',mail:'信箱',calendar:'日历',setting:'设置',placeholder:'占位'};openImageModal('更改 '+map[type],type);}));
 if(closeImageModal)closeImageModal.addEventListener('click',function(){imageSelectMask.style.display='none';currentEditTarget=null;});
 if(confirmImageBtn)confirmImageBtn.addEventListener('click',async function(){let url='';if(localImageFile.files&&localImageFile.files[0]){url=await fileToDataUrl(localImageFile.files[0]);}else if(imageLinkInput.value.trim()){url=imageLinkInput.value.trim();}if(!url){alert('请选择图片或输入链接');return;}if(currentEditTarget==='wallpaper'){store.wallpaper=url;wallpaperPreview.src=url;}else if(currentEditTarget==='chatBg'){store.chatBg=url;chatBgPreview.src=url;}else if(currentEditTarget==='videoBg'){store.chatSettings.videoBg=url;applyVideoBg();}else if(currentEditTarget==='profileCover'){store.profile.cover=url;coverImage.src=url;}else if(currentEditTarget==='profileAvatar'){store.profile.avatar=url;avatarImage.src=url;}else if(currentEditTarget==='decoImage'){store.decoImage=url;decoImg.src=url;}else if(currentEditTarget==='emoji'){store.emojiList.push(url);renderEmojiGrid();}else{store.appIcon[currentEditTarget]=url;refreshAllIconPreview();}saveLocal();applyBgStyle();imageSelectMask.style.display='none';currentEditTarget=null;});
