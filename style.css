@@ -207,7 +207,67 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .image-panel .image-preview-box .image-preview-placeholder{color:#bbb;font-size:12px}
 .image-panel .image-preview-box.has-image img{display:block}
 .image-panel .image-preview-box.has-image .image-preview-placeholder{display:none}
-/* ===== 强化关键按钮样式（加 !important 防止覆盖） ===== */
+
+/* ===== 修复布局错位 ===== */
+/* 壁纸与图标更改按钮右对齐 */
+.wallpaper-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  justify-content: flex-end !important;
+}
+.wallpaper-row.reverse {
+  flex-direction: row !important;
+}
+.wallpaper-row .change-btn {
+  flex-shrink: 0 !important;
+}
+.icon-set-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 10px !important;
+}
+.icon-set-item .change-btn {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* 上传本地图片按钮与输入框同宽同高 */
+.upload-btn {
+  width: 100% !important;
+  padding: 9px 0 !important; /* 与输入框内边距一致 */
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+.image-panel input[type="text"] {
+  height: 40px !important; /* 与上传按钮高度匹配 */
+}
+
+/* 聊天背景更换按钮位置修正 */
+.set-block-item .wallpaper-row.reverse {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+.set-block-item .wallpaper-row.reverse .change-btn {
+  order: 2 !important;
+}
+.set-block-item .wallpaper-row.reverse .preview-box {
+  order: 1 !important;
+}
+
+/* 角色/用户头像预览圆角正方形 */
+#taPreviewBox, #mePreviewBox {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* ===== 强化关键按钮样式（保持原有） ===== */
 .change-btn,
 .upload-btn,
 .save-btn,
@@ -283,7 +343,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   width:100%; border:1px solid #ddd; padding:8px 10px; border-radius:8px; font-size:15px; margin-bottom:8px; outline:none; background:#fafafa;
 }
 .panel input:not([type="file"]):focus, .panel textarea:focus { border-color:#999; }
-/* 其他原有样式保留 */
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
 .mask.show{display:flex}
 .panel{width:100%;max-width:460px;background:#fff;padding:20px 24px;border-radius:14px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.2)}
