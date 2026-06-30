@@ -1659,6 +1659,104 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 // ===== 字卡管理 =====
+// 折叠控制
+const collapseHeader = document.getElementById('groupCollapseHeader');
+const collapseBody = document.getElementById('groupCollapseBody');
+const collapseArrow = document.getElementById('collapseArrow');
+let isCollapsed = true; // 默认折叠
+
+if (collapseHeader) {
+  collapseHeader.addEventListener('click', function() {
+    isCollapsed = !isCollapsed;
+    collapseBody.style.display = isCollapsed ? 'none' : 'block';
+    collapseArrow.classList.toggle('open', !isCollapsed);
+  });
+}
+
+// 管理字卡弹窗
+const cardManageModal = document.getElementById('cardManageModal');
+const cardManageList = document.getElementById('cardManageList');
+const cardManageTitle = document.getElementById('cardManageTitle');
+const cardManageCount = document.getElementById('cardManageCount');
+const cardManageClose = document.getElementById('cardManageClose');
+const manageCardBtn = document.getElementById('manageCardBtn');
+
+function openCardManageModal() {
+  const g = store.currentSelectGroup;
+  if (!g || !store.groups[g]) {
+    alert('请先选择或创建分组');
+    return;
+  }
+  cardManageTitle.textContent = `📝 管理「${g}」字卡`;
+  renderCardManageList();
+  cardManageModal.style.display = 'flex';
+}
+
+function renderCardManageList() {
+  const g = store.currentSelectGroup;
+  if (!g || !store.groups[g]) {
+    cardManageList.innerHTML = '<div class="card-manage-empty">暂无字卡</div>';
+    cardManageCount.textContent = '共 0 条';
+    return;
+  }
+  const list = store.groups[g];
+  cardManageList.innerHTML = '';
+  list.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = `card-manage-item ${card.disabled ? 'disabled' : ''}`;
+    div.innerHTML = `
+      <span class="card-manage-text">${escapeHtml(card.text)}</span>
+      <div class="card-manage-opts">
+        <button class="edit-btn" data-idx="${idx}"><img src="https://i.ibb.co/sdw1Gc33/bianjiheibeifen.png" alt="编辑"></button>
+        <button class="del-btn" data-idx="${idx}"><img src="https://i.ibb.co/24WKj9F/shanchu.png" alt="删除"></button>
+        <button class="switch-btn" data-idx="${idx}"><img src="https://i.ibb.co/0pTRWNG4/Shield-pingbi.png" alt="${card.disabled ? '启用' : '屏蔽'}"></button>
+      </div>
+    `;
+    div.querySelector('.edit-btn').addEventListener('click', function() {
+      const i = parseInt(this.dataset.idx);
+      const res = prompt('修改字卡', list[i].text);
+      if (res && res.trim()) { list[i].text = res.trim(); saveLocal(); renderCardManageList(); refreshGroupSelect(); }
+    });
+    div.querySelector('.del-btn').addEventListener('click', function() {
+      const i = parseInt(this.dataset.idx);
+      if (confirm('确定要删除该字卡吗？')) {
+        list.splice(i, 1);
+        saveLocal();
+        renderCardManageList();
+        refreshGroupSelect();
+      }
+    });
+    div.querySelector('.switch-btn').addEventListener('click', function() {
+      const i = parseInt(this.dataset.idx);
+      list[i].disabled = !list[i].disabled;
+      saveLocal();
+      renderCardManageList();
+      refreshGroupSelect();
+    });
+    cardManageList.appendChild(div);
+  });
+  cardManageCount.textContent = `共 ${list.length} 条`;
+}
+
+// 管理按钮事件
+if (manageCardBtn) {
+  manageCardBtn.addEventListener('click', openCardManageModal);
+}
+if (cardManageClose) {
+  cardManageClose.addEventListener('click', function() {
+    cardManageModal.style.display = 'none';
+  });
+}
+// 点击遮罩关闭弹窗
+if (cardManageModal) {
+  cardManageModal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.style.display = 'none';
+    }
+  });
+}
+
+// 创建分组
 if (createGroupBtn) {
   createGroupBtn.addEventListener('click', function() {
     const name = newGroupName.value.trim();
@@ -1676,12 +1774,13 @@ if (newGroupName) {
   });
 }
 
+// 刷新分组下拉和总数量（并保持折叠状态）
 function refreshGroupSelect() {
   const keys = Object.keys(store.groups);
   groupListWrap.innerHTML = '';
   currentGroupSelect.innerHTML = '';
 
-  // 计算总字卡数量
+  // 总数量
   let total = 0;
   keys.forEach(g => { total += store.groups[g].length; });
   const totalEl = document.getElementById('totalCardCount');
@@ -1692,9 +1791,13 @@ function refreshGroupSelect() {
     opt.value = '';
     opt.textContent = '请先创建分组';
     currentGroupSelect.appendChild(opt);
-    cardListWrap.innerHTML = '<div style="color:#999;text-align:center;padding:20px 0;">暂无分组</div>';
+    if (manageCardBtn) manageCardBtn.style.display = 'none';
+    // 如果弹窗开着就关掉
+    if (cardManageModal) cardManageModal.style.display = 'none';
     return;
   }
+  if (manageCardBtn) manageCardBtn.style.display = 'block';
+
   keys.forEach(g => {
     const opt = document.createElement('option');
     opt.value = g;
@@ -1710,6 +1813,10 @@ function refreshGroupSelect() {
         if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
         saveLocal();
         refreshGroupSelect();
+        // 如果弹窗打开且删除的是当前分组，关闭弹窗
+        if (cardManageModal && cardManageModal.style.display === 'flex') {
+          cardManageModal.style.display = 'none';
+        }
       }
     });
     groupListWrap.appendChild(row);
@@ -1719,55 +1826,14 @@ function refreshGroupSelect() {
   currentGroupSelect.onchange = function() {
     store.currentSelectGroup = this.value;
     saveLocal();
-    renderCurrentCardList();
+    // 如果弹窗打开，刷新内容
+    if (cardManageModal && cardManageModal.style.display === 'flex') {
+      renderCardManageList();
+    }
   };
-  renderCurrentCardList();
 }
 
-function renderCurrentCardList() {
-  cardListWrap.innerHTML = '';
-  const g = store.currentSelectGroup;
-  if (!g || !store.groups[g] || store.groups[g].length === 0) {
-    cardListWrap.innerHTML = '<div style="color:#999;text-align:center;padding:20px 0;">暂无字卡</div>';
-    return;
-  }
-  const list = store.groups[g];
-  list.forEach((card, idx) => {
-    const div = document.createElement('div');
-    div.className = `card-item ${card.disabled ? 'disabled' : ''}`;
-    div.innerHTML = `
-      <div class="card-text">${escapeHtml(card.text)}</div>
-      <div class="card-opts">
-        <button class="edit-btn" data-idx="${idx}"><img src="https://i.ibb.co/sdw1Gc33/bianjiheibeifen.png" alt="编辑"></button>
-        <button class="del-btn" data-idx="${idx}"><img src="https://i.ibb.co/24WKj9F/shanchu.png" alt="删除"></button>
-        <button class="switch-btn" data-idx="${idx}"><img src="https://i.ibb.co/0pTRWNG4/Shield-pingbi.png" alt="${card.disabled ? '启用' : '屏蔽'}"></button>
-      </div>
-    `;
-    div.querySelector('.edit-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      const res = prompt('修改字卡', list[i].text);
-      if (res && res.trim()) { list[i].text = res.trim();
-        saveLocal();
-        renderCurrentCardList(); }
-    });
-    div.querySelector('.del-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      if (confirm('确定要删除该字卡吗？')) {
-        list.splice(i, 1);
-        saveLocal();
-        renderCurrentCardList();
-      }
-    });
-    div.querySelector('.switch-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      list[i].disabled = !list[i].disabled;
-      saveLocal();
-      renderCurrentCardList();
-    });
-    cardListWrap.appendChild(div);
-  });
-}
-
+// 添加单条字卡
 if (addSingleCard) {
   addSingleCard.addEventListener('click', function() {
     const text = newCardInput.value.trim();
@@ -1775,7 +1841,6 @@ if (addSingleCard) {
     if (!text) { alert('请输入字卡内容'); return; }
     if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
 
-    // 去重检查
     const exists = store.groups[g].some(item => item.text === text);
     if (exists) {
       alert('该字卡在当前分组中已存在，不会重复添加。');
@@ -1786,8 +1851,11 @@ if (addSingleCard) {
     store.groups[g].push({ id: Date.now() + Math.random(), text, disabled: false });
     newCardInput.value = '';
     saveLocal();
-    renderCurrentCardList();
     refreshGroupSelect();
+    // 如果弹窗打开，刷新列表
+    if (cardManageModal && cardManageModal.style.display === 'flex') {
+      renderCardManageList();
+    }
   });
 }
 if (newCardInput) {
@@ -1795,6 +1863,8 @@ if (newCardInput) {
     if (e.key === 'Enter') addSingleCard.click();
   });
 }
+
+// 批量导入
 if (batchImportBtn) {
   batchImportBtn.addEventListener('click', function() {
     const text = batchTextarea.value.trim();
@@ -1805,7 +1875,6 @@ if (batchImportBtn) {
     const arr = text.split('\n').map(s => s.trim()).filter(s => s);
     if (arr.length === 0) { alert('没有有效的字卡内容'); return; }
 
-    // 去重导入
     const existingTexts = new Set(store.groups[g].map(item => item.text));
     let addedCount = 0;
     let duplicateCount = 0;
@@ -1822,8 +1891,11 @@ if (batchImportBtn) {
 
     batchTextarea.value = '';
     saveLocal();
-    renderCurrentCardList();
     refreshGroupSelect();
+    // 如果弹窗打开，刷新列表
+    if (cardManageModal && cardManageModal.style.display === 'flex') {
+      renderCardManageList();
+    }
 
     if (duplicateCount > 0) {
       alert(`导入完成！成功添加 ${addedCount} 条，跳过 ${duplicateCount} 条重复字卡。`);
@@ -1832,7 +1904,6 @@ if (batchImportBtn) {
     }
   });
 }
-
   // ===== 日历 =====
   function renderCalendar() {
     if (!calendarGrid) return;
