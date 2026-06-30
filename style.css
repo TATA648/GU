@@ -6,7 +6,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 
 /* ===== 页面容器 ===== */
 .page{flex:1;display:none;overflow-y:auto;opacity:0;transition:opacity .2s ease;min-height:0}
-.page.active{display:flex;flex-direction:column;opacity:1;overflow-y:visible}
+.page.active{display:flex;flex-direction:column;opacity:1;overflow-y:auto}
 .no-transition .page{transition:none!important}
 
 /* ===== 首页固定 ===== */
