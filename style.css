@@ -200,7 +200,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   padding: 14px 0;
   background: #ffffff;       /* 白色背景 */
   border: 1.5px solid #ccc;  /* 灰色描边 */
-  border-radius: 16px;
+  border-radius: 26px;
   font-size: 18px;
   font-weight: 500;
   color: #666;               /* 灰色文字 */
@@ -779,8 +779,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .tip-text {
   text-align: center !important;
   width: 100% !important;
-  font-size: 14px !important;
+  font-size: 12px !important;
   color: #666 !important;
-  margin-top: 1px !important;
+  margin-top: 0px !important;
   padding: 6px 0 !important;
 }
