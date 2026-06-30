@@ -9,12 +9,12 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .home-page{overflow:hidden!important}
 .home-container{display:flex;flex-direction:column;padding:16px 16px 80px;height:100vh;max-height:100vh;justify-content:center;overflow:hidden;flex:1}
 
-/* ===== 顶栏修复（非聊天页更紧凑，适配安全区域） ===== */
+/* ===== 顶栏修复（非聊天页适配安全区域，并增加内容偏移） ===== */
 .page-header {
   display: flex;
   align-items: center;
   padding: 4px 12px;
-  padding-top: env(safe-area-inset-top, 4px); /* 适配状态栏，避免返回键被遮挡 */
+  padding-top: env(safe-area-inset-top, 4px);
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
   flex-shrink: 0;
@@ -34,7 +34,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;  /* 保证点击区域舒适，但不增加顶栏高度（flex子项） */
+  min-width: 44px;
   min-height: 44px;
 }
 .page-header .back-btn img {
@@ -42,8 +42,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   height: 20px !important;
   display: block;
 }
-
-/* ===== 其他通用图标尺寸（不影响页面顶栏） ===== */
 .setting-btn img,
 .video-top-btn img {
   width: 24px;
@@ -51,7 +49,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   display: block;
 }
 
-/* ===== 聊天页顶栏（保持原样，已适配安全区域） ===== */
+/* ===== 聊天页顶栏（保持原样） ===== */
 .top-header {
   display: none;
   align-items: center;
@@ -97,7 +95,18 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .video-top-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .setting-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .chat-page{padding-top:68px;padding-bottom:0}
-.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:52px;padding-bottom:20px}
+
+/* ===== 非聊天页面增加顶部偏移，防止被顶栏遮挡 ===== */
+.setting-page,
+.chat-set-page,
+.appearance-page,
+.card-page,
+.mail-page,
+.calendar-page {
+  padding-top: 60px;   /* 增加至60px，确保内容不被遮挡 */
+  padding-bottom: 20px;
+}
+
 .chat-box{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:80px;min-height:0}
 .quote-bar{position:fixed;bottom:60px;left:0;right:0;background:#f0f0f0;padding:6px 16px;display:flex;align-items:center;gap:8px;border-top:1px solid #ddd;z-index:97;font-size:13px;color:#555}
 .quote-content{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -224,6 +233,10 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .badge{color:#e74c3c;font-size:14px}
 .mail-list-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
 .sent-box{flex:1;display:flex;flex-direction:column;min-height:0}
+/* ===== 修复收件箱显示：强制隐藏寄出箱和写信按钮 ===== */
+.sent-box.hidden {
+  display: none !important;
+}
 .mail-list-header{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;font-size:14px;color:#555;border-bottom:1px solid #eee}
 .mail-add-btn{background:transparent;border:none;cursor:pointer;padding:4px}
 .mail-add-btn img{width:24px;height:24px;display:block}
@@ -231,7 +244,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .sent-item{background:#f5f5f5;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:#333;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
 .sent-item .sent-time{font-size:11px;color:#999;margin-right:4px}
 .sent-item .sent-preview{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.inbox-box{flex:1;overflow-y:auto;min-height:0}
+.inbox-box{flex:1;overflow-y:auto;min-height:0;padding-top:0}  /* 移除顶部间距 */
 .inbox-box.hidden{display:none}
 .letter-item{background:#fff;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
 .letter-header{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:8px;background:#fafafa;transition:background .15s}
@@ -307,7 +320,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   padding: 9px 0 !important;
   box-sizing: border-box !important;
   text-align: center !important;
-  margin-bottom: 10px !important; /* 与下方输入框拉开间距 */
+  margin-bottom: 10px !important;
 }
 .image-panel input[type="text"] {
   height: 40px !important;
@@ -350,12 +363,10 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   object-fit: cover !important;
   display: block !important;
 }
-/* ===== 新增：隐藏壁纸/背景按钮，点击预览图触发（需配合 JS） ===== */
 #openWallpaperModal,
 #openChatBgModal {
   display: none !important;
 }
-/* 让预览图可点击（视觉反馈） */
 .preview-box.rect-h,
 .preview-box.rect-v {
   cursor: pointer !important;
@@ -366,13 +377,11 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .preview-box.rect-v:hover {
   border-color: #999 !important;
 }
-/* 壁纸预览图改为与聊天背景一样的长条形（80×140） */
 .preview-box.rect-h {
   width: 80px !important;
   height: 140px !important;
 }
 
-/* ===== 设置与外观页面中所有黑色按钮缩小 ===== */
 .appearance-page .change-btn,
 .appearance-page .save-btn,
 .setting-page .change-btn,
@@ -381,7 +390,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   font-size: 12px !important;
   min-height: 28px !important;
 }
-/* 同时保留全局按钮样式，但覆盖上述页面 */
 .change-btn,
 .upload-btn,
 .save-btn,
@@ -425,7 +433,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 #importDataBtn:active {
   background: #555 !important;
 }
-/* 预览框基础样式 */
 .preview-box,
 .image-preview-box {
   background: #f0f0f0 !important;
@@ -437,7 +444,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .preview-box.rect-v { width:80px; height:140px; }
 .preview-box.small { width:50px; height:50px; }
 .image-panel .image-preview-box { width:80px; height:80px; border-radius:12px; }
-/* 文件输入框 */
 #fontFileInput,
 #localImageFile,
 #taAvatarFile,
@@ -446,7 +452,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   padding: 6px 0 !important;
   font-size: 13px !important;
 }
-/* 弹窗通用 */
 .panel label { font-size:14px; color:#555; }
 .panel input:not([type="file"]), .panel textarea {
   width:100%; border:1px solid #ddd; padding:8px 10px; border-radius:8px; font-size:15px; margin-bottom:8px; outline:none; background:#fafafa;
@@ -507,7 +512,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .cal-day .day-emoji-group .emoji-single{font-size:12px}
 .cal-day .day-emoji-group .emoji-single.large{font-size:18px}
 .chat-box{padding-bottom:70px}
-.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:48px}
+.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:56px}
 .video-window{width:180px;height:240px;top:68px;right:8px}
 .video-avatar{width:60px;height:60px}
 .emoji-item{width:50px;height:50px}
