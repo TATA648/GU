@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const blockVideoBg = $('#blockVideoBg');
 
   const taMask = $('#taMask');
-  const taPreviewBox = $('#taPreviewBox');
-  const taPreviewImg = $('#taPreviewImg');
   const taLocalBtn = $('#taLocalBtn');
   const taAvatarFile = $('#taAvatarFile');
   const taAvatarLink = $('#taAvatarLink');
@@ -79,8 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const saveTaSet = $('#saveTaSet');
 
   const meMask = $('#meMask');
-  const mePreviewBox = $('#mePreviewBox');
-  const mePreviewImg = $('#mePreviewImg');
   const meLocalBtn = $('#meLocalBtn');
   const meAvatarFile = $('#meAvatarFile');
   const meAvatarLink = $('#meAvatarLink');
@@ -684,14 +680,12 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ===== HE / ME 弹窗 =====
+  // ===== HE / ME 弹窗（无预览） =====
   if (heBtn) {
     heBtn.addEventListener('click', function() {
       taNameInput.value = store.taInfo.name;
       taAvatarLink.value = store.taInfo.avatarUrl || '';
       taAvatarFile.value = '';
-      // 更新预览图
-      updateImagePreview(store.taInfo.avatarUrl, taPreviewBox, taPreviewImg);
       taMask.style.display = 'flex';
     });
   }
@@ -700,8 +694,6 @@ document.addEventListener('DOMContentLoaded', function() {
       meNameInput.value = store.myInfo.name;
       meAvatarLink.value = store.myInfo.avatarUrl || '';
       meAvatarFile.value = '';
-      // 更新预览图
-      updateImagePreview(store.myInfo.avatarUrl, mePreviewBox, mePreviewImg);
       meMask.style.display = 'flex';
     });
   }
@@ -719,15 +711,15 @@ document.addEventListener('DOMContentLoaded', function() {
       const reader = new FileReader();
       reader.onload = function(ev) {
         const url = ev.target.result;
-        updateImagePreview(url, taPreviewBox, taPreviewImg);
-        taAvatarLink.value = '';
+        // 只更新链接输入框，不显示预览
+        taAvatarLink.value = url;
       };
       reader.readAsDataURL(file);
     });
   }
   if (taAvatarLink) {
     taAvatarLink.addEventListener('input', function() {
-      updateImagePreview(this.value, taPreviewBox, taPreviewImg);
+      // 只更新链接输入框，不显示预览
     });
   }
   if (closeTaSet) {
@@ -764,15 +756,14 @@ document.addEventListener('DOMContentLoaded', function() {
       const reader = new FileReader();
       reader.onload = function(ev) {
         const url = ev.target.result;
-        updateImagePreview(url, mePreviewBox, mePreviewImg);
-        meAvatarLink.value = '';
+        meAvatarLink.value = url;
       };
       reader.readAsDataURL(file);
     });
   }
   if (meAvatarLink) {
     meAvatarLink.addEventListener('input', function() {
-      updateImagePreview(this.value, mePreviewBox, mePreviewImg);
+      // 只更新链接输入框，不显示预览
     });
   }
   if (closeMeSet) {
