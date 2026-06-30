@@ -152,7 +152,17 @@
   <div class="page calendar-page">
     <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
     <div class="calendar-container">
-      <div class="calendar-text-area"><div class="cal-block"><div class="cal-block-label">他的记录</div><div class="cal-text ta-text" id="calTaText">TA今天还没有记录哦～</div></div><div class="cal-divider"></div><div class="cal-block"><div class="cal-block-label">我的记录</div><div class="cal-text me-text" id="calMeText">今天有什么想说的。</div></div></div>
+      <!-- 两个独立卡片 -->
+      <div class="calendar-text-area">
+        <div class="cal-card">
+          <div class="cal-card-label">他的记录</div>
+          <div class="cal-card-text ta-text" id="calTaText">TA今天还没有记录哦～</div>
+        </div>
+        <div class="cal-card">
+          <div class="cal-card-label">我的记录</div>
+          <div class="cal-card-text me-text" id="calMeText">今天有什么想说的。</div>
+        </div>
+      </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <button class="calendar-mood-btn" id="openMoodModal">记录心情</button>
     </div>
