@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
 
-  // DOM 引用（略，与之前相同，但需确保所有变量声明完整）
   const topHeader = $('.top-header');
   const chatWrap = $('#chatWrap');
   const inputText = $('#inputText');
@@ -181,9 +180,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const rippleToggle = $('#rippleToggle');
   const inboxBadge = $('#inboxBadge');
 
-  // 注意：styleOptions 在 DOM 加载后才获取
-  let styleOptions = [];
+  const groupManageModal = $('#groupManageModal');
+  const groupManageList = $('#groupManageList');
+  const groupManageCount = $('#groupManageCount');
+  const groupManageClose = $('#groupManageClose');
+  const manageGroupBtn = $('#manageGroupBtn');
 
+  const cardManageModal = $('#cardManageModal');
+  const cardManageList = $('#cardManageList');
+  const cardManageTitle = $('#cardManageTitle');
+  const cardManageCount = $('#cardManageCount');
+  const cardManageClose = $('#cardManageClose');
+  const manageCardBtn = $('#manageCardBtn');
+
+  let styleOptions = [];
   let currentEditTarget = null;
   let currentMailTab = 'sent';
   let typingTimer = null;
@@ -196,13 +206,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ===== 工具函数 =====
   function deepMerge(target, source) {
+    if (!source) return target;
     const result = { ...target };
     for (const key in source) {
       if (source.hasOwnProperty(key)) {
-        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) && !(source[key] instanceof File)) {
-          result[key] = deepMerge(target[key] || {}, source[key]);
+        const sourceVal = source[key];
+        const targetVal = target[key];
+        if (sourceVal === undefined || sourceVal === null) continue;
+        if (!(key in target)) {
+          result[key] = sourceVal;
         } else {
-          result[key] = source[key];
+          if (typeof sourceVal === 'object' && !Array.isArray(sourceVal) && !(sourceVal instanceof File)) {
+            result[key] = deepMerge(targetVal, sourceVal);
+          } else if (Array.isArray(sourceVal) && Array.isArray(targetVal)) {
+            if (sourceVal.length > 0) {
+              result[key] = sourceVal;
+            } else {
+              result[key] = targetVal;
+            }
+          } else {
+            result[key] = sourceVal;
+          }
         }
       }
     }
@@ -343,7 +367,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function particleLoop() {
     if (!particleCtx) return;
     particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-    // 拖尾
     for (let i = trails.length - 1; i >= 0; i--) {
       const t = trails[i];
       t.x += t.vx;
@@ -357,7 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
       particleCtx.fillStyle = 'rgba(170,170,180,' + alpha + ')';
       particleCtx.fill();
     }
-    // 碎片
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx;
@@ -453,7 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
   // ===== 通用图片弹窗 =====
   function openImageModal(title, targetKey) {
     currentEditTarget = targetKey;
@@ -509,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 壁纸预览图点击
   const wallpaperPreviewContainer = document.querySelector('.preview-box.rect-h');
   if (wallpaperPreviewContainer) {
     wallpaperPreviewContainer.addEventListener('click', function(e) {
@@ -518,7 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 聊天背景预览图点击
   const chatBgPreviewContainer = document.querySelector('.preview-box.rect-v');
   if (chatBgPreviewContainer) {
     chatBgPreviewContainer.addEventListener('click', function(e) {
@@ -527,7 +546,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 图标更改按钮
   changeIconBtns.forEach(b => {
     b.addEventListener('click', function() {
       const type = this.dataset.type;
@@ -660,7 +678,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 装饰图点击
   if (decoImage) {
     decoImage.addEventListener('click', function() {
       openImageModal('更换装饰图', 'decoImage');
@@ -701,7 +718,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 关于TA保存
   if (taLocalBtn) {
     taLocalBtn.addEventListener('click', function() {
       taAvatarFile.click();
@@ -743,7 +759,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 关于我保存
   if (meLocalBtn) {
     meLocalBtn.addEventListener('click', function() {
       meAvatarFile.click();
@@ -787,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ===== 其他聊天设置 =====
   if (blockDelay) {
-    blockDelay.addEventListener('click', function() { /* 进度条无需弹窗 */ });
+    blockDelay.addEventListener('click', function() {});
   }
   if (delayRange) {
     delayRange.addEventListener('input', function() {
@@ -874,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===== 头像样式 =====
-  styleOptions = $$('.style-option');  // 先获取
+  styleOptions = $$('.style-option');
   styleOptions.forEach(opt => {
     opt.addEventListener('click', function() {
       styleOptions.forEach(o => o.classList.remove('active'));
@@ -1658,287 +1673,268 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-// ===== 字卡管理 =====
-// 管理分组弹窗
-const groupManageModal = document.getElementById('groupManageModal');
-const groupManageList = document.getElementById('groupManageList');
-const groupManageCount = document.getElementById('groupManageCount');
-const groupManageClose = document.getElementById('groupManageClose');
-const manageGroupBtn = document.getElementById('manageGroupBtn');
-
-function openGroupManageModal() {
-  renderGroupManageList();
-  groupManageModal.style.display = 'flex';
-}
-
-function renderGroupManageList() {
-  const keys = Object.keys(store.groups);
-  groupManageList.innerHTML = '';
-  if (keys.length === 0) {
-    groupManageList.innerHTML = '<div class="group-manage-empty">暂无分组</div>';
-    groupManageCount.textContent = '共 0 个分组';
-    return;
+  // ===== 字卡管理（完整） =====
+  function openGroupManageModal() {
+    renderGroupManageList();
+    groupManageModal.style.display = 'flex';
   }
-  keys.forEach(g => {
-    const div = document.createElement('div');
-    div.className = 'group-manage-item';
-    div.innerHTML = `
-      <div class="group-info">
-        <span class="group-name">${escapeHtml(g)}</span>
-        <span class="group-count">(${store.groups[g].length} 条)</span>
-      </div>
-      <button class="group-del-btn" data-group="${g}">删除</button>
-    `;
-    div.querySelector('.group-del-btn').addEventListener('click', function() {
-      const gName = this.dataset.group;
-      if (confirm(`确定删除分组「${gName}」及其所有字卡吗？`)) {
-        delete store.groups[gName];
-        if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
-        saveLocal();
-        renderGroupManageList();
-        refreshGroupSelect();
-        // 如果字卡管理弹窗打开且删除的是当前分组，关闭它
-        if (cardManageModal && cardManageModal.style.display === 'flex') {
-          cardManageModal.style.display = 'none';
+
+  function renderGroupManageList() {
+    const keys = Object.keys(store.groups);
+    groupManageList.innerHTML = '';
+    if (keys.length === 0) {
+      groupManageList.innerHTML = '<div class="group-manage-empty">暂无分组</div>';
+      groupManageCount.textContent = '共 0 个分组';
+      return;
+    }
+    keys.forEach(g => {
+      const div = document.createElement('div');
+      div.className = 'group-manage-item';
+      div.innerHTML = `
+        <div class="group-info">
+          <span class="group-name">${escapeHtml(g)}</span>
+          <span class="group-count">(${store.groups[g].length} 条)</span>
+        </div>
+        <button class="group-del-btn" data-group="${g}">删除</button>
+      `;
+      div.querySelector('.group-del-btn').addEventListener('click', function() {
+        const gName = this.dataset.group;
+        if (confirm(`确定删除分组「${gName}」及其所有字卡吗？`)) {
+          delete store.groups[gName];
+          if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
+          saveLocal();
+          renderGroupManageList();
+          refreshGroupSelect();
+          if (cardManageModal && cardManageModal.style.display === 'flex') {
+            cardManageModal.style.display = 'none';
+          }
         }
+      });
+      groupManageList.appendChild(div);
+    });
+    groupManageCount.textContent = `共 ${keys.length} 个分组`;
+  }
+
+  if (manageGroupBtn) {
+    manageGroupBtn.addEventListener('click', openGroupManageModal);
+  }
+  if (groupManageClose) {
+    groupManageClose.addEventListener('click', function() {
+      groupManageModal.style.display = 'none';
+    });
+  }
+  if (groupManageModal) {
+    groupManageModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
       }
     });
-    groupManageList.appendChild(div);
-  });
-  groupManageCount.textContent = `共 ${keys.length} 个分组`;
-}
+  }
 
-if (manageGroupBtn) {
-  manageGroupBtn.addEventListener('click', openGroupManageModal);
-}
-if (groupManageClose) {
-  groupManageClose.addEventListener('click', function() {
-    groupManageModal.style.display = 'none';
-  });
-}
-if (groupManageModal) {
-  groupManageModal.addEventListener('click', function(e) {
-    if (e.target === this) {
-      this.style.display = 'none';
+  function openCardManageModal() {
+    const g = store.currentSelectGroup;
+    if (!g || !store.groups[g]) {
+      alert('请先选择或创建分组');
+      return;
     }
-  });
-}
-
-// 管理字卡弹窗（与之前一致）
-const cardManageModal = document.getElementById('cardManageModal');
-const cardManageList = document.getElementById('cardManageList');
-const cardManageTitle = document.getElementById('cardManageTitle');
-const cardManageCount = document.getElementById('cardManageCount');
-const cardManageClose = document.getElementById('cardManageClose');
-const manageCardBtn = document.getElementById('manageCardBtn');
-
-function openCardManageModal() {
-  const g = store.currentSelectGroup;
-  if (!g || !store.groups[g]) {
-    alert('请先选择或创建分组');
-    return;
+    cardManageTitle.textContent = `📝 管理「${g}」字卡`;
+    renderCardManageList();
+    cardManageModal.style.display = 'flex';
   }
-  cardManageTitle.textContent = `📝 管理「${g}」字卡`;
-  renderCardManageList();
-  cardManageModal.style.display = 'flex';
-}
 
-function renderCardManageList() {
-  const g = store.currentSelectGroup;
-  if (!g || !store.groups[g]) {
-    cardManageList.innerHTML = '<div class="card-manage-empty">暂无字卡</div>';
-    cardManageCount.textContent = '共 0 条';
-    return;
-  }
-  const list = store.groups[g];
-  cardManageList.innerHTML = '';
-  list.forEach((card, idx) => {
-    const div = document.createElement('div');
-    div.className = `card-manage-item ${card.disabled ? 'disabled' : ''}`;
-    div.innerHTML = `
-      <span class="card-manage-text">${escapeHtml(card.text)}</span>
-      <div class="card-manage-opts">
-        <button class="edit-btn" data-idx="${idx}"><img src="https://i.ibb.co/sdw1Gc33/bianjiheibeifen.png" alt="编辑"></button>
-        <button class="del-btn" data-idx="${idx}"><img src="https://i.ibb.co/24WKj9F/shanchu.png" alt="删除"></button>
-        <button class="switch-btn" data-idx="${idx}"><img src="https://i.ibb.co/0pTRWNG4/Shield-pingbi.png" alt="${card.disabled ? '启用' : '屏蔽'}"></button>
-      </div>
-    `;
-    div.querySelector('.edit-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      const res = prompt('修改字卡', list[i].text);
-      if (res && res.trim()) { list[i].text = res.trim(); saveLocal(); renderCardManageList(); refreshGroupSelect(); }
-    });
-    div.querySelector('.del-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      if (confirm('确定要删除该字卡吗？')) {
-        list.splice(i, 1);
+  function renderCardManageList() {
+    const g = store.currentSelectGroup;
+    if (!g || !store.groups[g]) {
+      cardManageList.innerHTML = '<div class="card-manage-empty">暂无字卡</div>';
+      cardManageCount.textContent = '共 0 条';
+      return;
+    }
+    const list = store.groups[g];
+    cardManageList.innerHTML = '';
+    list.forEach((card, idx) => {
+      const div = document.createElement('div');
+      div.className = `card-manage-item ${card.disabled ? 'disabled' : ''}`;
+      div.innerHTML = `
+        <span class="card-manage-text">${escapeHtml(card.text)}</span>
+        <div class="card-manage-opts">
+          <button class="edit-btn" data-idx="${idx}"><img src="https://i.ibb.co/sdw1Gc33/bianjiheibeifen.png" alt="编辑"></button>
+          <button class="del-btn" data-idx="${idx}"><img src="https://i.ibb.co/24WKj9F/shanchu.png" alt="删除"></button>
+          <button class="switch-btn" data-idx="${idx}"><img src="https://i.ibb.co/0pTRWNG4/Shield-pingbi.png" alt="${card.disabled ? '启用' : '屏蔽'}"></button>
+        </div>
+      `;
+      div.querySelector('.edit-btn').addEventListener('click', function() {
+        const i = parseInt(this.dataset.idx);
+        const res = prompt('修改字卡', list[i].text);
+        if (res && res.trim()) { list[i].text = res.trim();
+          saveLocal();
+          renderCardManageList();
+          refreshGroupSelect(); }
+      });
+      div.querySelector('.del-btn').addEventListener('click', function() {
+        const i = parseInt(this.dataset.idx);
+        if (confirm('确定要删除该字卡吗？')) {
+          list.splice(i, 1);
+          saveLocal();
+          renderCardManageList();
+          refreshGroupSelect();
+        }
+      });
+      div.querySelector('.switch-btn').addEventListener('click', function() {
+        const i = parseInt(this.dataset.idx);
+        list[i].disabled = !list[i].disabled;
         saveLocal();
         renderCardManageList();
         refreshGroupSelect();
+      });
+      cardManageList.appendChild(div);
+    });
+    cardManageCount.textContent = `共 ${list.length} 条`;
+  }
+
+  if (manageCardBtn) {
+    manageCardBtn.addEventListener('click', openCardManageModal);
+  }
+  if (cardManageClose) {
+    cardManageClose.addEventListener('click', function() {
+      cardManageModal.style.display = 'none';
+    });
+  }
+  if (cardManageModal) {
+    cardManageModal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
       }
     });
-    div.querySelector('.switch-btn').addEventListener('click', function() {
-      const i = parseInt(this.dataset.idx);
-      list[i].disabled = !list[i].disabled;
+  }
+
+  if (createGroupBtn) {
+    createGroupBtn.addEventListener('click', function() {
+      const name = newGroupName.value.trim();
+      if (!name) { alert('请输入分组名称'); return; }
+      if (store.groups[name]) { alert('分组已存在'); return; }
+      store.groups[name] = [];
+      newGroupName.value = '';
       saveLocal();
-      renderCardManageList();
       refreshGroupSelect();
+      if (groupManageModal && groupManageModal.style.display === 'flex') {
+        renderGroupManageList();
+      }
     });
-    cardManageList.appendChild(div);
-  });
-  cardManageCount.textContent = `共 ${list.length} 条`;
-}
+  }
+  if (newGroupName) {
+    newGroupName.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') createGroupBtn.click();
+    });
+  }
 
-if (manageCardBtn) {
-  manageCardBtn.addEventListener('click', openCardManageModal);
-}
-if (cardManageClose) {
-  cardManageClose.addEventListener('click', function() {
-    cardManageModal.style.display = 'none';
-  });
-}
-if (cardManageModal) {
-  cardManageModal.addEventListener('click', function(e) {
-    if (e.target === this) {
-      this.style.display = 'none';
+  function refreshGroupSelect() {
+    const keys = Object.keys(store.groups);
+    currentGroupSelect.innerHTML = '';
+
+    let total = 0;
+    keys.forEach(g => { total += store.groups[g].length; });
+    const totalEl = document.getElementById('totalCardCount');
+    if (totalEl) totalEl.textContent = total;
+
+    if (keys.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '请先创建分组';
+      currentGroupSelect.appendChild(opt);
+      if (manageCardBtn) manageCardBtn.style.display = 'none';
+      if (cardManageModal) cardManageModal.style.display = 'none';
+      return;
     }
-  });
-}
+    if (manageCardBtn) manageCardBtn.style.display = 'block';
 
-// 创建分组
-if (createGroupBtn) {
-  createGroupBtn.addEventListener('click', function() {
-    const name = newGroupName.value.trim();
-    if (!name) { alert('请输入分组名称'); return; }
-    if (store.groups[name]) { alert('分组已存在'); return; }
-    store.groups[name] = [];
-    newGroupName.value = '';
-    saveLocal();
-    refreshGroupSelect();
-    // 刷新分组弹窗（如果打开）
+    keys.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g;
+      opt.textContent = `${g} (${store.groups[g].length}条)`;
+      currentGroupSelect.appendChild(opt);
+    });
+    if (!keys.includes(store.currentSelectGroup)) store.currentSelectGroup = keys[0];
+    currentGroupSelect.value = store.currentSelectGroup;
+    currentGroupSelect.onchange = function() {
+      store.currentSelectGroup = this.value;
+      saveLocal();
+      if (cardManageModal && cardManageModal.style.display === 'flex') {
+        renderCardManageList();
+      }
+    };
     if (groupManageModal && groupManageModal.style.display === 'flex') {
       renderGroupManageList();
     }
-  });
-}
-if (newGroupName) {
-  newGroupName.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') createGroupBtn.click();
-  });
-}
-
-// 刷新下拉框、总数量（并更新分组弹窗）
-function refreshGroupSelect() {
-  const keys = Object.keys(store.groups);
-  currentGroupSelect.innerHTML = '';
-
-  // 总数量
-  let total = 0;
-  keys.forEach(g => { total += store.groups[g].length; });
-  const totalEl = document.getElementById('totalCardCount');
-  if (totalEl) totalEl.textContent = total;
-
-  if (keys.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = '请先创建分组';
-    currentGroupSelect.appendChild(opt);
-    if (manageCardBtn) manageCardBtn.style.display = 'none';
-    if (cardManageModal) cardManageModal.style.display = 'none';
-    return;
   }
-  if (manageCardBtn) manageCardBtn.style.display = 'block';
 
-  keys.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g;
-    opt.textContent = `${g} (${store.groups[g].length}条)`;
-    currentGroupSelect.appendChild(opt);
-  });
-  if (!keys.includes(store.currentSelectGroup)) store.currentSelectGroup = keys[0];
-  currentGroupSelect.value = store.currentSelectGroup;
-  currentGroupSelect.onchange = function() {
-    store.currentSelectGroup = this.value;
-    saveLocal();
-    if (cardManageModal && cardManageModal.style.display === 'flex') {
-      renderCardManageList();
-    }
-  };
-  // 如果分组弹窗打开，刷新列表
-  if (groupManageModal && groupManageModal.style.display === 'flex') {
-    renderGroupManageList();
-  }
-}
+  if (addSingleCard) {
+    addSingleCard.addEventListener('click', function() {
+      const text = newCardInput.value.trim();
+      const g = store.currentSelectGroup;
+      if (!text) { alert('请输入字卡内容'); return; }
+      if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
 
-// 添加单条字卡
-if (addSingleCard) {
-  addSingleCard.addEventListener('click', function() {
-    const text = newCardInput.value.trim();
-    const g = store.currentSelectGroup;
-    if (!text) { alert('请输入字卡内容'); return; }
-    if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
+      const exists = store.groups[g].some(item => item.text === text);
+      if (exists) {
+        alert('该字卡在当前分组中已存在，不会重复添加。');
+        newCardInput.value = '';
+        return;
+      }
 
-    const exists = store.groups[g].some(item => item.text === text);
-    if (exists) {
-      alert('该字卡在当前分组中已存在，不会重复添加。');
+      store.groups[g].push({ id: Date.now() + Math.random(), text, disabled: false });
       newCardInput.value = '';
-      return;
-    }
-
-    store.groups[g].push({ id: Date.now() + Math.random(), text, disabled: false });
-    newCardInput.value = '';
-    saveLocal();
-    refreshGroupSelect();
-    if (cardManageModal && cardManageModal.style.display === 'flex') {
-      renderCardManageList();
-    }
-  });
-}
-if (newCardInput) {
-  newCardInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') addSingleCard.click();
-  });
-}
-
-// 批量导入
-if (batchImportBtn) {
-  batchImportBtn.addEventListener('click', function() {
-    const text = batchTextarea.value.trim();
-    const g = store.currentSelectGroup;
-    if (!text) { alert('请填入要导入的字卡'); return; }
-    if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
-
-    const arr = text.split('\n').map(s => s.trim()).filter(s => s);
-    if (arr.length === 0) { alert('没有有效的字卡内容'); return; }
-
-    const existingTexts = new Set(store.groups[g].map(item => item.text));
-    let addedCount = 0;
-    let duplicateCount = 0;
-
-    arr.forEach(t => {
-      if (existingTexts.has(t)) {
-        duplicateCount++;
-      } else {
-        store.groups[g].push({ id: Date.now() + Math.random(), text: t, disabled: false });
-        existingTexts.add(t);
-        addedCount++;
+      saveLocal();
+      refreshGroupSelect();
+      if (cardManageModal && cardManageModal.style.display === 'flex') {
+        renderCardManageList();
       }
     });
+  }
+  if (newCardInput) {
+    newCardInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') addSingleCard.click();
+    });
+  }
 
-    batchTextarea.value = '';
-    saveLocal();
-    refreshGroupSelect();
-    if (cardManageModal && cardManageModal.style.display === 'flex') {
-      renderCardManageList();
-    }
+  if (batchImportBtn) {
+    batchImportBtn.addEventListener('click', function() {
+      const text = batchTextarea.value.trim();
+      const g = store.currentSelectGroup;
+      if (!text) { alert('请填入要导入的字卡'); return; }
+      if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
 
-    if (duplicateCount > 0) {
-      alert(`导入完成！成功添加 ${addedCount} 条，跳过 ${duplicateCount} 条重复字卡。`);
-    } else {
-      alert(`成功添加 ${addedCount} 条字卡。`);
-    }
-  });
-}
+      const arr = text.split('\n').map(s => s.trim()).filter(s => s);
+      if (arr.length === 0) { alert('没有有效的字卡内容'); return; }
+
+      const existingTexts = new Set(store.groups[g].map(item => item.text));
+      let addedCount = 0;
+      let duplicateCount = 0;
+
+      arr.forEach(t => {
+        if (existingTexts.has(t)) {
+          duplicateCount++;
+        } else {
+          store.groups[g].push({ id: Date.now() + Math.random(), text: t, disabled: false });
+          existingTexts.add(t);
+          addedCount++;
+        }
+      });
+
+      batchTextarea.value = '';
+      saveLocal();
+      refreshGroupSelect();
+      if (cardManageModal && cardManageModal.style.display === 'flex') {
+        renderCardManageList();
+      }
+
+      if (duplicateCount > 0) {
+        alert(`导入完成！成功添加 ${addedCount} 条，跳过 ${duplicateCount} 条重复字卡。`);
+      } else {
+        alert(`成功添加 ${addedCount} 条字卡。`);
+      }
+    });
+  }
+
   // ===== 日历 =====
   function renderCalendar() {
     if (!calendarGrid) return;
@@ -2007,7 +2003,7 @@ if (batchImportBtn) {
   }
 
   function renderMoodEmojis() {
-    const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '☺️', '😡', '😳', '😶‍🌫️', '🔞', '😨'];
+    const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '😊', '😌', '😄', '🤗', '😏', '😜', '🤔', '🥱', '😤', '😢', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '🌟', '⭐', '☀️', '🌈', '☁️', '🌱', '🌸', '🌺', '🌻'];
     moodEmojiGrid.innerHTML = '';
     emojis.forEach(emo => {
       const span = document.createElement('span');
@@ -2082,7 +2078,6 @@ if (batchImportBtn) {
     });
   }
 
-  // 导出聊天记录
   if (exportChatBtn) {
     exportChatBtn.addEventListener('click', function() {
       const data = { messages: store.messages };
@@ -2097,7 +2092,6 @@ if (batchImportBtn) {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入聊天记录
   if (importChatBtn) {
     importChatBtn.addEventListener('click', function() {
       showImportConfirm('导入聊天记录', '导入将覆盖当前所有聊天消息，是否继续？', function() {
@@ -2126,7 +2120,6 @@ if (batchImportBtn) {
     });
   }
 
-  // 导出字卡
   if (exportCardsBtn) {
     exportCardsBtn.addEventListener('click', function() {
       const data = { groups: store.groups };
@@ -2141,7 +2134,6 @@ if (batchImportBtn) {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入字卡
   if (importCardsBtn) {
     importCardsBtn.addEventListener('click', function() {
       showImportConfirm('导入字卡', '导入将覆盖当前所有字卡分组及内容，是否继续？', function() {
@@ -2162,6 +2154,9 @@ if (batchImportBtn) {
                 else store.currentSelectGroup = '';
                 saveLocal();
                 refreshGroupSelect();
+                if (groupManageModal && groupManageModal.style.display === 'flex') {
+                  renderGroupManageList();
+                }
                 alert('字卡导入成功！');
               } else { alert('无效的数据文件'); }
             } catch (err) { alert('解析失败：' + err.message); }
@@ -2173,7 +2168,6 @@ if (batchImportBtn) {
     });
   }
 
-  // 导出全部数据
   if (exportDataBtn) {
     exportDataBtn.addEventListener('click', function() {
       const data = { store: store };
@@ -2188,7 +2182,6 @@ if (batchImportBtn) {
       URL.revokeObjectURL(url);
     });
   }
-  // 导入全部数据
   if (importDataBtn) {
     importDataBtn.addEventListener('click', function() {
       showImportConfirm('导入全部数据', '导入将覆盖所有当前数据，是否继续？', function() {
@@ -2203,7 +2196,7 @@ if (batchImportBtn) {
             try {
               const data = JSON.parse(ev.target.result);
               if (data.store) {
-                store = data.store;
+                store = deepMerge(store, data.store);
                 saveLocal();
                 renderHeaderAvatar();
                 refreshAllIconPreview();
@@ -2224,7 +2217,12 @@ if (batchImportBtn) {
                 profileSignature.innerText = store.profile.signature || '浅尝辄止 是命运轻轻放过了我';
                 decoImg.src = store.decoImage || '';
                 const style = store.chatSettings.avatarStyle || 'circle';
-                styleOptions.forEach(o => { o.classList.toggle('active', o.dataset.style === style); });
+                if (styleOptions && styleOptions.length) {
+                  styleOptions.forEach(o => { o.classList.toggle('active', o.dataset.style === style); });
+                }
+                if (groupManageModal && groupManageModal.style.display === 'flex') {
+                  renderGroupManageList();
+                }
                 alert('数据导入成功！');
               } else { alert('无效的数据文件'); }
             } catch (err) { alert('解析失败：' + err.message); }
@@ -2245,6 +2243,7 @@ if (batchImportBtn) {
         store = deepMerge(store, parsed);
       }
     } catch (e) { console.warn('Load local error', e); }
+
     if (!store.messages) store.messages = [];
     if (!store.calendar) store.calendar = {};
     if (!store.appIcon) store.appIcon = {};
@@ -2256,6 +2255,16 @@ if (batchImportBtn) {
     if (!store.emojiList) store.emojiList = [];
     if (!store.appliedFont) store.appliedFont = '';
     if (store.rippleEnabled === undefined) store.rippleEnabled = true;
+
+    if (!store.profile.cover) store.profile.cover = '';
+    if (!store.profile.avatar) store.profile.avatar = '';
+    if (!store.profile.name) store.profile.name = 'TATA';
+    if (!store.profile.location) store.profile.location = '爱尔兰';
+    if (!store.profile.locationIcon) store.profile.locationIcon = 'https://i.ibb.co/pjyVcqxM/position.png';
+    if (!store.profile.signature) store.profile.signature = '浅尝辄止 是命运轻轻放过了我';
+    if (!store.chatSettings.patSuffix) store.chatSettings.patSuffix = '拍了拍';
+    if (!store.chatSettings.videoBg) store.chatSettings.videoBg = '';
+    if (!store.chatSettings.avatarStyle) store.chatSettings.avatarStyle = 'circle';
 
     renderHeaderAvatar();
     refreshAllIconPreview();
@@ -2280,7 +2289,9 @@ if (batchImportBtn) {
     decoImg.src = store.decoImage || '';
     if (placeholderIcon) placeholderIcon.src = store.appIcon.placeholder || '';
     const style = store.chatSettings.avatarStyle || 'circle';
-    styleOptions.forEach(o => { o.classList.toggle('active', o.dataset.style === style); });
+    if (styleOptions && styleOptions.length) {
+      styleOptions.forEach(o => { o.classList.toggle('active', o.dataset.style === style); });
+    }
 
     if (rippleToggle) {
       if (store.rippleEnabled !== undefined) particleEnabled = store.rippleEnabled;
