@@ -947,3 +947,141 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   padding: 30px 0;
   font-size: 14px;
 }
+/* ===== 分组管理弹窗 ===== */
+.group-manage-panel {
+  max-width: 400px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.group-manage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 12px 20px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+.group-manage-header h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #333;
+}
+.group-manage-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+  padding: 4px 8px;
+}
+.group-manage-close:active {
+  color: #555;
+}
+.group-manage-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  min-height: 80px;
+  max-height: 50vh;
+}
+.group-manage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8f8f8;
+  margin-bottom: 6px;
+  border: 1px solid #f0f0f0;
+}
+.group-manage-item .group-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.group-manage-item .group-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}
+.group-manage-item .group-count {
+  font-size: 13px;
+  color: #999;
+}
+.group-manage-item .group-del-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #e74c3c;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.group-manage-item .group-del-btn:active {
+  background: #ffebee;
+}
+.group-manage-footer {
+  padding: 10px 20px 16px 20px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #999;
+  flex-shrink: 0;
+  text-align: center;
+}
+.group-manage-empty {
+  text-align: center;
+  color: #999;
+  padding: 30px 0;
+  font-size: 14px;
+}
+
+/* ===== 管理分组按钮 ===== */
+.manage-group-btn {
+  width: 100%;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background .15s;
+  margin-top: 6px;
+}
+.manage-group-btn:active {
+  background: #e0e0e0;
+}
+
+/* ===== 管理当前分组字卡按钮 ===== */
+.manage-card-btn {
+  width: 100%;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background .15s;
+  margin-top: 6px;
+}
+.manage-card-btn:active {
+  background: #555;
+}
+
+/* ===== 总字卡数量（最下方居中） ===== */
+.total-card-count {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  padding: 12px 0 4px 0;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 10px;
+}
+.total-card-count strong {
+  color: #333;
+}
