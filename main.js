@@ -222,3 +222,79 @@ window.addEventListener('beforeunload',function(){saveLocal();});
 let lastTouchEnd=0;document.addEventListener('touchend',function(e){const now=Date.now();if(now-lastTouchEnd<=300)e.preventDefault();lastTouchEnd=now;},{passive:false});document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.querySelectorAll('input,textarea').forEach(el=>el.style.fontSize='16px');
 loadLocal();applyBgStyle();applyVideoBg();if(document.querySelector('.chat-page.active')&&chatWrap)setTimeout(()=>chatWrap.scrollTop=chatWrap.scrollHeight,100);console.log('✅ 梦角字卡传讯已启动 | 动画:',store.animEnabled?'开启':'关闭');
 });
+// ===== 个人资料交互 =====
+if (profileCover) {
+  profileCover.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openImageModal('选择封面', 'profileCover');
+  });
+}
+if (profileAvatar) {
+  profileAvatar.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openImageModal('选择头像', 'profileAvatar');
+  });
+}
+if (profileName) {
+  profileName.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openEditText('修改昵称', store.profile.name, function(val) {
+      store.profile.name = val;
+      profileName.innerText = val;
+      saveLocal();
+    });
+  });
+}
+if (profileLocation) {
+  profileLocation.addEventListener('click', function(e) {
+    e.stopPropagation();
+    // 弹出位置编辑窗口（包含文本和图标链接）
+    const panel = document.querySelector('#editTextMask .panel');
+    const originalContent = panel.innerHTML;
+    panel.innerHTML = `
+      <h3>修改位置</h3>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:14px;color:#555;">位置名称</label>
+        <input type="text" id="editLocationText" value="${store.profile.location}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
+      </div>
+      <div>
+        <label style="font-size:14px;color:#555;">位置图标链接</label>
+        <input type="text" id="editLocationIcon" value="${store.profile.locationIcon}" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:16px;margin-top:4px;">
+      </div>
+      <div class="btns-wrap">
+        <button class="close" id="editLocationCancel">取消</button>
+        <button class="save" id="editLocationSave">保存</button>
+      </div>
+    `;
+    document.getElementById('editLocationCancel').onclick = function() {
+      panel.innerHTML = originalContent;
+      editTextMask.style.display = 'none';
+    };
+    document.getElementById('editLocationSave').onclick = function() {
+      const newText = document.getElementById('editLocationText').value.trim();
+      const newIcon = document.getElementById('editLocationIcon').value.trim();
+      if (newText) {
+        store.profile.location = newText;
+        locationText.innerText = newText;
+      }
+      if (newIcon) {
+        store.profile.locationIcon = newIcon;
+        locationIcon.src = newIcon;
+      }
+      saveLocal();
+      panel.innerHTML = originalContent;
+      editTextMask.style.display = 'none';
+    };
+    editTextMask.style.display = 'flex';
+  });
+}
+if (profileSignature) {
+  profileSignature.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openEditText('修改签名', store.profile.signature, function(val) {
+      store.profile.signature = val;
+      profileSignature.innerText = val;
+      saveLocal();
+    });
+  });
+}
