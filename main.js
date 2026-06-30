@@ -1659,21 +1659,72 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 // ===== 字卡管理 =====
-// 折叠控制
-const collapseHeader = document.getElementById('groupCollapseHeader');
-const collapseBody = document.getElementById('groupCollapseBody');
-const collapseArrow = document.getElementById('collapseArrow');
-let isCollapsed = true; // 默认折叠
+// 管理分组弹窗
+const groupManageModal = document.getElementById('groupManageModal');
+const groupManageList = document.getElementById('groupManageList');
+const groupManageCount = document.getElementById('groupManageCount');
+const groupManageClose = document.getElementById('groupManageClose');
+const manageGroupBtn = document.getElementById('manageGroupBtn');
 
-if (collapseHeader) {
-  collapseHeader.addEventListener('click', function() {
-    isCollapsed = !isCollapsed;
-    collapseBody.style.display = isCollapsed ? 'none' : 'block';
-    collapseArrow.classList.toggle('open', !isCollapsed);
+function openGroupManageModal() {
+  renderGroupManageList();
+  groupManageModal.style.display = 'flex';
+}
+
+function renderGroupManageList() {
+  const keys = Object.keys(store.groups);
+  groupManageList.innerHTML = '';
+  if (keys.length === 0) {
+    groupManageList.innerHTML = '<div class="group-manage-empty">暂无分组</div>';
+    groupManageCount.textContent = '共 0 个分组';
+    return;
+  }
+  keys.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'group-manage-item';
+    div.innerHTML = `
+      <div class="group-info">
+        <span class="group-name">${escapeHtml(g)}</span>
+        <span class="group-count">(${store.groups[g].length} 条)</span>
+      </div>
+      <button class="group-del-btn" data-group="${g}">删除</button>
+    `;
+    div.querySelector('.group-del-btn').addEventListener('click', function() {
+      const gName = this.dataset.group;
+      if (confirm(`确定删除分组「${gName}」及其所有字卡吗？`)) {
+        delete store.groups[gName];
+        if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
+        saveLocal();
+        renderGroupManageList();
+        refreshGroupSelect();
+        // 如果字卡管理弹窗打开且删除的是当前分组，关闭它
+        if (cardManageModal && cardManageModal.style.display === 'flex') {
+          cardManageModal.style.display = 'none';
+        }
+      }
+    });
+    groupManageList.appendChild(div);
+  });
+  groupManageCount.textContent = `共 ${keys.length} 个分组`;
+}
+
+if (manageGroupBtn) {
+  manageGroupBtn.addEventListener('click', openGroupManageModal);
+}
+if (groupManageClose) {
+  groupManageClose.addEventListener('click', function() {
+    groupManageModal.style.display = 'none';
+  });
+}
+if (groupManageModal) {
+  groupManageModal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.style.display = 'none';
+    }
   });
 }
 
-// 管理字卡弹窗
+// 管理字卡弹窗（与之前一致）
 const cardManageModal = document.getElementById('cardManageModal');
 const cardManageList = document.getElementById('cardManageList');
 const cardManageTitle = document.getElementById('cardManageTitle');
@@ -1738,7 +1789,6 @@ function renderCardManageList() {
   cardManageCount.textContent = `共 ${list.length} 条`;
 }
 
-// 管理按钮事件
 if (manageCardBtn) {
   manageCardBtn.addEventListener('click', openCardManageModal);
 }
@@ -1747,7 +1797,6 @@ if (cardManageClose) {
     cardManageModal.style.display = 'none';
   });
 }
-// 点击遮罩关闭弹窗
 if (cardManageModal) {
   cardManageModal.addEventListener('click', function(e) {
     if (e.target === this) {
@@ -1766,6 +1815,10 @@ if (createGroupBtn) {
     newGroupName.value = '';
     saveLocal();
     refreshGroupSelect();
+    // 刷新分组弹窗（如果打开）
+    if (groupManageModal && groupManageModal.style.display === 'flex') {
+      renderGroupManageList();
+    }
   });
 }
 if (newGroupName) {
@@ -1774,10 +1827,9 @@ if (newGroupName) {
   });
 }
 
-// 刷新分组下拉和总数量（并保持折叠状态）
+// 刷新下拉框、总数量（并更新分组弹窗）
 function refreshGroupSelect() {
   const keys = Object.keys(store.groups);
-  groupListWrap.innerHTML = '';
   currentGroupSelect.innerHTML = '';
 
   // 总数量
@@ -1792,7 +1844,6 @@ function refreshGroupSelect() {
     opt.textContent = '请先创建分组';
     currentGroupSelect.appendChild(opt);
     if (manageCardBtn) manageCardBtn.style.display = 'none';
-    // 如果弹窗开着就关掉
     if (cardManageModal) cardManageModal.style.display = 'none';
     return;
   }
@@ -1803,34 +1854,20 @@ function refreshGroupSelect() {
     opt.value = g;
     opt.textContent = `${g} (${store.groups[g].length}条)`;
     currentGroupSelect.appendChild(opt);
-    const row = document.createElement('div');
-    row.className = 'group-item-row';
-    row.innerHTML = `<span>${g}</span><span class="del-group-btn" data-group="${g}">删除</span>`;
-    row.querySelector('.del-group-btn').addEventListener('click', function() {
-      const gName = this.dataset.group;
-      if (confirm(`确定删除分组「${gName}」及其所有字卡吗？`)) {
-        delete store.groups[gName];
-        if (store.currentSelectGroup === gName) store.currentSelectGroup = Object.keys(store.groups)[0] || '';
-        saveLocal();
-        refreshGroupSelect();
-        // 如果弹窗打开且删除的是当前分组，关闭弹窗
-        if (cardManageModal && cardManageModal.style.display === 'flex') {
-          cardManageModal.style.display = 'none';
-        }
-      }
-    });
-    groupListWrap.appendChild(row);
   });
   if (!keys.includes(store.currentSelectGroup)) store.currentSelectGroup = keys[0];
   currentGroupSelect.value = store.currentSelectGroup;
   currentGroupSelect.onchange = function() {
     store.currentSelectGroup = this.value;
     saveLocal();
-    // 如果弹窗打开，刷新内容
     if (cardManageModal && cardManageModal.style.display === 'flex') {
       renderCardManageList();
     }
   };
+  // 如果分组弹窗打开，刷新列表
+  if (groupManageModal && groupManageModal.style.display === 'flex') {
+    renderGroupManageList();
+  }
 }
 
 // 添加单条字卡
@@ -1852,7 +1889,6 @@ if (addSingleCard) {
     newCardInput.value = '';
     saveLocal();
     refreshGroupSelect();
-    // 如果弹窗打开，刷新列表
     if (cardManageModal && cardManageModal.style.display === 'flex') {
       renderCardManageList();
     }
@@ -1892,7 +1928,6 @@ if (batchImportBtn) {
     batchTextarea.value = '';
     saveLocal();
     refreshGroupSelect();
-    // 如果弹窗打开，刷新列表
     if (cardManageModal && cardManageModal.style.display === 'flex') {
       renderCardManageList();
     }
