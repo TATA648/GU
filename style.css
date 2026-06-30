@@ -105,6 +105,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   align-items: center;
   gap: 1px;
   z-index: 1;
+  margin-top: 6px;
 }
 .header-avatar-group {
   display: flex;
