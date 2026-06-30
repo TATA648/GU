@@ -65,7 +65,7 @@ function updateImagePreview(url,previewBox,previewImg){if(!previewBox)previewBox
 if(localImageBtn)localImageBtn.addEventListener('click',function(){localImageFile.click();});
 if(localImageFile)localImageFile.addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){const url=ev.target.result;updateImagePreview(url);imageLinkInput.value='';};reader.readAsDataURL(file);});
 if(imageLinkInput)imageLinkInput.addEventListener('input',function(){updateImagePreview(this.value);});
-if// 点击壁纸预览图触发弹窗（按钮已隐藏）
+// 点击壁纸预览图触发弹窗（按钮已隐藏）
 if(wallpaperPreview){
   wallpaperPreview.parentElement.addEventListener('click', function(e){
     e.stopPropagation();
