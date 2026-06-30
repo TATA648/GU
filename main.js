@@ -1658,7 +1658,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // ===== 字卡管理 =====
+// ===== 字卡管理 =====
   if (createGroupBtn) {
     createGroupBtn.addEventListener('click', function() {
       const name = newGroupName.value.trim();
@@ -1743,11 +1743,14 @@ document.addEventListener('DOMContentLoaded', function() {
           saveLocal();
           renderCurrentCardList(); }
       });
+      // 删除字卡加入确认步骤
       div.querySelector('.del-btn').addEventListener('click', function() {
         const i = parseInt(this.dataset.idx);
-        list.splice(i, 1);
-        saveLocal();
-        renderCurrentCardList();
+        if (confirm('确定要删除该字卡吗？')) {
+          list.splice(i, 1);
+          saveLocal();
+          renderCurrentCardList();
+        }
       });
       div.querySelector('.switch-btn').addEventListener('click', function() {
         const i = parseInt(this.dataset.idx);
