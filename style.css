@@ -260,7 +260,25 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   border-radius: 12px !important;
   overflow: hidden !important;
 }
-
+#taPreviewBox,
+#mePreviewBox {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f0f0f0 !important;
+  border: 1px solid #e0e0e0 !important;
+}
+#taPreviewBox img,
+#mePreviewBox img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
 /* ===== 新增：隐藏壁纸/背景按钮，点击预览图触发（需配合 JS） ===== */
 #openWallpaperModal,
 #openChatBgModal {
