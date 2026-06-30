@@ -1863,7 +1863,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderMoodEmojis() {
-    const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴'];
+    const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '☺️', '😡', '😳', '😶‍🌫️', '🔞', '😨'];
     moodEmojiGrid.innerHTML = '';
     emojis.forEach(emo => {
       const span = document.createElement('span');
