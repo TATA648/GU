@@ -42,8 +42,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   min-height: 44px;
 }
 .page-header .back-btn img {
-  width: 20px !important;
-  height: 20px !important;
+  width: 15px !important;
+  height: 15px !important;
   display: block;
 }
 .setting-btn img,
@@ -176,8 +176,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   flex-shrink: 0;
 }
 #sendBtn img {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   display: block;
 }
 #sendBtn:active {
@@ -336,7 +336,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: -20px;
+  row-gap: -40px;
   column-gap: 2px;
   background: #fafafa;
   border-radius: 12px;
