@@ -2,23 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <!-- ===== 沉浸式状态栏配置 ===== -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#f5f5f5" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#f5f5f5">  <!-- 状态栏颜色，与背景统一 -->
-  <!-- ===== 桌面图标（请替换 src 链接为您自己的图标） ===== -->
-  <link rel="icon" type="image/png" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="32x32" />
-  <link rel="icon" type="image/png" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="16x16" />
-  <link rel="apple-touch-icon" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="180x180" />
-  <link rel="apple-touch-icon" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="152x152" />
-  <link rel="apple-touch-icon" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="120x120" />
-  <link rel="apple-touch-icon" href="https://i.ibb.co/wjZjVBS/IMG-1719.jpg" sizes="76x76" />
-  
-  <!-- ===== 视口 ===== -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  
   <title>梦角字卡传讯</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -27,38 +11,87 @@
   <!-- ===== 首页 ===== -->
   <div class="page home-page active">
     <div class="home-container">
+      <!-- 个人资料卡片（缩短） -->
       <div class="profile-card" id="profileCard">
-        <div class="profile-cover" id="profileCover"><img id="coverImage" src="" alt="封面" /><div class="cover-hint">点击更换封面</div></div>
+        <div class="profile-cover" id="profileCover">
+          <img id="coverImage" src="" alt="封面" />
+          <div class="cover-hint">点击更换封面</div>
+        </div>
         <div class="profile-bottom">
-          <div class="profile-avatar" id="profileAvatar"><img id="avatarImage" src="" alt="头像" /></div>
+          <div class="profile-avatar" id="profileAvatar">
+            <img id="avatarImage" src="" alt="头像" />
+          </div>
           <div class="profile-name" id="profileName">TATA</div>
-          <div class="profile-location" id="profileLocation"><span id="locationText">爱尔兰</span><span class="location-icon">_</span><img class="location-icon-img" id="locationIcon" src="https://i.ibb.co/pjyVcqxM/position.png" alt="位置图标" /></div>
+          <div class="profile-location" id="profileLocation">
+            <span id="locationText">爱尔兰</span>
+            <span class="location-icon">_</span>
+            <img class="location-icon-img" id="locationIcon" src="https://i.ibb.co/pjyVcqxM/position.png" alt="位置图标" />
+          </div>
           <div class="profile-signature" id="profileSignature">浅尝辄止 是命运轻轻放过了我</div>
         </div>
       </div>
+
+      <!-- 应用网格 + 装饰图 -->
       <div class="app-row">
         <div class="app-grid">
-          <div class="app-card" data-target="chat-page"><img class="app-icon" id="chatAppIcon" alt="聊天" /><span class="app-label">聊天</span></div>
-          <div class="app-card" data-target="card-page"><img class="app-icon" id="cardAppIcon" alt="字卡" /><span class="app-label">字卡</span></div>
-          <div class="app-card" data-target="mail-page"><img class="app-icon" id="mailAppIcon" alt="信箱" /><span class="app-label">信箱</span></div>
-          <div class="app-card" data-target="calendar-page"><img class="app-icon" id="calendarAppIcon" alt="日历" /><span class="app-label">日历</span></div>
+          <div class="app-card" data-target="chat-page">
+            <img class="app-icon" id="chatAppIcon" alt="聊天" />
+            <span class="app-label">聊天</span>
+          </div>
+          <div class="app-card" data-target="card-page">
+            <img class="app-icon" id="cardAppIcon" alt="字卡" />
+            <span class="app-label">字卡</span>
+          </div>
+          <div class="app-card" data-target="mail-page">
+            <img class="app-icon" id="mailAppIcon" alt="信箱" />
+            <span class="app-label">信箱</span>
+          </div>
+          <div class="app-card" data-target="calendar-page">
+            <img class="app-icon" id="calendarAppIcon" alt="日历" />
+            <span class="app-label">日历</span>
+          </div>
         </div>
-        <div class="deco-image" id="decoImage"><img id="decoImg" src="" alt="装饰" /><div class="deco-hint">点击更换</div></div>
+        <!-- 装饰图片 -->
+        <div class="deco-image" id="decoImage">
+          <img id="decoImg" src="" alt="装饰" />
+          <div class="deco-hint">点击更换</div>
+        </div>
       </div>
+
+      <!-- 底栏 -->
       <div class="bottom-bar">
-        <div class="bar-item" data-target="setting-page"><img class="bar-icon" id="settingAppIcon" alt="设置" /><span class="bar-label">设置</span></div>
-        <div class="bar-item placeholder" id="placeholderApp"><img class="bar-icon" id="placeholderIcon" src="" alt="⌯'Ⱉ'⌯" /><span class="bar-label">⌯'Ⱉ'⌯</span></div>
-        <div class="bar-item" data-target="appearance-page"><img class="bar-icon" id="themeAppIcon" alt="外观" /><span class="bar-label">外观</span></div>
+        <div class="bar-item" data-target="setting-page">
+          <img class="bar-icon" id="settingAppIcon" alt="设置" />
+          <span class="bar-label">设置</span>
+        </div>
+        <div class="bar-item placeholder" id="placeholderApp">
+          <img class="bar-icon" id="placeholderIcon" src="" alt="⌯'Ⱉ'⌯" />
+          <span class="bar-label">⌯'Ⱉ'⌯</span>
+        </div>
+        <div class="bar-item" data-target="appearance-page">
+          <img class="bar-icon" id="themeAppIcon" alt="外观" />
+          <span class="bar-label">外观</span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ===== 外观设置页 ===== -->
   <div class="page appearance-page">
-    <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
+    <div class="page-header">
+      <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
     <div class="setting-container">
-      <div class="setting-block"><h4 class="block-title">主页壁纸</h4><div class="wallpaper-row reverse"><div class="preview-box rect-h"><img id="wallpaperPreview" class="preview-img" alt="壁纸预览" /></div></div></div>
-      <div class="setting-block"><h4 class="block-title">应用图标设置</h4>
+      <div class="setting-block">
+        <h4 class="block-title">主页壁纸</h4>
+        <div class="wallpaper-row reverse">
+          <button class="change-btn" id="openWallpaperModal">更换壁纸</button>
+          <div class="preview-box rect-h"><img id="wallpaperPreview" class="preview-img" alt="壁纸预览" /></div>
+        </div>
+      </div>
+      <div class="setting-block">
+        <h4 class="block-title">应用图标设置</h4>
+        <!-- 只保留首页四个 + 底栏三个（设置、外观、占位） -->
         <div class="icon-set-item"><div class="preview-box small"><img id="chatIconPreview" class="preview-img" /></div><span class="item-name">聊天</span><button class="change-btn icon-change-btn" data-type="chat">更改</button></div>
         <div class="icon-set-item"><div class="preview-box small"><img id="cardIconPreview" class="preview-img" /></div><span class="item-name">字卡</span><button class="change-btn icon-change-btn" data-type="card">更改</button></div>
         <div class="icon-set-item"><div class="preview-box small"><img id="mailIconPreview" class="preview-img" /></div><span class="item-name">信箱</span><button class="change-btn icon-change-btn" data-type="mail">更改</button></div>
@@ -67,34 +100,90 @@
         <div class="icon-set-item"><div class="preview-box small"><img id="settingIconPreview" class="preview-img" /></div><span class="item-name">设置</span><button class="change-btn icon-change-btn" data-type="setting">更改</button></div>
         <div class="icon-set-item"><div class="preview-box small"><img id="placeholderIconPreview" class="preview-img" /></div><span class="item-name">占位</span><button class="change-btn icon-change-btn" data-type="placeholder">更改</button></div>
       </div>
-      <div class="setting-block"><h4 class="block-title">全局字体</h4><div class="font-upload-area"><input type="file" id="fontFileInput" accept=".ttf,.otf" /><button class="change-btn" id="applyFontBtn">应用字体</button></div><div style="font-size:12px; color:#999; margin-top:4px;">上传 .ttf 或 .otf 文件，刷新后失效</div></div>
-      <div class="setting-block"><h4 class="block-title">页面切换动画</h4><div class="toggle-row"><span class="toggle-label">启用平滑切换</span><div class="toggle-switch active" id="animToggle"><div class="toggle-knob"></div></div></div></div>
-      <div class="setting-block"><h4 class="block-title">滑动特效</h4><div class="toggle-row"><span class="toggle-label">启用粒子拖尾效果</span><div class="toggle-switch active" id="rippleToggle"><div class="toggle-knob"></div></div></div><div style="font-size:12px; color:#999; margin-top:4px;">点击产生碎片粒子，滑动产生拖尾</div></div>
+      <div class="setting-block">
+        <h4 class="block-title">全局字体</h4>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="file" id="fontFileInput" accept=".ttf,.otf" style="flex:1; padding:6px 0;" />
+          <button class="change-btn" id="applyFontBtn">应用字体</button>
+        </div>
+        <div style="font-size:12px; color:#999; margin-top:4px;">上传 .ttf 或 .otf 文件，刷新后失效</div>
+      </div>
+      <div class="setting-block">
+        <h4 class="block-title">页面切换动画</h4>
+        <div class="toggle-row"><span class="toggle-label">启用平滑切换</span><div class="toggle-switch active" id="animToggle"><div class="toggle-knob"></div></div></div>
+      </div>
       <div class="tip-text">所有设置保存后刷新页面生效</div>
     </div>
   </div>
 
-  <!-- ===== 设置页 ===== -->
+  <!-- ===== 设置页（数据管理 + 聊天记录/字卡导入导出） ===== -->
   <div class="page setting-page">
-    <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
+    <div class="page-header">
+      <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
     <div class="setting-container">
-      <div class="setting-block"><h4 class="block-title">聊天记录</h4><div style="display:flex; gap:12px; flex-wrap:wrap;"><button class="change-btn" id="exportChatBtn">导出聊天记录</button><button class="change-btn" id="importChatBtn">导入聊天记录</button></div><div style="font-size:12px; color:#999; margin-top:4px;">仅导出/导入聊天消息，不影响其他数据</div></div>
-      <div class="setting-block"><h4 class="block-title">字卡管理</h4><div style="display:flex; gap:12px; flex-wrap:wrap;"><button class="change-btn" id="exportCardsBtn">导出字卡</button><button class="change-btn" id="importCardsBtn">导入字卡</button></div><div style="font-size:12px; color:#999; margin-top:4px;">导出/导入所有分组及字卡</div></div>
-      <div class="setting-block"><h4 class="block-title">数据管理</h4><div style="display:flex; gap:12px; flex-wrap:wrap;"><button class="change-btn" id="exportDataBtn">导出全部数据</button><button class="change-btn" id="importDataBtn">导入全部数据</button></div><div style="font-size:12px; color:#999; margin-top:4px;">全部数据JSON，导入将覆盖所有</div></div>
+      <div class="setting-block">
+        <h4 class="block-title">聊天记录</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="change-btn" id="exportChatBtn">导出聊天记录</button>
+          <button class="change-btn" id="importChatBtn">导入聊天记录</button>
+        </div>
+        <div style="font-size:12px; color:#999; margin-top:4px;">仅导出/导入聊天消息，不影响其他数据</div>
+      </div>
+      <div class="setting-block">
+        <h4 class="block-title">字卡管理</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="change-btn" id="exportCardsBtn">导出字卡</button>
+          <button class="change-btn" id="importCardsBtn">导入字卡</button>
+        </div>
+        <div style="font-size:12px; color:#999; margin-top:4px;">导出/导入所有分组及字卡</div>
+      </div>
+      <div class="setting-block">
+        <h4 class="block-title">数据管理</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="change-btn" id="exportDataBtn">导出全部数据</button>
+          <button class="change-btn" id="importDataBtn">导入全部数据</button>
+        </div>
+        <div style="font-size:12px; color:#999; margin-top:4px;">全部数据JSON，导入将覆盖所有</div>
+      </div>
     </div>
   </div>
 
   <!-- ===== 聊天设置页 ===== -->
   <div class="page chat-set-page">
-    <div class="page-header"><button class="back-btn chat-set-back"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
-    <div class="chat-setting-container">
-      <div class="chat-set-item he-me-row"><button class="he-me-btn" id="heBtn">HE</button><button class="he-me-btn" id="meBtn">ME</button></div>
-      <div class="chat-set-item" id="blockDelay"><div class="chat-set-label">回复时长</div><div class="range-row"><input type="range" id="delayRange" min="20" max="120" value="20" /><span class="range-value" id="delayRangeValue">20秒</span></div></div>
-      <div class="chat-set-item" id="blockPatSuffix">我的拍一拍后缀</div>
-      <div class="chat-set-item" id="blockVideoBg">视频通话背景</div>
-      <div class="chat-set-item"><div class="chat-set-label">头像样式</div><div class="avatar-style-picker"><div class="style-option circle" data-style="circle"><div class="style-preview circle"></div><span>圆形</span></div><div class="style-option square" data-style="square"><div class="style-preview square"></div><span>方形</span></div></div></div>
-      <div class="chat-set-item"><div class="chat-set-label">聊天背景壁纸</div><div class="wallpaper-row reverse"><div class="preview-box rect-v"><img id="chatBgPreview" class="preview-img" alt="竖版聊天背景" /></div></div></div>
-      <button class="save-btn" id="saveChatSetting">保存全部设置</button>
+    <div class="page-header">
+      <button class="back-btn chat-set-back"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
+    <div class="setting-container">
+      <div class="setting-block">
+        <h4 class="block-title">聊天设置</h4>
+        <div class="set-block-item" id="blockTa">关于TA</div>
+        <div class="set-block-item" id="blockMe">关于我</div>
+        <div class="set-block-item" id="blockDelay">回复时长</div>
+        <div class="set-block-item" id="blockPatSuffix">我的拍一拍后缀</div>
+        <div class="set-block-item" id="blockVideoBg">视频通话背景</div>
+        <div class="set-block-item">
+          <div class="block-title" style="margin-bottom:8px;">头像样式</div>
+          <div class="avatar-style-picker">
+            <div class="style-option circle" data-style="circle">
+              <div class="style-preview circle"></div>
+              <span>圆形</span>
+            </div>
+            <div class="style-option square" data-style="square">
+              <div class="style-preview square"></div>
+              <span>方形</span>
+            </div>
+          </div>
+        </div>
+        <div class="set-block-item">
+          <div class="block-title">聊天背景壁纸</div>
+          <div class="wallpaper-row reverse">
+            <button class="change-btn" id="openChatBgModal">更换背景</button>
+            <div class="preview-box rect-v"><img id="chatBgPreview" class="preview-img" alt="竖版聊天背景" /></div>
+          </div>
+        </div>
+        <button class="save-btn" id="saveChatSetting">保存全部设置</button>
+      </div>
     </div>
   </div>
 
@@ -102,31 +191,71 @@
   <div class="page chat-page">
     <div class="top-header">
       <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
-      <div class="header-center"><div class="header-avatar-group"><div class="header-avatar" id="taAvatar"><img id="headerTaAvatar" alt="角色头像" /></div><div class="header-avatar" id="myAvatar"><img id="headerMyAvatar" alt="我的头像" /></div></div><div class="status-bar"><span class="status-text" id="currentStatusText">平静</span></div></div>
-      <div class="header-right-btns"><button class="video-top-btn" id="videoTopBtn"><img src="https://i.ibb.co/gbf4LjwW/shipintonghua.png" alt="视频" /></button><button class="setting-btn" id="openChatSettingPage"><img src="https://i.ibb.co/bgWYH15g/gengduo-2.png" alt="更多" /></button></div>
+      <div class="header-center">
+        <div class="header-avatar-group">
+          <div class="header-avatar" id="taAvatar"><img id="headerTaAvatar" alt="角色头像" /></div>
+          <div class="header-avatar" id="myAvatar"><img id="headerMyAvatar" alt="我的头像" /></div>
+        </div>
+        <div class="status-bar"><span class="status-text" id="currentStatusText">平静</span></div>
+      </div>
+      <button class="setting-btn" id="openChatSettingPage"><img src="https://i.ibb.co/bgWYH15g/gengduo-2.png" alt="更多" /></button>
     </div>
     <div class="chat-box" id="chatWrap"></div>
-    <div class="quote-bar" id="quoteBar" style="display:none;"><span class="quote-content" id="quoteContent">引用消息</span><button class="quote-close" id="quoteClose">✕</button></div>
+    <div class="quote-bar" id="quoteBar" style="display:none;">
+      <span class="quote-content" id="quoteContent">引用消息</span>
+      <button class="quote-close" id="quoteClose">✕</button>
+    </div>
     <div class="input-area" id="inputWrap">
       <button class="album-btn" id="albumBtn"><img src="https://i.ibb.co/bRWBPsxH/xiangce.png" alt="相册" /></button>
-      <input type="text" id="inputText" placeholder="…" autocomplete="off" />
-      <div class="emoji-btn-wrapper"><button class="emoji-send-btn" id="emojiSendBtn"><img src="https://i.ibb.co/JWCM6nHz/pengyouquanbiaoqingbao.png" alt="表情" /></button><button id="sendBtn">发送</button></div>
+      <input type="text" id="inputText" placeholder="输入想要发送的话..." autocomplete="off" />
+      <div class="emoji-btn-wrapper">
+        <button class="emoji-send-btn" id="emojiSendBtn"><img src="https://i.ibb.co/JWCM6nHz/pengyouquanbiaoqingbao.png" alt="表情" /></button>
+        <button id="sendBtn">发送</button>
+      </div>
     </div>
-    <div class="emoji-panel" id="emojiPanel"><div class="emoji-grid" id="emojiGrid"></div></div>
-    <div class="video-window" id="videoWindow" style="display:none;"><div class="video-bg" id="videoBg"></div><div class="video-header"><span class="video-timer" id="videoTimer">00:00:00</span><button class="video-fold-btn" id="videoFoldBtn">−</button></div><div class="video-avatar"><img id="videoAvatar" src="" alt="对方头像" /></div><button class="video-hangup" id="videoHangupBtn">挂断</button><div class="video-answer" id="videoAnswerArea" style="display:none;"><button class="video-answer-btn" id="videoAnswerBtn">接听</button><button class="video-reject-btn" id="videoRejectBtn">拒接</button></div></div>
-    <div class="video-capsule" id="videoCapsule" style="display:none;"><span class="capsule-timer" id="capsuleTimer">00:00:00</span><button class="capsule-expand" id="capsuleExpand">⤴</button></div>
+    <div class="emoji-panel" id="emojiPanel">
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+    <div class="video-window" id="videoWindow" style="display:none;">
+      <div class="video-bg" id="videoBg"></div>
+      <div class="video-header">
+        <span class="video-timer" id="videoTimer">00:00:00</span>
+        <button class="video-fold-btn" id="videoFoldBtn">−</button>
+      </div>
+      <div class="video-avatar"><img id="videoAvatar" src="" alt="对方头像" /></div>
+      <button class="video-hangup" id="videoHangupBtn">挂断</button>
+      <div class="video-answer" id="videoAnswerArea" style="display:none;">
+        <button class="video-answer-btn" id="videoAnswerBtn">接听</button>
+        <button class="video-reject-btn" id="videoRejectBtn">拒接</button>
+      </div>
+    </div>
+    <div class="video-capsule" id="videoCapsule" style="display:none;">
+      <span class="capsule-timer" id="capsuleTimer">00:00:00</span>
+      <button class="capsule-expand" id="capsuleExpand">⤴</button>
+    </div>
   </div>
 
   <!-- ===== 字卡管理页 ===== -->
   <div class="page card-page">
-    <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
+    <div class="page-header">
+      <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
     <div class="card-container">
-      <div class="group-op-bar"><input type="text" id="newGroupName" placeholder="新建分组名称" autocomplete="off" /><button id="createGroupBtn">创建分组</button></div>
+      <div class="group-op-bar">
+        <input type="text" id="newGroupName" placeholder="新建分组名称" autocomplete="off" />
+        <button id="createGroupBtn">创建分组</button>
+      </div>
       <div class="group-list" id="groupListWrap"></div>
       <label style="font-size:13px;color:#555;margin-bottom:4px;display:block;">当前操作分组</label>
       <select id="currentGroupSelect"></select>
-      <div class="card-add-bar"><input type="text" id="newCardInput" placeholder="添加单条字卡" autocomplete="off" /><button id="addSingleCard">添加</button></div>
-      <div class="batch-import-wrap"><textarea id="batchTextarea" placeholder="批量导入，一行一条"></textarea><button id="batchImportBtn">批量导入</button></div>
+      <div class="card-add-bar">
+        <input type="text" id="newCardInput" placeholder="添加单条字卡" autocomplete="off" />
+        <button id="addSingleCard">添加</button>
+      </div>
+      <div class="batch-import-wrap">
+        <textarea id="batchTextarea" placeholder="批量导入，一行一条"></textarea>
+        <button id="batchImportBtn">批量导入</button>
+      </div>
       <div class="card-list-title">当前分组字卡</div>
       <div class="card-list" id="cardListWrap"></div>
     </div>
@@ -134,11 +263,22 @@
 
   <!-- ===== 信箱页 ===== -->
   <div class="page mail-page">
-    <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
+    <div class="page-header">
+      <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
     <div class="mail-container">
-      <div class="mail-tab-bar"><button class="mail-tab active" data-tab="sent">寄出</button><button class="mail-tab" data-tab="inbox" id="inboxTab">收件箱<span class="badge" id="inboxBadge" style="display:none;">●</span></button></div>
+      <div class="mail-tab-bar">
+        <button class="mail-tab active" data-tab="sent">寄出</button>
+        <button class="mail-tab" data-tab="inbox">收件箱</button>
+      </div>
       <div class="mail-list-wrap">
-        <div class="sent-box" id="sentBox"><div class="mail-list-header"><span>已寄出</span><button class="mail-add-btn" id="mailAddBtn"><img src="https://i.ibb.co/yLYFm34/a-24-wanzhengxiexin.png" alt="写信" /></button></div><div class="sent-list" id="sentList"></div></div>
+        <div class="sent-box" id="sentBox">
+          <div class="mail-list-header">
+            <span>已寄出</span>
+            <button class="mail-add-btn" id="mailAddBtn">＋</button>
+          </div>
+          <div class="sent-list" id="sentList"></div>
+        </div>
         <div class="inbox-box hidden" id="inboxWrap"></div>
       </div>
     </div>
@@ -146,59 +286,107 @@
 
   <!-- ===== 日历页 ===== -->
   <div class="page calendar-page">
-    <div class="page-header"><button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button></div>
+    <div class="page-header">
+      <button class="back-btn"><img src="https://i.ibb.co/hxpr767Z/fanhui-3.png" alt="返回" /></button>
+    </div>
     <div class="calendar-container">
-      <div class="calendar-text-area"><div class="cal-block"><div class="cal-block-label">他的记录</div><div class="cal-text ta-text" id="calTaText">TA今天还没有记录哦～</div></div><div class="cal-divider"></div><div class="cal-block"><div class="cal-block-label">我的记录</div><div class="cal-text me-text" id="calMeText">今天有什么想说的。</div></div></div>
+      <div class="calendar-text-area">
+        <div class="cal-text-item ta-text" id="calTaText">TA今天还没有记录哦～</div>
+        <div class="cal-text-item me-text" id="calMeText">今天有什么想说的。</div>
+      </div>
       <div class="calendar-grid" id="calendarGrid"></div>
       <button class="calendar-mood-btn" id="openMoodModal">记录心情</button>
     </div>
   </div>
 
   <!-- ===== 弹窗区 ===== -->
+  <!-- 图片选择弹窗 -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
-      <div class="image-preview-wrap"><div class="image-preview-box" id="imagePreviewBox"><img id="imagePreviewImg" src="" alt="图片预览" /><div class="image-preview-placeholder" id="imagePreviewPlaceholder">暂无图片</div></div></div>
-      <button class="upload-btn" id="localImageBtn">上传本地图片</button>
-      <input type="file" id="localImageFile" accept="image/*" style="display:none;" />
-      <input type="text" id="imageLinkInput" placeholder="填入图片链接" autocomplete="off" />
+      <div class="upload-item"><label>上传本地图片</label><input type="file" id="localImageFile" accept="image/*" /></div>
+      <div class="link-item"><label>填入图片链接</label><input type="text" id="imageLinkInput" placeholder="粘贴网络图片地址" autocomplete="off" /></div>
       <div class="btns-wrap"><button class="close" id="closeImageModal">取消</button><button class="save" id="confirmImageBtn">确定使用</button></div>
     </div>
   </div>
 
-  <div class="mask" id="editTextMask"><div class="panel"><h3 id="editTextTitle">编辑内容</h3><input type="text" id="editTextInput" placeholder="请输入新内容" /><div class="btns-wrap"><button class="close" id="closeEditText">取消</button><button class="save" id="saveEditText">保存</button></div></div></div>
-  <div class="mask" id="importConfirmMask"><div class="panel"><h3 id="importConfirmTitle">确认导入</h3><p id="importConfirmMsg" style="margin:16px 0;">导入将覆盖当前数据，是否继续？</p><div class="btns-wrap"><button class="close" id="importCancelBtn">取消</button><button class="save" id="importConfirmBtn">确认导入</button></div></div></div>
+  <!-- 编辑文本弹窗 -->
+  <div class="mask" id="editTextMask">
+    <div class="panel">
+      <h3 id="editTextTitle">编辑内容</h3>
+      <input type="text" id="editTextInput" placeholder="请输入新内容" />
+      <div class="btns-wrap"><button class="close" id="closeEditText">取消</button><button class="save" id="saveEditText">保存</button></div>
+    </div>
+  </div>
 
-  <!-- 关于TA（已移除预览图） -->
+  <!-- 导入确认弹窗（通用） -->
+  <div class="mask" id="importConfirmMask">
+    <div class="panel">
+      <h3 id="importConfirmTitle">确认导入</h3>
+      <p id="importConfirmMsg" style="margin:16px 0;">导入将覆盖当前数据，是否继续？</p>
+      <div class="btns-wrap"><button class="close" id="importCancelBtn">取消</button><button class="save" id="importConfirmBtn">确认导入</button></div>
+    </div>
+  </div>
+
+  <!-- 关于TA -->
   <div class="mask" id="taMask">
     <div class="panel">
       <h3>角色信息设置</h3>
-      <button class="upload-btn" id="taLocalBtn">上传本地图片</button>
-      <input type="file" id="taAvatarFile" accept="image/*" style="display:none;" />
-      <input type="text" id="taAvatarLink" placeholder="填入图片链接" autocomplete="off" />
-      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">角色昵称</label>
-      <input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
+      <div class="upload-item"><label>角色头像（本地上传）</label><input type="file" id="taAvatarFile" accept="image/*" /></div>
+      <div class="link-item"><label>角色头像（图片链接）</label><input type="text" id="taAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
+      <label style="font-size:14px;color:#444;">角色昵称</label><input type="text" id="taNameInput" placeholder="角色昵称" autocomplete="off" />
       <div class="btns-wrap"><button class="close" id="closeTaSet">取消</button><button class="save" id="saveTaSet">保存</button></div>
     </div>
   </div>
 
-  <!-- 关于我（已移除预览图） -->
+  <!-- 关于我 -->
   <div class="mask" id="meMask">
     <div class="panel">
       <h3>个人信息设置</h3>
-      <button class="upload-btn" id="meLocalBtn">上传本地图片</button>
-      <input type="file" id="meAvatarFile" accept="image/*" style="display:none;" />
-      <input type="text" id="meAvatarLink" placeholder="填入图片链接" autocomplete="off" />
-      <label style="font-size:14px;color:#444;margin-top:10px;display:block;">我的昵称</label>
-      <input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
+      <div class="upload-item"><label>我的头像（本地上传）</label><input type="file" id="meAvatarFile" accept="image/*" /></div>
+      <div class="link-item"><label>我的头像（图片链接）</label><input type="text" id="meAvatarLink" placeholder="粘贴头像链接" autocomplete="off" /></div>
+      <label style="font-size:14px;color:#444;">我的昵称</label><input type="text" id="meNameInput" placeholder="我的昵称" autocomplete="off" />
       <div class="btns-wrap"><button class="close" id="closeMeSet">取消</button><button class="save" id="saveMeSet">保存</button></div>
     </div>
   </div>
 
-  <div class="mask" id="patMask"><div class="panel"><h3>我的拍一拍后缀</h3><input type="text" id="patSuffixInput" placeholder="输入后缀，如：摸了摸头" /><div class="btns-wrap"><button class="close" id="closePatSet">取消</button><button class="save" id="savePatSet">保存</button></div></div></div>
-  <div class="mask" id="videoBgMask"><div class="panel"><h3>视频通话背景</h3><div class="upload-item"><label>上传背景图片</label><input type="file" id="videoBgFile" accept="image/*" /></div><div class="link-item"><label>图片链接</label><input type="text" id="videoBgLink" placeholder="粘贴图片链接" autocomplete="off" /></div><div class="btns-wrap"><button class="close" id="closeVideoBg">取消</button><button class="save" id="saveVideoBg">保存</button></div></div></div>
-  <div class="mask" id="writeLetterMask"><div class="panel"><h3>写信</h3><textarea id="letterContentInput" placeholder="写下你想寄出的信件..." style="width:100%;min-height:120px;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:16px;resize:vertical;"></textarea><div class="btns-wrap"><button class="close" id="closeLetterModal">取消</button><button class="save" id="sendLetterConfirm">寄出</button></div></div></div>
-  <div class="mask" id="moodModal"><div class="panel"><h3>记录今日心情</h3><div class="mood-emoji-grid" id="moodEmojiGrid"></div><label style="font-size:14px;color:#444;margin-top:10px;display:block;">想说的话</label><input type="text" id="moodTextInput" placeholder="写下你想说的话..." /><div class="btns-wrap"><button class="close" id="closeMoodModal">取消</button><button class="save" id="saveMoodModal">保存</button></div></div></div>
+  <!-- 回复时长 -->
+  <div class="mask" id="delayMask">
+    <div class="panel">
+      <h3>回复间隔设置</h3>
+      <label style="font-size:14px;color:#444;">最小等待秒数（最低20）</label><input type="number" id="minDelayInput" min="20" value="20" />
+      <label style="font-size:14px;color:#444;margin-top:8px;">最大等待秒数（最高120）</label><input type="number" id="maxDelayInput" max="120" value="120" />
+      <div class="btns-wrap"><button class="close" id="closeDelaySet">取消</button><button class="save" id="saveDelaySet">保存</button></div>
+    </div>
+  </div>
+
+  <!-- 拍一拍后缀 -->
+  <div class="mask" id="patMask">
+    <div class="panel">
+      <h3>我的拍一拍后缀</h3>
+      <input type="text" id="patSuffixInput" placeholder="输入后缀，如：摸了摸头" />
+      <div class="btns-wrap"><button class="close" id="closePatSet">取消</button><button class="save" id="savePatSet">保存</button></div>
+    </div>
+  </div>
+
+  <!-- 视频背景 -->
+  <div class="mask" id="videoBgMask">
+    <div class="panel">
+      <h3>视频通话背景</h3>
+      <div class="upload-item"><label>上传背景图片</label><input type="file" id="videoBgFile" accept="image/*" /></div>
+      <div class="link-item"><label>图片链接</label><input type="text" id="videoBgLink" placeholder="粘贴图片链接" autocomplete="off" /></div>
+      <div class="btns-wrap"><button class="close" id="closeVideoBg">取消</button><button class="save" id="saveVideoBg">保存</button></div>
+    </div>
+  </div>
+
+  <!-- 写信弹窗 -->
+  <div class="mask" id="writeLetterMask">
+    <div class="panel">
+      <h3>写信</h3>
+      <textarea id="letterContentInput" placeholder="写下你想寄出的信件..." style="width:100%;min-height:120px;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:16px;resize:vertical;"></textarea>
+      <div class="btns-wrap"><button class="close" id="closeLetterModal">取消</button><button class="save" id="sendLetterConfirm">寄出</button></div>
+    </div>
+  </div>
 
   <script src="main.js"></script>
 </body>
