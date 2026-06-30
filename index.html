@@ -2,7 +2,24 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
+  
+  <!-- ===== 沉浸式状态栏配置 ===== -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#f5f5f5" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  
+  <!-- ===== 桌面图标（请替换 src 链接为您自己的图标） ===== -->
+  <link rel="icon" type="image/png" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="16x16" />
+  <link rel="apple-touch-icon" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="180x180" />
+  <link rel="apple-touch-icon" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="152x152" />
+  <link rel="apple-touch-icon" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="120x120" />
+  <link rel="apple-touch-icon" href="https://i.ibb.co/bRWBPsxH/xiangce.png" sizes="76x76" />
+  
+  <!-- ===== 视口 ===== -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  
   <title>梦角字卡传讯</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -11,7 +28,6 @@
   <!-- ===== 首页 ===== -->
   <div class="page home-page active">
     <div class="home-container">
-      <!-- 个人资料卡片 -->
       <div class="profile-card" id="profileCard">
         <div class="profile-cover" id="profileCover"><img id="coverImage" src="" alt="封面" /><div class="cover-hint">点击更换封面</div></div>
         <div class="profile-bottom">
@@ -21,7 +37,6 @@
           <div class="profile-signature" id="profileSignature">浅尝辄止 是命运轻轻放过了我</div>
         </div>
       </div>
-      <!-- 应用网格 -->
       <div class="app-row">
         <div class="app-grid">
           <div class="app-card" data-target="chat-page"><img class="app-icon" id="chatAppIcon" alt="聊天" /><span class="app-label">聊天</span></div>
@@ -31,7 +46,6 @@
         </div>
         <div class="deco-image" id="decoImage"><img id="decoImg" src="" alt="装饰" /><div class="deco-hint">点击更换</div></div>
       </div>
-      <!-- 底栏 -->
       <div class="bottom-bar">
         <div class="bar-item" data-target="setting-page"><img class="bar-icon" id="settingAppIcon" alt="设置" /><span class="bar-label">设置</span></div>
         <div class="bar-item placeholder" id="placeholderApp"><img class="bar-icon" id="placeholderIcon" src="" alt="⌯'Ⱉ'⌯" /><span class="bar-label">⌯'Ⱉ'⌯</span></div>
@@ -142,7 +156,6 @@
   </div>
 
   <!-- ===== 弹窗区 ===== -->
-  <!-- 通用图片选择弹窗 -->
   <div class="mask" id="imageSelectMask">
     <div class="panel image-panel">
       <h3 id="modalTitle">选择图片</h3>
@@ -154,19 +167,8 @@
     </div>
   </div>
 
-  <!-- 编辑文本弹窗 -->
-  <div class="mask" id="editTextMask">
-    <div class="panel">
-      <h3 id="editTextTitle">编辑内容</h3>
-      <input type="text" id="editTextInput" placeholder="请输入新内容" />
-      <div class="btns-wrap"><button class="close" id="closeEditText">取消</button><button class="save" id="saveEditText">保存</button></div>
-    </div>
-  </div>
-
-  <!-- 导入确认弹窗 -->
-  <div class="mask" id="importConfirmMask">
-    <div class="panel"><h3 id="importConfirmTitle">确认导入</h3><p id="importConfirmMsg" style="margin:16px 0;">导入将覆盖当前数据，是否继续？</p><div class="btns-wrap"><button class="close" id="importCancelBtn">取消</button><button class="save" id="importConfirmBtn">确认导入</button></div></div>
-  </div>
+  <div class="mask" id="editTextMask"><div class="panel"><h3 id="editTextTitle">编辑内容</h3><input type="text" id="editTextInput" placeholder="请输入新内容" /><div class="btns-wrap"><button class="close" id="closeEditText">取消</button><button class="save" id="saveEditText">保存</button></div></div></div>
+  <div class="mask" id="importConfirmMask"><div class="panel"><h3 id="importConfirmTitle">确认导入</h3><p id="importConfirmMsg" style="margin:16px 0;">导入将覆盖当前数据，是否继续？</p><div class="btns-wrap"><button class="close" id="importCancelBtn">取消</button><button class="save" id="importConfirmBtn">确认导入</button></div></div></div>
 
   <!-- 关于TA（已移除预览图） -->
   <div class="mask" id="taMask">
@@ -194,7 +196,6 @@
     </div>
   </div>
 
-  <!-- 其他弹窗 -->
   <div class="mask" id="patMask"><div class="panel"><h3>我的拍一拍后缀</h3><input type="text" id="patSuffixInput" placeholder="输入后缀，如：摸了摸头" /><div class="btns-wrap"><button class="close" id="closePatSet">取消</button><button class="save" id="savePatSet">保存</button></div></div></div>
   <div class="mask" id="videoBgMask"><div class="panel"><h3>视频通话背景</h3><div class="upload-item"><label>上传背景图片</label><input type="file" id="videoBgFile" accept="image/*" /></div><div class="link-item"><label>图片链接</label><input type="text" id="videoBgLink" placeholder="粘贴图片链接" autocomplete="off" /></div><div class="btns-wrap"><button class="close" id="closeVideoBg">取消</button><button class="save" id="saveVideoBg">保存</button></div></div></div>
   <div class="mask" id="writeLetterMask"><div class="panel"><h3>写信</h3><textarea id="letterContentInput" placeholder="写下你想寄出的信件..." style="width:100%;min-height:120px;border:1px solid #ddd;border-radius:8px;padding:12px;font-size:16px;resize:vertical;"></textarea><div class="btns-wrap"><button class="close" id="closeLetterModal">取消</button><button class="save" id="sendLetterConfirm">寄出</button></div></div></div>
