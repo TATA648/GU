@@ -11,9 +11,29 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .page-header{display:flex;align-items:center;padding:8px 12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);flex-shrink:0;position:fixed;top:0;left:0;right:0;z-index:1000}
 .page-header .back-btn{margin-right:auto}
 .back-btn img,.setting-btn img,.video-top-btn img{width:24px;height:24px;display:block}
-.top-header{display:none;align-items:center;justify-content:space-between;padding:8px 12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);position:fixed;top:0;left:0;right:0;z-index:1000;min-height:60px}
-.top-header.show{display:flex}
-.top-header .back-btn{position:static;transform:none;flex-shrink:0}
+./* ===== 顶部栏（毛玻璃透明效果） ===== */
+.top-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  /* 毛玻璃透明背景 */
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  min-height: 60px;
+  /* 安全区域适配 */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.top-header.show {
+  display: flex;
+}
 .header-center{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
 .header-avatar-group{display:flex;gap:12px}
 .header-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#e0e0e0;flex-shrink:0;cursor:pointer}
