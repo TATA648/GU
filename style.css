@@ -105,7 +105,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   align-items: center;
   gap: 1px;
   z-index: 1;
-  margin-top: 26px;
+  margin-top: 31px;
 }
 .header-avatar-group {
   display: flex;
@@ -1039,8 +1039,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   font-size: 14px;
 }
 
-/* ===== 管理分组按钮 ===== */
-.manage-group-btn {
+/* ===== 字卡管理按钮（统一灰色描边样式） ===== */
+.manage-btn {
   width: 100%;
   background: #f0f0f0;
   color: #333;
@@ -1052,25 +1052,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   transition: background .15s;
   margin-top: 6px;
 }
-.manage-group-btn:active {
+.manage-btn:active {
   background: #e0e0e0;
-}
-
-/* ===== 管理当前分组字卡按钮 ===== */
-.manage-card-btn {
-  width: 100%;
-  background: #333;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background .15s;
-  margin-top: 6px;
-}
-.manage-card-btn:active {
-  background: #555;
 }
 
 /* ===== 总字卡数量（最下方居中） ===== */
