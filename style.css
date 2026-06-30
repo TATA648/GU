@@ -209,7 +209,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .image-panel .image-preview-box.has-image .image-preview-placeholder{display:none}
 
 /* ===== 修复布局错位 ===== */
-/* 壁纸与图标更改按钮右对齐 */
 .wallpaper-row {
   display: flex !important;
   align-items: center !important;
@@ -232,19 +231,16 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   margin-left: auto !important;
   flex-shrink: 0 !important;
 }
-
-/* 上传本地图片按钮与输入框同宽同高 */
 .upload-btn {
   width: 100% !important;
-  padding: 9px 0 !important; /* 与输入框内边距一致 */
+  padding: 9px 0 !important;
   box-sizing: border-box !important;
   text-align: center !important;
+  margin-bottom: 10px !important; /* 与下方输入框拉开间距 */
 }
 .image-panel input[type="text"] {
-  height: 40px !important; /* 与上传按钮高度匹配 */
+  height: 40px !important;
 }
-
-/* 聊天背景更换按钮位置修正 */
 .set-block-item .wallpaper-row.reverse {
   display: flex !important;
   flex-direction: row !important;
@@ -258,8 +254,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .set-block-item .wallpaper-row.reverse .preview-box {
   order: 1 !important;
 }
-
-/* 角色/用户头像预览圆角正方形 */
 #taPreviewBox, #mePreviewBox {
   width: 80px !important;
   height: 80px !important;
@@ -267,13 +261,42 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   overflow: hidden !important;
 }
 
-/* ===== 强化关键按钮样式（保持原有） ===== */
+/* ===== 新增：隐藏壁纸/背景按钮，点击预览图触发（需配合 JS） ===== */
+#openWallpaperModal,
+#openChatBgModal {
+  display: none !important;
+}
+/* 让预览图可点击（视觉反馈） */
+.preview-box.rect-h,
+.preview-box.rect-v {
+  cursor: pointer !important;
+  border: 2px solid transparent !important;
+  transition: border-color .2s !important;
+}
+.preview-box.rect-h:hover,
+.preview-box.rect-v:hover {
+  border-color: #999 !important;
+}
+/* 壁纸预览图改为与聊天背景一样的长条形（80×140） */
+.preview-box.rect-h {
+  width: 80px !important;
+  height: 140px !important;
+}
+
+/* ===== 设置与外观页面中所有黑色按钮缩小 ===== */
+.appearance-page .change-btn,
+.appearance-page .save-btn,
+.setting-page .change-btn,
+.setting-page .save-btn {
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  min-height: 28px !important;
+}
+/* 同时保留全局按钮样式，但覆盖上述页面 */
 .change-btn,
 .upload-btn,
 .save-btn,
 #applyFontBtn,
-#openWallpaperModal,
-#openChatBgModal,
 #createGroupBtn,
 #addSingleCard,
 #batchImportBtn,
@@ -301,8 +324,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .upload-btn:active,
 .save-btn:active,
 #applyFontBtn:active,
-#openWallpaperModal:active,
-#openChatBgModal:active,
 #createGroupBtn:active,
 #addSingleCard:active,
 #batchImportBtn:active,
@@ -315,7 +336,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 #importDataBtn:active {
   background: #555 !important;
 }
-/* 预览框强制样式 */
+/* 预览框基础样式 */
 .preview-box,
 .image-preview-box {
   background: #f0f0f0 !important;
@@ -324,11 +345,10 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   flex-shrink: 0 !important;
   border: 1px solid #e0e0e0 !important;
 }
-.preview-box.rect-h { width:140px; height:70px; }
 .preview-box.rect-v { width:80px; height:140px; }
 .preview-box.small { width:50px; height:50px; }
 .image-panel .image-preview-box { width:80px; height:80px; border-radius:12px; }
-/* 文件输入框样式 */
+/* 文件输入框 */
 #fontFileInput,
 #localImageFile,
 #taAvatarFile,
@@ -337,7 +357,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   padding: 6px 0 !important;
   font-size: 13px !important;
 }
-/* 弹窗中的标签和输入 */
+/* 弹窗通用 */
 .panel label { font-size:14px; color:#555; }
 .panel input:not([type="file"]), .panel textarea {
   width:100%; border:1px solid #ddd; padding:8px 10px; border-radius:8px; font-size:15px; margin-bottom:8px; outline:none; background:#fafafa;
@@ -389,8 +409,8 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 ::-webkit-scrollbar-thumb:hover{background:#aaa}
 @media(max-width:420px){
 .app-icon{width:48px!important;height:48px!important}
-.preview-box.rect-h{width:100px;height:50px}
-.preview-box.rect-v{width:60px;height:100px}
+.preview-box.rect-h{width:60px!important;height:105px!important}
+.preview-box.rect-v{width:60px;height:105px}
 .chat-page{padding-top:62px}
 .top-header{min-height:54px;padding:4px 8px}
 .header-avatar{width:28px;height:28px}
