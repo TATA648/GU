@@ -53,25 +53,26 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   display: block;
 }
 
-/* ===== 聊天页顶栏 ===== */
+/* ===== 聊天页顶栏（改成和其他页面一致） ===== */
 .top-header {
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px;
-  padding-top: env(safe-area-inset-top, 12px);
-  background: rgba(255,255,255,0.65) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  padding: 4px 12px;
+  padding-top: env(safe-area-inset-top, 4px);
+  background: #fff;                    /* 白色背景，与其他页面一致 */
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  flex-shrink: 0;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  min-height: 64px;
+  min-height: 52px;                   /* 与其他页面顶栏高度一致 */
 }
 .top-header.show { display:flex; }
+
+/* 返回按钮（左侧） */
 .top-header .back-btn {
   background: transparent !important;
   border: none !important;
@@ -79,37 +80,94 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   box-shadow: none !important;
   padding: 4px;
   min-width: 44px;
-  min-height: 45px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.top-header .back-btn img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* 居中区域（头像 + 状态） */
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex: 1;
+}
+.header-avatar-group {
+  display: flex;
+  gap: 10px;
+}
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e0e0e0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.header-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.status-bar {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
+  text-align: center;
+  padding: 0px 0;
+}
+.status-text { cursor: default; }
+
+/* 右侧按钮组 */
+.header-right-btns {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.video-top-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.top-header .back-btn img {
-  width: 15px;
-  height: 15px;
+.video-top-btn img {
+  width: 22px;
+  height: 22px;
   display: block;
 }
-.header-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.setting-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 34px;
+  height: 34px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  margin-top: 2px;        /* 新增：整体下移 6px，数值越大越靠下 */
+  justify-content: center;
 }
-.header-avatar-group{display:flex;gap:12px}
-.header-avatar{width:35px;height:35px;border-radius:50%;overflow:hidden;background:#e0e0e0;flex-shrink:0;cursor:pointer}
-.header-avatar img{width:100%;height:100%;object-fit:cover}
-.status-bar{font-size:12px;color:#888;font-weight:400;text-align:center;padding:1px 0}
-.status-text{cursor:default}
-.header-right-btns{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.video-top-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
-.setting-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
-
+.setting-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
 /* ===== 页面顶部偏移 ===== */
-.chat-page{padding-top:75px;padding-bottom:0}
+.chat-page{padding-top:56px;padding-bottom:0}
 .setting-page,
 .chat-set-page,
 .appearance-page,
