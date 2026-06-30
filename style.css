@@ -101,7 +101,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .setting-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 
 /* ===== 页面顶部偏移（统一为68px，与聊天页一致） ===== */
-.chat-page{padding-top:68px;padding-bottom:0}
+.chat-page{padding-top:75px;padding-bottom:0}
 .setting-page,
 .chat-set-page,
 .appearance-page,
