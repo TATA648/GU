@@ -108,7 +108,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .card-page,
 .mail-page,
 .calendar-page {
-  padding-top: 68px;
+  padding-top: 75px;
   padding-bottom: 20px;
 }
 
@@ -523,7 +523,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .cal-day .day-emoji-group .emoji-single{font-size:12px}
 .cal-day .day-emoji-group .emoji-single.large{font-size:18px}
 .chat-box{padding-bottom:70px}
-.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:62px}
+.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:70px}
 .video-window{width:180px;height:240px;top:68px;right:8px}
 .video-avatar{width:60px;height:60px}
 .emoji-item{width:50px;height:50px}
