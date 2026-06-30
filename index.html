@@ -20,7 +20,7 @@
   <!-- ===== 视口 ===== -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   
-  <title>梦角字卡传讯</title>
+  <title>GU</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -91,7 +91,7 @@
     <div class="chat-setting-container">
       <div class="chat-set-item he-me-row"><button class="he-me-btn" id="heBtn">HE</button><button class="he-me-btn" id="meBtn">ME</button></div>
       <div class="chat-set-item" id="blockDelay"><div class="chat-set-label">回复时长</div><div class="range-row"><input type="range" id="delayRange" min="20" max="120" value="20" /><span class="range-value" id="delayRangeValue">20秒</span></div></div>
-      <div class="chat-set-item" id="blockPatSuffix">我的拍一拍后缀</div>
+      <div class="chat-set-item" id="blockPatSuffix">我的拍一拍</div>
       <div class="chat-set-item" id="blockVideoBg">视频通话背景</div>
       <div class="chat-set-item"><div class="chat-set-label">头像样式</div><div class="avatar-style-picker"><div class="style-option circle" data-style="circle"><div class="style-preview circle"></div><span>圆形</span></div><div class="style-option square" data-style="square"><div class="style-preview square"></div><span>方形</span></div></div></div>
       <div class="chat-set-item"><div class="chat-set-label">聊天背景壁纸</div><div class="wallpaper-row reverse"><div class="preview-box rect-v"><img id="chatBgPreview" class="preview-img" alt="竖版聊天背景" /></div></div></div>
@@ -109,9 +109,9 @@
     <div class="chat-box" id="chatWrap"></div>
     <div class="quote-bar" id="quoteBar" style="display:none;"><span class="quote-content" id="quoteContent">引用消息</span><button class="quote-close" id="quoteClose">✕</button></div>
     <div class="input-area" id="inputWrap">
-      <button class="album-btn" id="albumBtn"><img src="https://i.ibb.co/bRWBPsxH/xiangce.png" alt="相册" /></button>
+      <button class="album-btn" id="albumBtn"><img src="https://i.ibb.co/7J7Mpg68/tupian-3.png" alt="相册" /></button>
       <input type="text" id="inputText" placeholder="…" autocomplete="off" />
-      <div class="emoji-btn-wrapper"><button class="emoji-send-btn" id="emojiSendBtn"><img src="https://i.ibb.co/JWCM6nHz/pengyouquanbiaoqingbao.png" alt="表情" /></button><button id="sendBtn">发送</button></div>
+      <div class="emoji-btn-wrapper"><button class="emoji-send-btn" id="emojiSendBtn"><img src="https://i.ibb.co/b5CtYqSQ/biaoqing.png" alt="表情" /></button><button id="sendBtn"><img src="https://i.ibb.co/dNqSXQ1/fasong-2.png" alt="发送"></button>
     </div>
     <div class="emoji-panel" id="emojiPanel"><div class="emoji-grid" id="emojiGrid"></div></div>
     <div class="video-window" id="videoWindow" style="display:none;"><div class="video-bg" id="videoBg"></div><div class="video-header"><span class="video-timer" id="videoTimer">00:00:00</span><button class="video-fold-btn" id="videoFoldBtn">−</button></div><div class="video-avatar"><img id="videoAvatar" src="" alt="对方头像" /></div><button class="video-hangup" id="videoHangupBtn">挂断</button><div class="video-answer" id="videoAnswerArea" style="display:none;"><button class="video-answer-btn" id="videoAnswerBtn">接听</button><button class="video-reject-btn" id="videoRejectBtn">拒接</button></div></div>
