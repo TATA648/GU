@@ -9,11 +9,12 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .home-page{overflow:hidden!important}
 .home-container{display:flex;flex-direction:column;padding:16px 16px 80px;height:100vh;max-height:100vh;justify-content:center;overflow:hidden;flex:1}
 
-/* ===== 顶栏修复（其他页面降低高度，去除返回键灰色背景） ===== */
+/* ===== 顶栏修复（非聊天页更紧凑，适配安全区域） ===== */
 .page-header {
   display: flex;
   align-items: center;
-  padding: 4px 12px;           /* 从 8px 改为 4px，降低高度 */
+  padding: 4px 12px;
+  padding-top: env(safe-area-inset-top, 4px); /* 适配状态栏，避免返回键被遮挡 */
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
   flex-shrink: 0;
@@ -28,14 +29,16 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  padding: 4px;               /* 保持点击区域舒适 */
+  padding: 4px;
   margin-right: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;  /* 保证点击区域舒适，但不增加顶栏高度（flex子项） */
+  min-height: 44px;
 }
 .page-header .back-btn img {
-  width: 20px !important;     /* 从 24px 调小到 20px */
+  width: 20px !important;
   height: 20px !important;
   display: block;
 }
@@ -48,12 +51,13 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   display: block;
 }
 
-/* ===== 聊天页顶栏（保持原样） ===== */
+/* ===== 聊天页顶栏（保持原样，已适配安全区域） ===== */
 .top-header {
   display: none;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
+  padding-top: env(safe-area-inset-top, 8px);
   background: rgba(255,255,255,0.65) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -64,7 +68,6 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   right: 0;
   z-index: 1000;
   min-height: 60px;
-  padding-top: env(safe-area-inset-top, 0px);
 }
 .top-header.show { display:flex; }
 .top-header .back-btn {
@@ -73,6 +76,11 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
   outline: none !important;
   box-shadow: none !important;
   padding: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .top-header .back-btn img {
   width: 24px;
@@ -89,7 +97,7 @@ body.home-bg{background-image:var(--wallpaper,none);background-size:cover;backgr
 .video-top-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .setting-btn{background:transparent;border:none;cursor:pointer;padding:4px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .chat-page{padding-top:68px;padding-bottom:0}
-.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:52px;padding-bottom:20px} /* 顶部偏移适配新顶栏高度 */
+.setting-page,.chat-set-page,.appearance-page,.card-page,.mail-page,.calendar-page{padding-top:52px;padding-bottom:20px}
 .chat-box{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:80px;min-height:0}
 .quote-bar{position:fixed;bottom:60px;left:0;right:0;background:#f0f0f0;padding:6px 16px;display:flex;align-items:center;gap:8px;border-top:1px solid #ddd;z-index:97;font-size:13px;color:#555}
 .quote-content{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
