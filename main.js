@@ -986,6 +986,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="letter-time">${formatTime(item.time)}</span>
           ${isUnread ? '<span class="unread-dot">●</span>' : ''}
           <span class="letter-expand">展开 ▾</span>
+          <div class="letter-preview">${escapeHtml(item.replyText)}</div>
         </div>
         <div class="letter-body" style="display:none;">
           <div class="letter-note">
@@ -1005,11 +1006,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const header = div.querySelector('.letter-header');
       const body = div.querySelector('.letter-body');
       const expandBtn = header.querySelector('.letter-expand');
+      const previewEl = header.querySelector('.letter-preview');
       header.addEventListener('click', function(e) {
         if (e.target.closest('.letter-close')) return;
         const isOpen = body.style.display === 'block';
         body.style.display = isOpen ? 'none' : 'block';
         expandBtn.textContent = isOpen ? '展开 ▾' : '收起 ▴';
+        if (previewEl) previewEl.style.display = isOpen ? '' : 'none';
         if (!item.read) {
           item.read = true;
           const dot = header.querySelector('.unread-dot');
@@ -1023,6 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.stopPropagation();
         body.style.display = 'none';
         expandBtn.textContent = '展开 ▾';
+        if (previewEl) previewEl.style.display = '';
       });
     });
     updateBadge();
@@ -1285,13 +1289,10 @@ document.addEventListener('DOMContentLoaded', function() {
     chatWrap.scrollTop = chatWrap.scrollHeight;
     if (!system && !isUser && Math.random() < 0.1) {
       setTimeout(() => {
-        const target = Math.random() < 0.5 ? 'user' : 'ta';
-        const targetName = target === 'user' ? store.myInfo.name : store.taInfo.name;
         const cards = getAllValidCards();
-        let suffix = '拍了拍';
-        if (cards.length > 0) { const idx = randomInt(0, cards.length - 1);
-          suffix = cards[idx].text; }
-        const patText = `${store.taInfo.name} 拍了拍 ${targetName} ${suffix}`;
+        let suffix = '';
+        if (cards.length > 0) { suffix = cards[randomInt(0, cards.length - 1)].text; }
+        const patText = `${store.taInfo.name}拍了拍我${suffix}`;
         addMessage(patText, false, Date.now(), null, true, false);
       }, 1500);
     }
@@ -1387,12 +1388,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   // ===== 拍一拍 =====
   function handlePat(avatarEl, isUser) {
-    const initiator = store.myInfo.name;
-    let targetName = '';
-    if (isUser) targetName = store.myInfo.name;
-    else targetName = store.taInfo.name;
-    const suffix = store.chatSettings.patSuffix || '拍了拍';
-    const patText = `${initiator} 拍了拍 ${targetName} ${suffix}`;
+    const me = store.myInfo.name || '我';
+    const targetName = isUser ? '自己' : store.taInfo.name;
+    let suffix = store.chatSettings.patSuffix || '';
+    if (suffix === '拍了拍') suffix = '';
+    const patText = `${me}拍了拍${targetName}${suffix}`;
     addMessage(patText, false, Date.now(), null, true, false);
   }
   let clickCount = 0,
@@ -1452,6 +1452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     store.videoCall.active = false;
     store.videoCall.caller = '';
     store.videoCall.startTime = null;
+    store.videoCall.answered = false;
   }
   function foldVideoWindow() {
     if (videoWindow.classList.contains('active')) {
@@ -1518,7 +1519,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.removeEventListener('mouseup', onDragEnd);
   }
   function initiateVideoCall(caller) {
-    if (store.videoCall.active) return;
+    const shown = videoWindow.classList.contains('active') || videoCapsule.classList.contains('active');
+    if (store.videoCall.active && shown) return;
+    store.videoCall.active = false;
     if (caller === 'ta') {
       videoWindow.classList.add('active');
       videoCapsule.classList.remove('active');
@@ -2105,6 +2108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         store = deepMerge(store, parsed);
       }
     } catch (e) { console.warn('Load local error', e); }
+    store.videoCall = { active: false, caller: '', startTime: null, answered: false, folded: false, timer: null };
     if (!store.messages) store.messages = [];
     if (!store.calendar) store.calendar = {};
     if (!store.appIcon) store.appIcon = {};
@@ -2175,7 +2179,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function saveLocal() {
     try {
-      localStorage.setItem('dreamCardStore', JSON.stringify(store));
+      const copy = Object.assign({}, store);
+      delete copy.videoCall; // 通话状态不持久化，避免残留导致再也打不了
+      localStorage.setItem('dreamCardStore', JSON.stringify(copy));
     } catch (e) { console.warn('Save local error', e); }
   }
   window.addEventListener('beforeunload', function() {
@@ -2184,7 +2190,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     const now = Date.now();
-    if (now - lastTouchEnd <= 300) e.preventDefault();
+    if (now - lastTouchEnd <= 300 && !(e.target.closest && e.target.closest('.chat-page, .mask, button, input, textarea'))) e.preventDefault();
     lastTouchEnd = now;
   }, { passive: false });
   document.addEventListener('gesturestart', function(e) {
