@@ -22,10 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     appliedFont: "",
     rippleEnabled: true
   };
-
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
-
   const topHeader = $('.top-header');
   const chatWrap = $('#chatWrap');
   const inputText = $('#inputText');
@@ -34,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const emojiPanel = $('#emojiPanel');
   const emojiGrid = $('#emojiGrid');
   const albumBtn = $('#albumBtn');
-
   const imageSelectMask = $('#imageSelectMask');
   const modalTitle = $('#modalTitle');
   const imagePreviewBox = $('#imagePreviewBox');
@@ -45,20 +42,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const imageLinkInput = $('#imageLinkInput');
   const closeImageModal = $('#closeImageModal');
   const confirmImageBtn = $('#confirmImageBtn');
-
   const editTextMask = $('#editTextMask');
   const editTextTitle = $('#editTextTitle');
   const editTextInput = $('#editTextInput');
   const closeEditText = $('#closeEditText');
   const saveEditText = $('#saveEditText');
-
   const wallpaperPreview = $('#wallpaperPreview');
   const chatBgPreview = $('#chatBgPreview');
   const changeIconBtns = $$('.icon-change-btn');
   const openChatSettingPage = $('#openChatSettingPage');
   const saveChatSetting = $('#saveChatSetting');
   const chatSetBack = $('.chat-set-back');
-
   const heBtn = $('#heBtn');
   const meBtn = $('#meBtn');
   const blockDelay = $('#blockDelay');
@@ -66,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const delayRangeValue = $('#delayRangeValue');
   const blockPatSuffix = $('#blockPatSuffix');
   const blockVideoBg = $('#blockVideoBg');
-
   const taMask = $('#taMask');
   const taLocalBtn = $('#taLocalBtn');
   const taAvatarFile = $('#taAvatarFile');
@@ -74,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const taNameInput = $('#taNameInput');
   const closeTaSet = $('#closeTaSet');
   const saveTaSet = $('#saveTaSet');
-
   const meMask = $('#meMask');
   const meLocalBtn = $('#meLocalBtn');
   const meAvatarFile = $('#meAvatarFile');
@@ -82,28 +74,23 @@ document.addEventListener('DOMContentLoaded', function() {
   const meNameInput = $('#meNameInput');
   const closeMeSet = $('#closeMeSet');
   const saveMeSet = $('#saveMeSet');
-
   const patMask = $('#patMask');
   const patSuffixInput = $('#patSuffixInput');
   const closePatSet = $('#closePatSet');
   const savePatSet = $('#savePatSet');
-
   const videoBgMask = $('#videoBgMask');
   const videoBgFile = $('#videoBgFile');
   const videoBgLink = $('#videoBgLink');
   const closeVideoBg = $('#closeVideoBg');
   const saveVideoBg = $('#saveVideoBg');
-
   const mailTabs = $$('.mail-tab');
   const sentList = $('#sentList');
   const inboxWrap = $('#inboxWrap');
   const mailAddBtn = $('#mailAddBtn');
-
   const writeLetterMask = $('#writeLetterMask');
   const letterContentInput = $('#letterContentInput');
   const closeLetterModal = $('#closeLetterModal');
   const sendLetterConfirm = $('#sendLetterConfirm');
-
   const newGroupName = $('#newGroupName');
   const createGroupBtn = $('#createGroupBtn');
   const groupListWrap = $('#groupListWrap');
@@ -113,16 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const batchTextarea = $('#batchTextarea');
   const batchImportBtn = $('#batchImportBtn');
   const cardListWrap = $('#cardListWrap');
-
   const headerTaAvatar = $('#headerTaAvatar');
   const headerMyAvatar = $('#headerMyAvatar');
   const currentStatusText = $('#currentStatusText');
-
   const animToggle = $('#animToggle');
   const quoteBar = $('#quoteBar');
   const quoteContent = $('#quoteContent');
   const quoteClose = $('#quoteClose');
-
   const calendarGrid = $('#calendarGrid');
   const calTaText = $('#calTaText');
   const calMeText = $('#calMeText');
@@ -132,20 +116,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const moodTextInput = $('#moodTextInput');
   const closeMoodModal = $('#closeMoodModal');
   const saveMoodModal = $('#saveMoodModal');
-
   const exportDataBtn = $('#exportDataBtn');
   const importDataBtn = $('#importDataBtn');
   const exportChatBtn = $('#exportChatBtn');
   const importChatBtn = $('#importChatBtn');
   const exportCardsBtn = $('#exportCardsBtn');
   const importCardsBtn = $('#importCardsBtn');
-
   const importConfirmMask = $('#importConfirmMask');
   const importConfirmTitle = $('#importConfirmTitle');
   const importConfirmMsg = $('#importConfirmMsg');
   const importCancelBtn = $('#importCancelBtn');
   const importConfirmBtn = $('#importConfirmBtn');
-
   const videoWindow = $('#videoWindow');
   const videoBg = $('#videoBg');
   const videoTimer = $('#videoTimer');
@@ -159,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const capsuleTimer = $('#capsuleTimer');
   const capsuleExpand = $('#capsuleExpand');
   const videoTopBtn = $('#videoTopBtn');
-
   const profileCover = $('#profileCover');
   const coverImage = $('#coverImage');
   const profileAvatar = $('#profileAvatar');
@@ -169,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const locationText = $('#locationText');
   const locationIcon = $('#locationIcon');
   const profileSignature = $('#profileSignature');
-
   const decoImage = $('#decoImage');
   const decoImg = $('#decoImg');
   const fontFileInput = $('#fontFileInput');
@@ -179,20 +158,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const bottomBarItems = $$('.bar-item');
   const rippleToggle = $('#rippleToggle');
   const inboxBadge = $('#inboxBadge');
-
   const groupManageModal = $('#groupManageModal');
   const groupManageList = $('#groupManageList');
   const groupManageCount = $('#groupManageCount');
   const groupManageClose = $('#groupManageClose');
   const manageGroupBtn = $('#manageGroupBtn');
-
   const cardManageModal = $('#cardManageModal');
   const cardManageList = $('#cardManageList');
   const cardManageTitle = $('#cardManageTitle');
   const cardManageCount = $('#cardManageCount');
   const cardManageClose = $('#cardManageClose');
   const manageCardBtn = $('#manageCardBtn');
-
   let styleOptions = [];
   let currentEditTarget = null;
   let currentMailTab = 'sent';
@@ -203,7 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let quoteMsg = null;
   let videoTimerInterval = null;
   let importCallback = null;
-
   // ===== 工具函数 =====
   function deepMerge(target, source) {
     if (!source) return target;
@@ -232,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return result;
   }
-
   function fileToDataUrl(file) {
     return new Promise(resolve => {
       const reader = new FileReader();
@@ -240,23 +214,19 @@ document.addEventListener('DOMContentLoaded', function() {
       reader.readAsDataURL(file);
     });
   }
-
   function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-
   function formatTime(ts) {
     const d = new Date(ts);
     return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
   function pad(n) { return String(n).padStart(2, '0'); }
-
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-
   // ===== 页面切换 =====
   function switchPage(pageName) {
     const pages = $$('.page');
@@ -273,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (pageName === 'calendar-page') renderCalendar();
     if (pageName === 'mail-page') renderMail();
   }
-
   // ===== 导航事件 =====
   $$('.app-card').forEach(card => {
     card.addEventListener('click', function(e) {
@@ -282,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (target) switchPage(target);
     });
   });
-
   bottomBarItems.forEach(item => {
     if (item.classList.contains('placeholder')) return;
     item.addEventListener('click', function(e) {
@@ -290,33 +258,28 @@ document.addEventListener('DOMContentLoaded', function() {
       if (target) switchPage(target);
     });
   });
-
   $$('.back-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       switchPage('home-page');
     });
   });
-
   if (chatSetBack) {
     chatSetBack.addEventListener('click', function(e) {
       e.stopPropagation();
       switchPage('chat-page');
     });
   }
-
   if (openChatSettingPage) {
     openChatSettingPage.addEventListener('click', function() {
       switchPage('chat-set-page');
     });
   }
-
   if (videoTopBtn) {
     videoTopBtn.addEventListener('click', function() {
       initiateVideoCall('me');
     });
   }
-
   // ===== 动画开关 =====
   function updateAnimToggleUI() {
     if (!animToggle) return;
@@ -335,11 +298,9 @@ document.addEventListener('DOMContentLoaded', function() {
       saveLocal();
     });
   }
-
   // ===== 粒子特效 =====
   let particleEnabled = true;
   let particleCtx = null, particleCanvas = null, particles = [], trails = [], particleAnimId = null;
-
   function initParticleCanvas() {
     if (particleCanvas) return;
     particleCanvas = document.createElement('canvas');
@@ -357,13 +318,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', resizeParticleCanvas);
     particleLoop();
   }
-
   function resizeParticleCanvas() {
     if (!particleCanvas) return;
     particleCanvas.width = window.innerWidth;
     particleCanvas.height = window.innerHeight;
   }
-
   function particleLoop() {
     if (!particleCtx) return;
     particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
@@ -400,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     particleAnimId = requestAnimationFrame(particleLoop);
   }
-
   function emitParticles(x, y, count, color) {
     if (!particleEnabled || !particleCtx) return;
     count = Math.min(count, 12);
@@ -418,7 +376,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
-
   function emitTrail(x, y) {
     if (!particleEnabled || !particleCtx) return;
     for (let i = 0; i < 3; i++) {
@@ -432,12 +389,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
-
   document.addEventListener('click', function(e) {
     if (!particleEnabled) return;
     emitParticles(e.clientX, e.clientY, 8 + Math.floor(Math.random() * 4));
   });
-
   document.addEventListener('touchstart', function(e) {
     if (!particleEnabled) return;
     const touch = e.touches[0];
@@ -445,7 +400,6 @@ document.addEventListener('DOMContentLoaded', function() {
       emitParticles(touch.clientX, touch.clientY, 6 + Math.floor(Math.random() * 3));
     }
   }, { passive: true });
-
   document.addEventListener('touchmove', function(e) {
     if (!particleEnabled) return;
     const touch = e.touches[0];
@@ -454,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (Math.random() < 0.25) emitParticles(touch.clientX, touch.clientY, 2);
     }
   }, { passive: true });
-
   if (rippleToggle) {
     if (store.rippleEnabled !== undefined) particleEnabled = store.rippleEnabled;
     if (particleEnabled) {
@@ -493,7 +446,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateImagePreview(existing);
     imageSelectMask.style.display = 'flex';
   }
-
   function updateImagePreview(url, previewBox, previewImg) {
     if (!previewBox) previewBox = imagePreviewBox;
     if (!previewImg) previewImg = imagePreviewImg;
@@ -505,7 +457,6 @@ document.addEventListener('DOMContentLoaded', function() {
       previewBox.classList.remove('has-image');
     }
   }
-
   if (localImageBtn) {
     localImageBtn.addEventListener('click', function() {
       localImageFile.click();
@@ -529,7 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
       updateImagePreview(this.value);
     });
   }
-
   const wallpaperPreviewContainer = document.querySelector('.preview-box.rect-h');
   if (wallpaperPreviewContainer) {
     wallpaperPreviewContainer.addEventListener('click', function(e) {
@@ -537,7 +487,6 @@ document.addEventListener('DOMContentLoaded', function() {
       openImageModal('设置主页壁纸', 'wallpaper');
     });
   }
-
   const chatBgPreviewContainer = document.querySelector('.preview-box.rect-v');
   if (chatBgPreviewContainer) {
     chatBgPreviewContainer.addEventListener('click', function(e) {
@@ -545,7 +494,6 @@ document.addEventListener('DOMContentLoaded', function() {
       openImageModal('设置聊天背景', 'chatBg');
     });
   }
-
   changeIconBtns.forEach(b => {
     b.addEventListener('click', function() {
       const type = this.dataset.type;
@@ -553,14 +501,12 @@ document.addEventListener('DOMContentLoaded', function() {
       openImageModal('更改 ' + map[type], type);
     });
   });
-
   if (closeImageModal) {
     closeImageModal.addEventListener('click', function() {
       imageSelectMask.style.display = 'none';
       currentEditTarget = null;
     });
   }
-
   if (confirmImageBtn) {
     confirmImageBtn.addEventListener('click', async function() {
       let url = '';
@@ -601,7 +547,6 @@ document.addEventListener('DOMContentLoaded', function() {
       currentEditTarget = null;
     });
   }
-
   // ===== 首页个人资料交互 =====
   if (profileCover) {
     profileCover.addEventListener('click', function(e) {
@@ -677,13 +622,11 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-
   if (decoImage) {
     decoImage.addEventListener('click', function() {
       openImageModal('更换装饰图', 'decoImage');
     });
   }
-
   // ===== 文本编辑弹窗 =====
   function openEditText(title, currentValue, callback) {
     editTextTitle.innerText = title;
@@ -699,7 +642,6 @@ document.addEventListener('DOMContentLoaded', function() {
       editTextMask.style.display = 'none';
     };
   }
-
   // ===== HE / ME 弹窗 =====
   if (heBtn) {
     heBtn.addEventListener('click', function() {
@@ -717,7 +659,6 @@ document.addEventListener('DOMContentLoaded', function() {
       meMask.style.display = 'flex';
     });
   }
-
   if (taLocalBtn) {
     taLocalBtn.addEventListener('click', function() {
       taAvatarFile.click();
@@ -758,7 +699,6 @@ document.addEventListener('DOMContentLoaded', function() {
       taMask.style.display = 'none';
     });
   }
-
   if (meLocalBtn) {
     meLocalBtn.addEventListener('click', function() {
       meAvatarFile.click();
@@ -799,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
       meMask.style.display = 'none';
     });
   }
-
   // ===== 其他聊天设置 =====
   if (blockDelay) {
     blockDelay.addEventListener('click', function() {});
@@ -827,7 +766,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
-
   if (blockPatSuffix) {
     blockPatSuffix.addEventListener('click', function() {
       patSuffixInput.value = store.chatSettings.patSuffix || '拍了拍';
@@ -849,7 +787,6 @@ document.addEventListener('DOMContentLoaded', function() {
       patMask.style.display = 'none';
     });
   }
-
   if (blockVideoBg) {
     blockVideoBg.addEventListener('click', function() {
       videoBgLink.value = store.chatSettings.videoBg || '';
@@ -878,7 +815,6 @@ document.addEventListener('DOMContentLoaded', function() {
       videoBgMask.style.display = 'none';
     });
   }
-
   if (saveChatSetting) {
     saveChatSetting.addEventListener('click', function() {
       applyBgStyle();
@@ -887,7 +823,6 @@ document.addEventListener('DOMContentLoaded', function() {
       switchPage('chat-page');
     });
   }
-
   // ===== 头像样式 =====
   styleOptions = $$('.style-option');
   styleOptions.forEach(opt => {
@@ -900,7 +835,6 @@ document.addEventListener('DOMContentLoaded', function() {
       renderMessages();
     });
   });
-
   // ===== 字体 =====
   if (applyFontBtn) {
     applyFontBtn.addEventListener('click', function() {
@@ -924,7 +858,6 @@ document.addEventListener('DOMContentLoaded', function() {
       reader.readAsArrayBuffer(file);
     });
   }
-
   // ===== 表情包 =====
   function renderEmojiGrid() {
     emojiGrid.innerHTML = '';
@@ -957,7 +890,6 @@ document.addEventListener('DOMContentLoaded', function() {
       emojiPanel.classList.remove('show');
     }
   });
-
   // ===== 相册 =====
   if (albumBtn) {
     albumBtn.addEventListener('click', function() {
@@ -978,7 +910,6 @@ document.addEventListener('DOMContentLoaded', function() {
       input.click();
     });
   }
-
   function sendImageMessage(imageUrl) {
     const quote = quoteMsg;
     quoteMsg = null;
@@ -1013,12 +944,10 @@ document.addEventListener('DOMContentLoaded', function() {
       typingTimer = null;
     }, wait);
   }
-
   // ===== 信箱 =====
   function renderMail() { renderSentList();
     renderInbox();
     updateBadge(); }
-
   function renderSentList() {
     if (!sentList) return;
     sentList.innerHTML = '';
@@ -1035,13 +964,11 @@ document.addEventListener('DOMContentLoaded', function() {
       sentList.appendChild(div);
     });
   }
-
   function updateBadge() {
     if (!inboxBadge) return;
     const unreadCount = store.inbox.filter(item => !item.read).length;
     inboxBadge.style.display = unreadCount > 0 ? 'inline' : 'none';
   }
-
   function renderInbox() {
     if (!inboxWrap) return;
     inboxWrap.innerHTML = '';
@@ -1075,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       `;
       inboxWrap.appendChild(div);
-
       const header = div.querySelector('.letter-header');
       const body = div.querySelector('.letter-body');
       const expandBtn = header.querySelector('.letter-expand');
@@ -1092,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', function() {
           updateBadge();
         }
       });
-
       const closeBtn = div.querySelector('.letter-close');
       closeBtn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -1102,7 +1027,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     updateBadge();
   }
-
   mailTabs.forEach(tab => {
     tab.addEventListener('click', function() {
       mailTabs.forEach(t => t.classList.remove('active'));
@@ -1113,7 +1037,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (currentMailTab === 'inbox') renderInbox();
     });
   });
-
   if (mailAddBtn) {
     mailAddBtn.addEventListener('click', function() {
       writeLetterMask.style.display = 'flex';
@@ -1142,23 +1065,22 @@ document.addEventListener('DOMContentLoaded', function() {
       alert(`信件已寄出，预计 ${Math.round(realDelay / 3600000)} 小时后收到回信。`);
     });
   }
-
   function scheduleLetterReplies() {
     if (letterTimer) { clearTimeout(letterTimer);
       letterTimer = null; }
     const now = Date.now();
     let earliest = Infinity;
     store.letters.forEach(l => {
-      if (!l.done && l.replyTime > now && l.replyTime < earliest) earliest = l.replyTime;
+      // 已到期但还没处理的信（比如页面关闭/后台期间到期的）也要算进来
+      if (!l.done && l.replyTime < earliest) earliest = l.replyTime;
     });
     if (earliest !== Infinity) {
-      const delay = earliest - now + 1000;
+      const delay = Math.min(Math.max(earliest - now + 1000, 1000), 2147483647);
       letterTimer = setTimeout(() => {
         processLetterReplies();
-      }, Math.max(delay, 1000));
+      }, delay);
     }
   }
-
   function processLetterReplies() {
     const allCards = getAllValidCards();
     let changed = false;
@@ -1180,7 +1102,15 @@ document.addEventListener('DOMContentLoaded', function() {
       renderSentList(); }
     scheduleLetterReplies();
   }
-
+  // 手机切后台/锁屏时定时器会暂停，回到页面或定期检查一次，补收已到期的回信
+  setInterval(function() {
+    if (store.letters.some(l => !l.done && Date.now() >= l.replyTime)) processLetterReplies();
+  }, 30000);
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) processLetterReplies();
+  });
+  window.addEventListener('pageshow', function() { processLetterReplies(); });
+  window.addEventListener('focus', function() { processLetterReplies(); });
   // ===== 聊天核心 =====
   function updateRandomStatus() {
     const allCards = getAllValidCards();
@@ -1192,22 +1122,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (currentStatusText) currentStatusText.innerText = store.currentStatus;
   }
-
   function renderHeaderAvatar() {
     headerTaAvatar.src = store.taInfo.avatarUrl || '';
     headerMyAvatar.src = store.myInfo.avatarUrl || '';
     updateRandomStatus();
   }
-
   function applyBgStyle() {
     document.body.style.setProperty('--wallpaper', store.wallpaper ? `url(${store.wallpaper})` : 'none');
     document.documentElement.style.setProperty('--chat-bg', store.chatBg ? `url(${store.chatBg})` : 'none');
   }
-
   function applyVideoBg() {
     if (videoBg) videoBg.style.backgroundImage = store.chatSettings.videoBg ? `url(${store.chatSettings.videoBg})` : 'none';
   }
-
   function refreshAllIconPreview() {
     const keys = ['chat', 'card', 'theme', 'mail', 'calendar', 'setting', 'placeholder'];
     keys.forEach(key => {
@@ -1220,17 +1146,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (placeholderIcon) placeholderIcon.src = store.appIcon.placeholder || '';
     if (decoImg) decoImg.src = store.decoImage || '';
   }
-
   function parseEmojiText(text) {
     return text.replace(/\[emoji:(.+?)\]/g, (m, src) => `<img class="msg-emoji-inside" src="${src}" loading="lazy">`);
   }
-
   function randomAttachEmoji() {
     if (store.emojiList.length === 0) return null;
     if (Math.random() < 0.25) return store.emojiList[randomInt(0, store.emojiList.length - 1)];
     return null;
   }
-
   function renderMessages() {
     if (!chatWrap) return;
     chatWrap.innerHTML = '';
@@ -1253,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     chatWrap.scrollTop = chatWrap.scrollHeight;
   }
-
   function appendMessageElement(msg) {
     if (msg.system) {
       const div = document.createElement('div');
@@ -1280,13 +1202,11 @@ document.addEventListener('DOMContentLoaded', function() {
       chatWrap.appendChild(item);
       return;
     }
-
     const isEmojiOnly = /^\[emoji:.+\]$/.test(msg.text.trim());
     const item = document.createElement('div');
     item.className = `msg-item ${msg.isUser ? 'user-msg' : 'target-msg'}`;
     if (isEmojiOnly) item.classList.add('emoji-only');
     item.dataset.msgId = msg.id;
-
     let hideAvatar = false;
     const msgs = store.messages;
     const idx = msgs.indexOf(msg);
@@ -1294,7 +1214,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const prev = msgs[idx - 1];
       if (!prev.system && prev.isUser === msg.isUser && (msg.time - prev.time) < 3000) hideAvatar = true;
     }
-
     let quoteHtml = '';
     if (msg.quote) { quoteHtml = `<div class="msg-quote">${escapeHtml(msg.quote.text)}</div>`; }
     let html = '';
@@ -1314,7 +1233,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarHtml = hideAvatar ? '' : `<div class="msg-avatar ${avatarClass}" data-msgid="${msg.id}">${avatarSrc ? `<img src="${avatarSrc}" loading="lazy">` : ''}</div>`;
     const avatarPlaceholder = hideAvatar ? `<div class="msg-avatar ${avatarClass}" style="visibility:hidden;"></div>` : avatarHtml;
     item.innerHTML = `${avatarPlaceholder}<div class="msg-bubble-wrap">${quoteHtml}${isEmojiOnly ? '' : `<div class="msg-bubble">${html}</div>`}${isEmojiOnly ? html : ''}</div>`;
-
     let longPressTimer = null,
       isLongPress = false,
       touchStartX = 0,
@@ -1329,7 +1247,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (navigator.vibrate) navigator.vibrate(10);
       }, 300);
     }, { passive: true });
-
     item.addEventListener('touchmove', function(e) {
       if (!isLongPress) return;
       const touch = e.touches[0];
@@ -1349,7 +1266,6 @@ document.addEventListener('DOMContentLoaded', function() {
         item.removeEventListener('touchcancel', touchEndHandler);
       }
     }, { passive: false });
-
     const touchEndHandler = function() {
       clearTimeout(longPressTimer);
       longPressTimer = null;
@@ -1357,10 +1273,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     item.addEventListener('touchend', touchEndHandler, { passive: true });
     item.addEventListener('touchcancel', touchEndHandler, { passive: true });
-
     chatWrap.appendChild(item);
   }
-
   function addMessage(text, isUser, time, quote, system, isRed, imageUrl) {
     const msg = { id: Date.now() + Math.random(), text, isUser, time: time || Date.now(), quote: quote || null, system: system || false, isRed: isRed || false, imageUrl: imageUrl || null };
     store.messages.push(msg);
@@ -1385,25 +1299,21 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(() => { initiateVideoCall('ta'); }, 1000);
     }
   }
-
   function needTimeStamp() {
     if (store.messages.length === 0) return false;
     const last = store.messages[store.messages.length - 1];
     return (Date.now() - last.time) > 10 * 60 * 1000;
   }
-
   function addTimeDivider() {
     const div = document.createElement('div');
     div.className = 'time-divider';
     div.innerText = getNowTime();
     chatWrap.appendChild(div);
   }
-
   function getNowTime() {
     const d = new Date();
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
-
   function getAllValidCards() {
     let list = [];
     Object.values(store.groups).forEach(arr => {
@@ -1411,7 +1321,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     return list;
   }
-
   function getRandomReplyArr() {
     const pool = getAllValidCards();
     if (pool.length === 0) return [{ text: '暂无可用字卡，请前往字卡库添加' }];
@@ -1423,7 +1332,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const take = Math.floor(Math.random() * 3) + 1;
     return arr.slice(0, take);
   }
-
   function sendMessageByText(text) {
     const quote = quoteMsg;
     quoteMsg = null;
@@ -1434,7 +1342,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRandomStatus();
     store.isTyping = true;
     renderMessages();
-
     const min = store.delay.min * 1000,
       max = (store.delay.min + 20) * 1000,
       wait = Math.floor(Math.random() * (max - min) + min);
@@ -1460,13 +1367,11 @@ document.addEventListener('DOMContentLoaded', function() {
       typingTimer = null;
     }, wait);
   }
-
   function sendMessage() {
     const content = inputText.value.trim();
     if (!content) return;
     sendMessageByText(content);
   }
-
   if (sendBtn) sendBtn.addEventListener('click', sendMessage);
   if (inputText) {
     inputText.addEventListener('keydown', function(e) {
@@ -1480,7 +1385,6 @@ document.addEventListener('DOMContentLoaded', function() {
       quoteBar.style.display = 'none';
     });
   }
-
   // ===== 拍一拍 =====
   function handlePat(avatarEl, isUser) {
     const initiator = store.myInfo.name;
@@ -1508,7 +1412,6 @@ document.addEventListener('DOMContentLoaded', function() {
       clickTimer = setTimeout(() => { clickCount = 0; }, 400);
     }
   });
-
   // ===== 视频通话 =====
   function startVideoTimer() {
     if (videoTimerInterval) clearInterval(videoTimerInterval);
@@ -1523,12 +1426,10 @@ document.addEventListener('DOMContentLoaded', function() {
       capsuleTimer.textContent = timeStr;
     }, 1000);
   }
-
   function stopVideoTimer() {
     if (videoTimerInterval) { clearInterval(videoTimerInterval);
       videoTimerInterval = null; }
   }
-
   function showVideoWindow(caller) {
     videoWindow.classList.add('active');
     videoCapsule.classList.remove('active');
@@ -1544,7 +1445,6 @@ document.addEventListener('DOMContentLoaded', function() {
     store.videoCall.folded = false;
     enableVideoDrag();
   }
-
   function hideVideoWindow() {
     videoWindow.classList.remove('active');
     videoCapsule.classList.remove('active');
@@ -1553,7 +1453,6 @@ document.addEventListener('DOMContentLoaded', function() {
     store.videoCall.caller = '';
     store.videoCall.startTime = null;
   }
-
   function foldVideoWindow() {
     if (videoWindow.classList.contains('active')) {
       videoWindow.classList.remove('active');
@@ -1562,13 +1461,11 @@ document.addEventListener('DOMContentLoaded', function() {
       capsuleTimer.textContent = videoTimer.textContent;
     }
   }
-
   function unfoldVideoWindow() {
     videoCapsule.classList.remove('active');
     videoWindow.classList.add('active');
     store.videoCall.folded = false;
   }
-
   if (videoFoldBtn) videoFoldBtn.addEventListener('click', foldVideoWindow);
   if (capsuleExpand) capsuleExpand.addEventListener('click', unfoldVideoWindow);
   if (videoHangupBtn) {
@@ -1581,15 +1478,12 @@ document.addEventListener('DOMContentLoaded', function() {
       hideVideoWindow();
     });
   }
-
   let dragData = null;
-
   function enableVideoDrag() {
     const el = videoWindow;
     el.addEventListener('touchstart', onDragStart, { passive: false });
     el.addEventListener('mousedown', onDragStart);
   }
-
   function onDragStart(e) {
     if (e.target.closest('button')) return;
     const el = videoWindow;
@@ -1604,7 +1498,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mouseup', onDragEnd);
     e.preventDefault();
   }
-
   function onDragMove(e) {
     if (!dragData) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1616,7 +1509,6 @@ document.addEventListener('DOMContentLoaded', function() {
     el.style.bottom = 'auto';
     e.preventDefault();
   }
-
   function onDragEnd() {
     if (dragData) dragData.el.classList.remove('dragging');
     dragData = null;
@@ -1625,7 +1517,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.removeEventListener('touchend', onDragEnd);
     document.removeEventListener('mouseup', onDragEnd);
   }
-
   function initiateVideoCall(caller) {
     if (store.videoCall.active) return;
     if (caller === 'ta') {
@@ -1672,13 +1563,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-
   // ===== 字卡管理（完整） =====
   function openGroupManageModal() {
     renderGroupManageList();
     groupManageModal.style.display = 'flex';
   }
-
   function renderGroupManageList() {
     const keys = Object.keys(store.groups);
     groupManageList.innerHTML = '';
@@ -1714,7 +1603,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     groupManageCount.textContent = `共 ${keys.length} 个分组`;
   }
-
   if (manageGroupBtn) {
     manageGroupBtn.addEventListener('click', openGroupManageModal);
   }
@@ -1730,7 +1618,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
   function openCardManageModal() {
     const g = store.currentSelectGroup;
     if (!g || !store.groups[g]) {
@@ -1741,7 +1628,6 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCardManageList();
     cardManageModal.style.display = 'flex';
   }
-
   function renderCardManageList() {
     const g = store.currentSelectGroup;
     if (!g || !store.groups[g]) {
@@ -1790,7 +1676,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     cardManageCount.textContent = `共 ${list.length} 条`;
   }
-
   if (manageCardBtn) {
     manageCardBtn.addEventListener('click', openCardManageModal);
   }
@@ -1806,7 +1691,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
   if (createGroupBtn) {
     createGroupBtn.addEventListener('click', function() {
       const name = newGroupName.value.trim();
@@ -1826,16 +1710,13 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.key === 'Enter') createGroupBtn.click();
     });
   }
-
   function refreshGroupSelect() {
     const keys = Object.keys(store.groups);
     currentGroupSelect.innerHTML = '';
-
     let total = 0;
     keys.forEach(g => { total += store.groups[g].length; });
     const totalEl = document.getElementById('totalCardCount');
     if (totalEl) totalEl.textContent = total;
-
     if (keys.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
@@ -1846,7 +1727,6 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     if (manageCardBtn) manageCardBtn.style.display = 'block';
-
     keys.forEach(g => {
       const opt = document.createElement('option');
       opt.value = g;
@@ -1866,21 +1746,18 @@ document.addEventListener('DOMContentLoaded', function() {
       renderGroupManageList();
     }
   }
-
   if (addSingleCard) {
     addSingleCard.addEventListener('click', function() {
       const text = newCardInput.value.trim();
       const g = store.currentSelectGroup;
       if (!text) { alert('请输入字卡内容'); return; }
       if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
-
       const exists = store.groups[g].some(item => item.text === text);
       if (exists) {
         alert('该字卡在当前分组中已存在，不会重复添加。');
         newCardInput.value = '';
         return;
       }
-
       store.groups[g].push({ id: Date.now() + Math.random(), text, disabled: false });
       newCardInput.value = '';
       saveLocal();
@@ -1895,21 +1772,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.key === 'Enter') addSingleCard.click();
     });
   }
-
   if (batchImportBtn) {
     batchImportBtn.addEventListener('click', function() {
       const text = batchTextarea.value.trim();
       const g = store.currentSelectGroup;
       if (!text) { alert('请填入要导入的字卡'); return; }
       if (!g || !store.groups[g]) { alert('请先选择或创建分组'); return; }
-
       const arr = text.split('\n').map(s => s.trim()).filter(s => s);
       if (arr.length === 0) { alert('没有有效的字卡内容'); return; }
-
       const existingTexts = new Set(store.groups[g].map(item => item.text));
       let addedCount = 0;
       let duplicateCount = 0;
-
       arr.forEach(t => {
         if (existingTexts.has(t)) {
           duplicateCount++;
@@ -1919,14 +1792,12 @@ document.addEventListener('DOMContentLoaded', function() {
           addedCount++;
         }
       });
-
       batchTextarea.value = '';
       saveLocal();
       refreshGroupSelect();
       if (cardManageModal && cardManageModal.style.display === 'flex') {
         renderCardManageList();
       }
-
       if (duplicateCount > 0) {
         alert(`导入完成！成功添加 ${addedCount} 条，跳过 ${duplicateCount} 条重复字卡。`);
       } else {
@@ -1934,7 +1805,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
   // ===== 日历 =====
   function renderCalendar() {
     if (!calendarGrid) return;
@@ -1988,7 +1858,6 @@ document.addEventListener('DOMContentLoaded', function() {
     calTaText.innerText = todayData.taText || 'TA今天还没有记录哦～';
     calMeText.innerText = todayData.meText || '今天有什么想说的。';
   }
-
   if (openMoodModal) {
     openMoodModal.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -2001,7 +1870,6 @@ document.addEventListener('DOMContentLoaded', function() {
       moodModal.style.display = 'flex';
     });
   }
-
   function renderMoodEmojis() {
     const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '😊', '😌', '😄', '🤗', '😏', '😜', '🤔', '🥱', '😤', '😢', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '🌟', '⭐', '☀️', '🌈', '☁️', '🌱', '🌸', '🌺', '🌻'];
     moodEmojiGrid.innerHTML = '';
@@ -2016,7 +1884,6 @@ document.addEventListener('DOMContentLoaded', function() {
       moodEmojiGrid.appendChild(span);
     });
   }
-
   if (closeMoodModal) {
     closeMoodModal.addEventListener('click', function() {
       moodModal.style.display = 'none';
@@ -2053,7 +1920,6 @@ document.addEventListener('DOMContentLoaded', function() {
       selectedMoodEmoji = null;
     });
   }
-
   // ===== 导入导出 =====
   function showImportConfirm(title, msg, callback) {
     importConfirmTitle.innerText = title;
@@ -2077,7 +1943,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-
   if (exportChatBtn) {
     exportChatBtn.addEventListener('click', function() {
       const data = { messages: store.messages };
@@ -2119,7 +1984,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-
   if (exportCardsBtn) {
     exportCardsBtn.addEventListener('click', function() {
       const data = { groups: store.groups };
@@ -2167,7 +2031,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-
   if (exportDataBtn) {
     exportDataBtn.addEventListener('click', function() {
       const data = { store: store };
@@ -2233,7 +2096,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-
   // ===== 存储 =====
   function loadLocal() {
     try {
@@ -2243,7 +2105,6 @@ document.addEventListener('DOMContentLoaded', function() {
         store = deepMerge(store, parsed);
       }
     } catch (e) { console.warn('Load local error', e); }
-
     if (!store.messages) store.messages = [];
     if (!store.calendar) store.calendar = {};
     if (!store.appIcon) store.appIcon = {};
@@ -2255,7 +2116,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!store.emojiList) store.emojiList = [];
     if (!store.appliedFont) store.appliedFont = '';
     if (store.rippleEnabled === undefined) store.rippleEnabled = true;
-
     if (!store.profile.cover) store.profile.cover = '';
     if (!store.profile.avatar) store.profile.avatar = '';
     if (!store.profile.name) store.profile.name = 'TATA';
@@ -2265,7 +2125,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!store.chatSettings.patSuffix) store.chatSettings.patSuffix = '拍了拍';
     if (!store.chatSettings.videoBg) store.chatSettings.videoBg = '';
     if (!store.chatSettings.avatarStyle) store.chatSettings.avatarStyle = 'circle';
-
     renderHeaderAvatar();
     refreshAllIconPreview();
     if (wallpaperPreview) wallpaperPreview.src = store.wallpaper || '';
@@ -2292,7 +2151,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (styleOptions && styleOptions.length) {
       styleOptions.forEach(o => { o.classList.toggle('active', o.dataset.style === style); });
     }
-
     if (rippleToggle) {
       if (store.rippleEnabled !== undefined) particleEnabled = store.rippleEnabled;
       if (particleEnabled) {
@@ -2315,17 +2173,14 @@ document.addEventListener('DOMContentLoaded', function() {
       delayRangeValue.textContent = min + '秒';
     }
   }
-
   function saveLocal() {
     try {
       localStorage.setItem('dreamCardStore', JSON.stringify(store));
     } catch (e) { console.warn('Save local error', e); }
   }
-
   window.addEventListener('beforeunload', function() {
     saveLocal();
   });
-
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     const now = Date.now();
@@ -2336,7 +2191,6 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
   }, { passive: false });
   document.querySelectorAll('input, textarea').forEach(el => el.style.fontSize = '16px');
-
   loadLocal();
   applyBgStyle();
   applyVideoBg();
