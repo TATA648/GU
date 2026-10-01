@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chatSettings: { patSuffix: "拍了拍", videoBg: "", avatarStyle: "circle" },
     videoCall: { active: false, caller: "", startTime: null, answered: false, folded: false, timer: null },
     isTyping: false,
+    readNoReply: { enabled: false, chance: 20 },
     profile: { cover: "", avatar: "", name: "TATA", location: "爱尔兰", locationIcon: "https://i.ibb.co/pjyVcqxM/position.png", signature: "浅尝辄止 是命运轻轻放过了我" },
     decoImage: "",
     appliedFont: "",
@@ -743,6 +744,27 @@ document.addEventListener('DOMContentLoaded', function() {
   if (blockDelay) {
     blockDelay.addEventListener('click', function() {});
   }
+  const rnToggle = document.getElementById('readNoReplyToggle');
+  const rnRange = document.getElementById('readNoReplyRange');
+  const rnValue = document.getElementById('readNoReplyValue');
+  const rnRow = document.getElementById('readNoReplyChanceRow');
+  function syncReadNoReplyUI() {
+    const rn = store.readNoReply || { enabled: false, chance: 20 };
+    if (rnToggle) rnToggle.classList.toggle('active', !!rn.enabled);
+    if (rnRange) rnRange.value = rn.chance;
+    if (rnValue) rnValue.textContent = rn.chance + '%';
+    if (rnRow) rnRow.style.display = rn.enabled ? 'flex' : 'none';
+  }
+  if (rnToggle) rnToggle.addEventListener('click', function() {
+    store.readNoReply.enabled = !store.readNoReply.enabled;
+    saveLocal(); syncReadNoReplyUI(); updateReadMark();
+  });
+  if (rnRange) rnRange.addEventListener('input', function() {
+    store.readNoReply.chance = parseInt(this.value);
+    if (rnValue) rnValue.textContent = this.value + '%';
+    saveLocal();
+  });
+  setTimeout(syncReadNoReplyUI, 100);
   if (delayRange) {
     delayRange.addEventListener('input', function() {
       const val = parseInt(this.value);
@@ -916,33 +938,7 @@ document.addEventListener('DOMContentLoaded', function() {
     quoteBar.style.display = 'none';
     const now = Date.now();
     addMessage('', true, now, quote, false, false, imageUrl);
-    updateRandomStatus();
-    store.isTyping = true;
-    renderMessages();
-    const min = store.delay.min * 1000,
-      max = (store.delay.min + 20) * 1000,
-      wait = Math.floor(Math.random() * (max - min) + min);
-    if (typingTimer) clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-      store.isTyping = false;
-      const replyList = getRandomReplyArr();
-      let quoteReply = null;
-      if (Math.random() < 0.2 && store.messages.length > 1) {
-        const lastUser = [...store.messages].reverse().find(m => m.isUser);
-        if (lastUser) quoteReply = lastUser;
-      }
-      const placeholder = chatWrap.querySelector('.typing-placeholder');
-      if (placeholder) placeholder.remove();
-      replyList.forEach((item, idx) => {
-        setTimeout(() => {
-          addMessage(item.text, false, Date.now(), quoteReply);
-        }, idx * 500);
-      });
-      setTimeout(() => {
-        updateRandomStatus();
-      }, replyList.length * 500 + 100);
-      typingTimer = null;
-    }, wait);
+    triggerReply();
   }
   // ===== 信箱 =====
   function renderMail() { renderSentList();
@@ -1057,8 +1053,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!text) return;
       const now = Date.now();
       const len = text.length;
-      const delayHour = 12 + (len / 500) * 12;
-      const realDelay = Math.min(Math.max(delayHour, 12), 24) * 3600 * 1000;
+      const realDelay = (10 + Math.random() * 14) * 3600 * 1000;
       const replyTime = now + realDelay;
       store.letters.push({ text, create: now, replyTime, done: false, replied: false });
       letterContentInput.value = '';
@@ -1085,25 +1080,37 @@ document.addEventListener('DOMContentLoaded', function() {
       }, delay);
     }
   }
+  function showToast(msg) {
+    const old = document.getElementById('appToast'); if (old) old.remove();
+    const t = document.createElement('div'); t.id = 'appToast'; t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(40,40,40,.88);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;z-index:10001;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+    document.body.appendChild(t); setTimeout(() => t.remove(), 4500);
+  }
   function processLetterReplies() {
     const allCards = getAllValidCards();
-    let changed = false;
+    let changed = false, arrived = false;
     store.letters.forEach(letter => {
       if (letter.done || Date.now() < letter.replyTime) return;
       letter.done = true;
       letter.replied = true;
       changed = true;
-      const count = randomInt(5, 20);
-      let reply = [];
+      const count = randomInt(8, 12);
+      let reply = [], last = -1;
       for (let i = 0; i < count; i++) {
-        if (allCards.length === 0) reply.push('（暂无字卡）');
-        else reply.push(allCards[randomInt(0, allCards.length - 1)].text);
+        if (allCards.length === 0) { reply.push('（暂无字卡）'); continue; }
+        let k = randomInt(0, allCards.length - 1);
+        if (allCards.length > 1 && k === last) k = (k + 1) % allCards.length;
+        last = k;
+        const r = Math.random();
+        reply.push(allCards[k].text + (r < 0.2 ? '！' : r < 0.4 ? '...' : '。'));
       }
-      store.inbox.push({ replyText: reply.join(''), originText: letter.text, time: letter.replyTime, read: false, originLetterId: Date.now() + Math.random() });
+      arrived = true;
+      store.inbox.push({ replyText: reply.join(''), originText: letter.text, time: Date.now(), read: false, originLetterId: Date.now() + Math.random() });
     });
     if (changed) { saveLocal();
       renderInbox();
       renderSentList(); }
+    if (arrived) showToast('💌 收到了一封回信，去信箱看看吧');
     scheduleLetterReplies();
   }
   // 手机切后台/锁屏时定时器会暂停，回到页面或定期检查一次，补收已到期的回信
@@ -1118,18 +1125,26 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== 聊天核心 =====
   function updateRandomStatus() {
     const allCards = getAllValidCards();
-    if (allCards.length > 0) {
-      const idx = randomInt(0, allCards.length - 1);
-      store.currentStatus = allCards[idx].text;
-    } else {
-      store.currentStatus = '暂无状态字卡';
-    }
-    if (currentStatusText) currentStatusText.innerText = store.currentStatus;
+    store.currentStatus = allCards.length > 0 ? allCards[randomInt(0, allCards.length - 1)].text : '暂无状态字卡';
+    store.statusLast = Date.now();
+    store.statusNext = 1 + Math.random() * 7; // 小时
+    saveLocal();
+    showStatus();
   }
+  function showStatus() { if (currentStatusText) currentStatusText.innerText = store.currentStatus || ''; }
+  function checkStatusChange() {
+    const empty = !store.currentStatus || store.currentStatus === '暂无状态字卡';
+    const due = (Date.now() - (store.statusLast || 0)) / 36e5 >= (store.statusNext || 0);
+    if (empty || due) updateRandomStatus(); else showStatus();
+  }
+  setInterval(checkStatusChange, 60000);
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) { checkStatusChange(); renderCalendar(); }
+  });
   function renderHeaderAvatar() {
     headerTaAvatar.src = store.taInfo.avatarUrl || '';
     headerMyAvatar.src = store.myInfo.avatarUrl || '';
-    updateRandomStatus();
+    checkStatusChange();
   }
   function applyBgStyle() {
     document.body.style.setProperty('--wallpaper', store.wallpaper ? `url(${store.wallpaper})` : 'none');
@@ -1158,6 +1173,78 @@ document.addEventListener('DOMContentLoaded', function() {
     if (Math.random() < 0.25) return store.emojiList[randomInt(0, store.emojiList.length - 1)];
     return null;
   }
+  function makeTypingEl() {
+    const tempItem = document.createElement('div');
+    tempItem.className = 'msg-item target-msg typing-placeholder';
+    tempItem.innerHTML = `<div class="msg-avatar ${store.chatSettings.avatarStyle === 'square' ? 'square' : ''}">${store.taInfo.avatarUrl ? `<img src="${store.taInfo.avatarUrl}" loading="lazy">` : ''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
+    return tempItem;
+  }
+  function setTyping(on) {
+    store.isTyping = on;
+    const old = chatWrap.querySelector('.typing-placeholder');
+    if (old) old.remove();
+    if (on) { chatWrap.appendChild(makeTypingEl()); chatWrap.scrollTop = chatWrap.scrollHeight; }
+  }
+  // 回复时长：设置值 ~ 设置值+4/20 秒随机（设置较小时窗口收窄）
+  function getReplyWait() {
+    const m = store.delay.min || 20;
+    return (m + Math.random() * (m < 10 ? 4 : 20)) * 1000;
+  }
+  let replyChain = [];
+  function cancelReplyChain() { replyChain.forEach(clearTimeout); replyChain = []; }
+  let readTimer = null;
+  function updateReadMark() {
+    chatWrap.querySelectorAll('.read-mark').forEach(e => e.remove());
+    if (!store.readNoReply || !store.readNoReply.enabled) return;
+    const last = [...store.messages].reverse().find(m => m.isUser && !m.system);
+    if (!last || !last.read) return;
+    const item = chatWrap.querySelector('.msg-item[data-msgid="' + last.id + '"]');
+    const wrap = item && item.querySelector('.msg-bubble-wrap');
+    if (wrap) { const d = document.createElement('div'); d.className = 'read-mark'; d.textContent = '已读'; wrap.appendChild(d); }
+  }
+  function markRead() {
+    let ch = false;
+    store.messages.forEach(m => { if (m.isUser && !m.system && !m.read) { m.read = true; ch = true; } });
+    if (ch) { saveLocal(); updateReadMark(); }
+  }
+  function triggerReply() {
+    cancelReplyChain();
+    if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+    // 对方 1.5-4 秒后看到消息，显示“已读”
+    if (readTimer) clearTimeout(readTimer);
+    readTimer = setTimeout(markRead, 1500 + Math.random() * 2500);
+    setTyping(false);
+    // 已读不回：按设置的概率只已读、不回复（也不显示“正在输入”）
+    const rn = store.readNoReply;
+    if (rn && rn.enabled && Math.random() * 100 < (Number(rn.chance) || 0)) return;
+    setTyping(true);
+    typingTimer = setTimeout(() => { typingTimer = null; runReply(); }, getReplyWait());
+  }
+  function taPoke() {
+    const cards = getAllValidCards();
+    const suffix = cards.length ? cards[randomInt(0, cards.length - 1)].text : '';
+    addMessage(`${store.taInfo.name}拍了拍我${suffix}`, false, Date.now(), null, true, false);
+  }
+  function runReply() {
+    setTyping(false);
+    // 3% 概率这次不回消息，改为拍一拍
+    if (Math.random() < 0.03) { taPoke(); return; }
+    // 1 条 75%，2 条约 24%，3 条约 1%
+    const n = Math.random() < 0.75 ? 1 : (Math.random() < 0.95 ? 2 : 3);
+    const list = getRandomReplyArr(n);
+    // 第一条有 30% 概率引用最近 10 条我发的话中的随机一条
+    let quote = null;
+    const recent = store.messages.filter(m => m.isUser && !m.system && m.text).slice(-10);
+    if (recent.length && Math.random() < 0.3) quote = recent[randomInt(0, recent.length - 1)];
+    const sendAt = (i) => {
+      addMessage(list[i].text, false, Date.now(), i === 0 ? quote : null);
+      if (i < list.length - 1) {
+        setTyping(true);
+        replyChain.push(setTimeout(() => { setTyping(false); sendAt(i + 1); }, 1500 + Math.random() * 2500));
+      }
+    };
+    sendAt(0);
+  }
   function renderMessages() {
     if (!chatWrap) return;
     chatWrap.innerHTML = '';
@@ -1172,12 +1259,8 @@ document.addEventListener('DOMContentLoaded', function() {
       lastTime = msg.time;
       appendMessageElement(msg);
     });
-    if (store.isTyping) {
-      const tempItem = document.createElement('div');
-      tempItem.className = 'msg-item target-msg typing-placeholder';
-      tempItem.innerHTML = `<div class="msg-avatar ${store.chatSettings.avatarStyle === 'square' ? 'square' : ''}">${store.taInfo.avatarUrl ? `<img src="${store.taInfo.avatarUrl}" loading="lazy">` : ''}</div><div class="msg-bubble-wrap"><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
-      chatWrap.appendChild(tempItem);
-    }
+    if (store.isTyping) chatWrap.appendChild(makeTypingEl());
+    updateReadMark();
     chatWrap.scrollTop = chatWrap.scrollHeight;
   }
   function appendMessageElement(msg) {
@@ -1191,6 +1274,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (msg.imageUrl) {
       const item = document.createElement('div');
       item.className = `msg-item ${msg.isUser ? 'user-msg' : 'target-msg'}`;
+      item.dataset.msgid = msg.id;
       const avatarSrc = msg.isUser ? store.myInfo.avatarUrl : store.taInfo.avatarUrl;
       let hideAvatar = false;
       const msgs = store.messages;
@@ -1209,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const isEmojiOnly = /^\[emoji:.+\]$/.test(msg.text.trim());
     const item = document.createElement('div');
     item.className = `msg-item ${msg.isUser ? 'user-msg' : 'target-msg'}`;
+    item.dataset.msgid = msg.id;
     if (isEmojiOnly) item.classList.add('emoji-only');
     item.dataset.msgId = msg.id;
     let hideAvatar = false;
@@ -1287,18 +1372,6 @@ document.addEventListener('DOMContentLoaded', function() {
     store.lastChatTime = Date.now();
     appendMessageElement(msg);
     chatWrap.scrollTop = chatWrap.scrollHeight;
-    if (!system && !isUser && Math.random() < 0.1) {
-      setTimeout(() => {
-        const cards = getAllValidCards();
-        let suffix = '';
-        if (cards.length > 0) { suffix = cards[randomInt(0, cards.length - 1)].text; }
-        const patText = `${store.taInfo.name}拍了拍我${suffix}`;
-        addMessage(patText, false, Date.now(), null, true, false);
-      }, 1500);
-    }
-    if (!system && !isUser && Math.random() < 0.05) {
-      setTimeout(() => { initiateVideoCall('ta'); }, 1000);
-    }
   }
   function needTimeStamp() {
     if (store.messages.length === 0) return false;
@@ -1322,7 +1395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     return list;
   }
-  function getRandomReplyArr() {
+  function getRandomReplyArr(n) {
     const pool = getAllValidCards();
     if (pool.length === 0) return [{ text: '暂无可用字卡，请前往字卡库添加' }];
     let arr = [...pool];
@@ -1330,8 +1403,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const r = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[r]] = [arr[r], arr[i]];
     }
-    const take = Math.floor(Math.random() * 3) + 1;
-    return arr.slice(0, take);
+    return arr.slice(0, n || 1);
   }
   function sendMessageByText(text) {
     const quote = quoteMsg;
@@ -1340,33 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const now = Date.now();
     addMessage(text, true, now, quote);
     inputText.value = '';
-    updateRandomStatus();
-    store.isTyping = true;
-    renderMessages();
-    const min = store.delay.min * 1000,
-      max = (store.delay.min + 20) * 1000,
-      wait = Math.floor(Math.random() * (max - min) + min);
-    if (typingTimer) clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-      store.isTyping = false;
-      const replyList = getRandomReplyArr();
-      let quoteReply = null;
-      if (Math.random() < 0.2 && store.messages.length > 1) {
-        const lastUser = [...store.messages].reverse().find(m => m.isUser);
-        if (lastUser) quoteReply = lastUser;
-      }
-      const placeholder = chatWrap.querySelector('.typing-placeholder');
-      if (placeholder) placeholder.remove();
-      replyList.forEach((item, idx) => {
-        setTimeout(() => {
-          addMessage(item.text, false, Date.now(), quoteReply);
-        }, idx * 500);
-      });
-      setTimeout(() => {
-        updateRandomStatus();
-      }, replyList.length * 500 + 100);
-      typingTimer = null;
-    }, wait);
+    triggerReply();
   }
   function sendMessage() {
     const content = inputText.value.trim();
@@ -1446,6 +1492,10 @@ document.addEventListener('DOMContentLoaded', function() {
     enableVideoDrag();
   }
   function hideVideoWindow() {
+    if (store.videoCall.answered && store.videoCall.startTime) {
+      const s = Math.floor((Date.now() - store.videoCall.startTime) / 1000);
+      if (s >= 2) addMessage(`视频通话已结束 ${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`, false, Date.now(), null, true, false);
+    }
     videoWindow.classList.remove('active');
     videoCapsule.classList.remove('active');
     stopVideoTimer();
@@ -1534,6 +1584,12 @@ document.addEventListener('DOMContentLoaded', function() {
       store.videoCall.caller = 'ta';
       store.videoCall.startTime = null;
       enableVideoDrag();
+      setTimeout(() => {
+        if (store.videoCall.active && store.videoCall.caller === 'ta' && !store.videoCall.answered) {
+          hideVideoWindow();
+          addMessage(`错过了 ${store.taInfo.name} 的来电`, false, Date.now(), null, true, true);
+        }
+      }, 22000);
       videoAnswerBtn.onclick = function() {
         videoAnswerArea.style.display = 'none';
         videoHangupBtn.style.display = 'block';
@@ -1550,22 +1606,37 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     } else {
       showVideoWindow('me');
-      const answer = Math.random() < 0.8;
-      if (answer) {
+      videoTimer.textContent = '连接中...';
+      stopVideoTimer();
+      store.videoCall.answered = false;
+      const name = store.taInfo.name;
+      if (Math.random() < 0.35) {
+        const labels = [name + ' 未接听', name + ' 正在忙，无法接听', name + ' 拒绝了通话', name + ' 暂时无法接听'];
         setTimeout(() => {
+          if (!store.videoCall.active || store.videoCall.answered) return;
+          hideVideoWindow();
+          addMessage(labels[randomInt(0, labels.length - 1)], false, Date.now(), null, true, true);
+        }, 4000 + Math.random() * 8000);
+      } else {
+        setTimeout(() => {
+          if (!store.videoCall.active || store.videoCall.answered) return;
           videoTimer.textContent = '00:00:00';
           startVideoTimer();
           store.videoCall.answered = true;
-          addMessage(`${store.taInfo.name} 接听了你的视频`, false, Date.now(), null, true, false);
-        }, 2000);
-      } else {
-        setTimeout(() => {
-          hideVideoWindow();
-          addMessage(`${store.taInfo.name} 正忙，未接听`, false, Date.now(), null, true, true);
-        }, 3000);
+          store.videoCall.startTime = Date.now();
+          addMessage(`${name} 接听了你的视频`, false, Date.now(), null, true, false);
+        }, 1400 + Math.random() * 1400);
       }
     }
   }
+  // 对方来电 22 秒无人接听 → 未接来电记录；每 15-60 分钟有 25% 概率来电
+  function scheduleRandomCall() {
+    setTimeout(() => {
+      if (!document.hidden && chatWrap.offsetParent !== null && !store.videoCall.active && Math.random() < 0.25) initiateVideoCall('ta');
+      scheduleRandomCall();
+    }, (15 + Math.random() * 45) * 60 * 1000);
+  }
+  scheduleRandomCall();
   // ===== 字卡管理（完整） =====
   function openGroupManageModal() {
     renderGroupManageList();
@@ -1809,8 +1880,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   // ===== 日历 =====
+  function localDateStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  const MOOD_EMOJIS = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '😊', '😌', '😄', '🤗', '😏', '😜', '🤔', '🥱', '😤', '😢', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '🌟', '⭐', '☀️', '🌈', '☁️', '🌱', '🌸', '🌺', '🌻'];
+  // 对方每天只判定一次：20% 概率当天不记录；记录时心情随机、备注随机 1-3 张字卡。与“我”是否记录完全无关
+  function checkPartnerDailyMood() {
+    const ds = localDateStr(new Date());
+    const data = store.calendar[ds] || (store.calendar[ds] = {});
+    if (data.partnerChecked) return;
+    data.partnerChecked = true;
+    if (data.taEmoji || data.taText) { saveLocal(); return; }
+    if (Math.random() < 0.2) { saveLocal(); return; }
+    data.taEmoji = MOOD_EMOJIS[randomInt(0, MOOD_EMOJIS.length - 1)];
+    const cards = getAllValidCards();
+    if (cards.length > 0) {
+      const count = Math.min(randomInt(1, 3), cards.length);
+      data.taText = [...cards].sort(() => Math.random() - 0.5).slice(0, count).map(c => c.text).join(' ');
+    }
+    saveLocal();
+  }
   function renderCalendar() {
     if (!calendarGrid) return;
+    checkPartnerDailyMood();
     const now = new Date();
     const year = now.getFullYear(),
       month = now.getMonth();
@@ -1824,7 +1916,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
-      const dateStr = dateObj.toISOString().slice(0, 10);
+      const dateStr = localDateStr(dateObj);
       const dayDiv = document.createElement('div');
       dayDiv.className = 'cal-day';
       dayDiv.innerHTML = `<div class="day-number">${d}</div>`;
@@ -1856,16 +1948,16 @@ document.addEventListener('DOMContentLoaded', function() {
       dayDiv.appendChild(emojiGroup);
       calendarGrid.appendChild(dayDiv);
     }
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = localDateStr(now);
     const todayData = store.calendar[todayStr] || {};
-    calTaText.innerText = todayData.taText || 'TA今天还没有记录哦～';
+    calTaText.innerText = todayData.taText || (todayData.taEmoji ? todayData.taEmoji : 'TA今天还没有记录哦～');
     calMeText.innerText = todayData.meText || '今天有什么想说的。';
   }
   if (openMoodModal) {
     openMoodModal.addEventListener('click', function(e) {
       e.stopPropagation();
       const now = new Date();
-      currentDateStr = now.toISOString().slice(0, 10);
+      currentDateStr = localDateStr(now);
       const data = store.calendar[currentDateStr] || {};
       selectedMoodEmoji = data.meEmoji || null;
       moodTextInput.value = data.meText || '';
@@ -1874,7 +1966,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   function renderMoodEmojis() {
-    const emojis = ['😭', '🥺', '🥰', '🥹', '😆', '😎', '🥳', '😖', '😫', '😴', '😊', '😌', '😄', '🤗', '😏', '😜', '🤔', '🥱', '😤', '😢', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '🌟', '⭐', '☀️', '🌈', '☁️', '🌱', '🌸', '🌺', '🌻'];
+    const emojis = MOOD_EMOJIS;
     moodEmojiGrid.innerHTML = '';
     emojis.forEach(emo => {
       const span = document.createElement('span');
@@ -1901,20 +1993,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = store.calendar[dateStr] || {};
       data.meEmoji = selectedMoodEmoji || data.meEmoji;
       data.meText = text || data.meText;
-      if (!data.taEmoji) {
-        const taEmojis = ['😊', '😌', '😄', '🤗', '😏', '😜', '🤔', '😴', '🥱'];
-        data.taEmoji = taEmojis[randomInt(0, taEmojis.length - 1)];
-      }
-      if (!data.taText) {
-        const cards = getAllValidCards();
-        if (cards.length > 0) {
-          const count = Math.min(randomInt(1, 3), cards.length);
-          const shuffled = [...cards].sort(() => Math.random() - 0.5);
-          data.taText = shuffled.slice(0, count).map(c => c.text).join(' ');
-        } else {
-          data.taText = '今天没有什么想说的～';
-        }
-      }
       store.calendar[dateStr] = data;
       saveLocal();
       renderCalendar();
@@ -2108,6 +2186,9 @@ document.addEventListener('DOMContentLoaded', function() {
         store = deepMerge(store, parsed);
       }
     } catch (e) { console.warn('Load local error', e); }
+    store.isTyping = false;
+    if (!store.readNoReply) store.readNoReply = { enabled: false, chance: 20 };
+    store.messages && store.messages.forEach(m => { if (m.isUser && !m.read && Date.now() - m.time > 5000) m.read = true; });
     store.videoCall = { active: false, caller: '', startTime: null, answered: false, folded: false, timer: null };
     if (!store.messages) store.messages = [];
     if (!store.calendar) store.calendar = {};
@@ -2167,7 +2248,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     if (openMoodModal) {
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = localDateStr(new Date());
       const hasRecord = store.calendar[todayStr] && (store.calendar[todayStr].meEmoji || store.calendar[todayStr].meText);
       openMoodModal.textContent = hasRecord ? '修改' : '记录心情';
     }
@@ -2176,6 +2257,7 @@ document.addEventListener('DOMContentLoaded', function() {
       delayRange.value = min;
       delayRangeValue.textContent = min + '秒';
     }
+    syncReadNoReplyUI();
   }
   function saveLocal() {
     try {
